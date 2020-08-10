@@ -1,0 +1,83 @@
+/*
+ *
+ */
+#include "NixieArray.h"
+
+#define PIN_HV5812_CLK 26
+#define PIN_HV5812_STROBE 13
+#define PIN_HV5812_DATA 14
+#define PIN_HV5812_BLANK 4
+#define PIN_COLON_R 16
+#define PIN_COLON_L 17
+#define PIN_LED 27
+
+#define PIN_SW1 33
+#define PIN_SW2 34
+#define PIN_SW3 35
+uint8_t pins_in[]  = {PIN_SW1, PIN_SW2, PIN_SW3};
+
+uint8_t nixie_pins[NixieArray::NIXIE_N][NixieArray::DIGIT_N] =
+  {{ 9,  0,  1,  2,  3,  4,  5,  6,  7,  8},
+   {19, 10, 11, 12, 13, 14, 15, 16, 17, 18},
+   {29, 20, 21, 22, 23, 24, 25, 26, 27, 28},
+   {39, 30, 31, 32, 33, 34, 35, 36, 37, 38},
+   {49, 40, 41, 42, 43, 44, 45, 46, 47, 48},
+   {59, 50, 51, 52, 53, 54, 55, 56, 57, 58} };
+
+NixieArray nixieArray;
+
+uint8_t nixieDigit[] = {NixieArray::DIGIT_FLASH,
+			NixieArray::DIGIT_FLASH,
+			NixieArray::DIGIT_FLASH,
+			NixieArray::DIGIT_FLASH,
+			NixieArray::DIGIT_FLASH,
+			NixieArray::DIGIT_FLASH};
+
+unsigned long count = 0;
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("begin");
+
+  nixieArray.init(PIN_HV5812_CLK,  PIN_HV5812_STROBE,
+		   PIN_HV5812_DATA, PIN_HV5812_BLANK,
+		   PIN_COLON_R, PIN_COLON_L, PIN_LED,
+		   nixie_pins);
+  
+  for (int i=0; i < sizeof(pins_in)/sizeof(uint8_t); i++) {
+    pinMode(pins_in[i], INPUT);
+
+    int val = digitalRead(pins_in[i]);
+    Serial.println("SW[" + String(i) + "]=" + String(val) );
+  }
+}
+
+void loop() {
+  uint8_t num;
+
+  //Serial.println("count=" + String(count));
+  num = count % 10;
+
+  for (int i=0; i < 3; i++) {
+    int val = digitalRead(pins_in[i]);
+    //Serial.print("SW[" + String(i) + "]=" + String(val) + "  ");
+  }
+  //Serial.println("");
+
+  nixieArray.colon_r(HIGH);
+  nixieArray.colon_l(LOW);
+
+  //Serial.println("num=" + String(num));
+  //uint8_t d[] = {num, num, num, num, num, num};
+  uint8_t d[] = {1, 2, 3, 4, 5, 6};
+  d[num % 6] = 100;
+  d[(num + 1) % 6] = 10;
+  nixieArray.display(d);
+  //nixieArray.display2(d, 2);
+  delay(1000);
+  
+  nixieArray.colon_r(LOW);
+  nixieArray.colon_l(HIGH);
+
+  count++;
+}

@@ -1,0 +1,104 @@
+/*
+ *
+ */
+#include "Nixie.h"
+#include "NixieArray.h"
+
+#define NIXIE_N 6
+
+#define PIN_HV5812_CLK 26
+#define PIN_HV5812_STROBE 13
+#define PIN_HV5812_DATA 14
+#define PIN_HV5812_BLANK 4
+#define PIN_COLON_R 16
+#define PIN_COLON_L 17
+#define PIN_LED 27
+#define PIN_SW1 33
+#define PIN_SW2 34
+#define PIN_SW3 35
+
+uint8_t pins_out[] = {PIN_HV5812_CLK, PIN_HV5812_STROBE, PIN_HV5812_DATA, 
+		      PIN_HV5812_BLANK, PIN_COLON_R, PIN_COLON_L,
+		      PIN_LED};
+uint8_t pins_in[]  = {PIN_SW1, PIN_SW2, PIN_SW3};
+
+uint8_t nixie_pin_array[][10] = { { 9,  0,  1,  2,  3,  4,  5,  6,  7,  8},
+				  {19, 10, 11, 12, 13, 14, 15, 16, 17, 18},
+				  {29, 20, 21, 22, 23, 24, 25, 26, 27, 28},
+				  {39, 30, 31, 32, 33, 34, 35, 36, 37, 38},
+				  {49, 40, 41, 42, 43, 44, 45, 46, 47, 48},
+				  {59, 50, 51, 52, 53, 54, 55, 56, 57, 58} };
+
+NixieArray na = NixieArray(nixie_pin_array);
+
+Nixie nixie[] = {Nixie( 9,  0,  1,  2,  3,  4,  5,  6,  7,  8),
+		 Nixie(19, 10, 11, 12, 13, 14, 15, 16, 17, 18),
+		 Nixie(29, 20, 21, 22, 23, 24, 25, 26, 27, 28),
+		 Nixie(39, 30, 31, 32, 33, 34, 35, 36, 37, 38),
+		 Nixie(49, 40, 41, 42, 43, 44, 45, 46, 47, 48),
+		 Nixie(59, 50, 51, 52, 53, 54, 55, 56, 57, 58)};
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("begin");
+  
+  for(int i=0; i<7; i++){
+    pinMode(pins_out[i], OUTPUT);
+    digitalWrite(pins_out[i], LOW);
+  }
+
+  for (int i=0; i<3; i++) {
+    pinMode(pins_in[i], INPUT);
+    int val = digitalRead(pins_in[i]);
+    Serial.println("SW[" + String(i) + "]=" + String(val) );
+  }
+}
+
+void loop() {
+  for (int i=0; i<3; i++) {
+    int val = digitalRead(pins_in[i]);
+    Serial.print("SW[" + String(i) + "]=" + String(val) + "  ");
+  }
+  Serial.println("");
+
+  for (int i=0; i<10; i++){
+    uint8_t n[NIXIE_N];
+
+    for (int j=0; j < NIXIE_N; j++) {
+      n[j] = nixie[j].digit(i);
+    }
+    
+    digitalWrite(PIN_COLON_R, HIGH);
+    displayNix(n);
+    delay(500);
+
+    digitalWrite(PIN_COLON_R, LOW);
+    delay(500);
+  }
+}
+
+void displayNix(uint8_t n[]){
+  const int a_n = NIXIE_N * Nixie::DIGIT_N;
+  uint8_t nixArray[a_n];
+
+  for(int i=(a_n-1); i >= 0; i--){
+    nixArray[i] = 1;
+  }
+
+  for (int i=0; i < NIXIE_N; i++) {
+    nixArray[n[i]] = 0;
+  }
+
+  for (int i = (a_n-1); i >= 0; i--){
+    digitalWrite(PIN_HV5812_DATA, nixArray[i]);
+    digitalWrite(PIN_HV5812_CLK, HIGH);
+    delay(1);
+    digitalWrite(PIN_HV5812_CLK, LOW);
+    delay(1);
+  }
+
+  digitalWrite(PIN_HV5812_STROBE, HIGH);
+  delay(1);
+  digitalWrite(PIN_HV5812_STROBE, LOW);
+  delay(1);
+}
