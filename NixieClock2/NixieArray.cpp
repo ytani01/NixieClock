@@ -137,16 +137,20 @@ NixieArray::display(unsigned long cur_ms, nixie_disp_data_t *nd) {
   digitalWrite(_pin_stobe, LOW);
   //delay(1);
   //--------------------------------------------------------------------------
+  // コロン
+  //
   digitalWrite(_pin_colon_r, nd->colon_r);
   digitalWrite(_pin_colon_l, nd->colon_l);
   //--------------------------------------------------------------------------
+  // LED
+  //
   digitalWrite(_pin_led, nd->led);
 }
 
 void
 NixieArray::all_off() {
-  const int pin_n = NIXIE_N * DIGIT_N;
-  uint8_t nxa[pin_n]; // nixie array pin values
+  const int	pin_n = NIXIE_N * DIGIT_N;
+  uint8_t	nxa[pin_n];			// nixie array pin values
 
   for (int i=0; i < pin_n; i++) {
     nxa[i] = HIGH;
