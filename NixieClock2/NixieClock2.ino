@@ -21,6 +21,8 @@
 #define VERSION_MODE	0x01
 #define CLOCK_MODE	0x10
 #define TEST1_MODE	0xF1
+
+#define LOOP_DELAY	0  // msec
 //============================================================================
 uint8_t pins_in[]  = {PIN_SW1, PIN_SW2, PIN_SW3};
 
@@ -32,20 +34,17 @@ uint8_t nixie_pins[NIXIE_N][DIGIT_N] =
    {49, 40, 41, 42, 43, 44, 45, 46, 47, 48},
    {59, 50, 51, 52, 53, 54, 55, 56, 57, 58} };
 
+uint8_t colon_pins[] = {PIN_COLON_R, PIN_COLON_L};
+
 NixieArray nixieArray;
 
 nixie_disp_data_t nixieDispData;
 
-unsigned long loopCount = 0;
-unsigned long curMsec = 0; // msec
-uint8_t loopDelay = 0; // msec
-uint8_t curNixie = 0;
+unsigned long	loopCount	= 0;
+unsigned long	curMsec		= 0;  // msec
+uint8_t		curNixie	= 0;
 
-uint8_t curMode = 0x00;
-//VersionMode	versionMode
-//ClockMode	clockMode;
-//Test1Mode	test1Mode;
-
+uint8_t		curMode		= 0x00;
 //============================================================================
 void btn_handler() {
   static unsigned long prev_msec = 0;
@@ -54,49 +53,58 @@ void btn_handler() {
   if ( cur_msec - prev_msec < DEBOUNCE ) {
     return;
   }
+
   prev_msec = cur_msec;
 
   if ( digitalRead(PIN_SW1) == LOW ) {
+    Serial.println("curMsec="+String(curMsec));
+    
+    for (int nx=0; nx < NIXIE_N; nx++) {
+      Serial.println(" nx=" + String(nx));
+
+      Nixie n1 = nixieArray.get_nixie(nx);
+      for (int d=0; d < DIGIT_N; d++) {
+	uint8_t bl = n1.get_blightness(d);
+	Serial.print(" " + String(bl));
+      }
+
+      Serial.println();
+    } // for(nx)
   }
 
   if ( digitalRead(PIN_SW2) == LOW) {
-    curNixie++;
-    if ( curNixie > 5 ) {
-      curNixie = 0;
-    }
+    curNixie = (curNixie + 1) % NIXIE_N;
     Serial.println("curNixie=" + String(curNixie));
   }
 
   if ( digitalRead(PIN_SW3) == LOW ) {
+    nixieDispData.nx_blightness[0][0]--;
+    nixieDispData.nx_blightness[0][1]++;
   }
-
-}
-
+} // btn_handler
 //============================================================================
 void setup() {
   Serial.begin(115200);
   Serial.println("begin");
 
   nixieArray.init(PIN_HV5812_CLK,  PIN_HV5812_STROBE,
-		   PIN_HV5812_DATA, PIN_HV5812_BLANK,
-		   PIN_COLON_R, PIN_COLON_L, PIN_LED,
-		   nixie_pins);
-  
+		  PIN_HV5812_DATA, PIN_HV5812_BLANK,
+		  nixie_pins, colon_pins, PIN_LED);
+
+  memset(nixieDispData.nx_blightness, 0, sizeof(uint8_t) * NIXIE_N * DIGIT_N);
   for (int nx=0; nx < NIXIE_N; nx++) {
     for (int d=0; d < DIGIT_N; d++) {
       if ( nx == d ) {
 	nixieDispData.nx_blightness[nx][d] = BLIGHTNESS_MAX;
-      } else {
-	nixieDispData.nx_blightness[nx][d] = 0;
       }
     } // for(d)
   } // for(nx)
 
-  nixieDispData.colon_r = HIGH;
-  nixieDispData.colon_l = HIGH;
-  nixieDispData.led = LOW;
+  nixieDispData.colon[COLON_R]	= HIGH;
+  nixieDispData.colon[COLON_L]	= HIGH;
+  nixieDispData.led		= LOW;
 
-  for (int i=0; i < sizeof(pins_in)/sizeof(uint8_t); i++) {
+  for (int i=0; i < sizeof(pins_in) / sizeof(uint8_t); i++) {
     pinMode(pins_in[i], INPUT);
 
     int val = digitalRead(pins_in[i]);
@@ -111,8 +119,7 @@ void setup() {
   //versionMode.init();
   //clockMode.init();
   //test1Mode.init();
-}
-
+} // setup
 //============================================================================
 void loop() {
   curMsec = millis();
@@ -128,5 +135,6 @@ void loop() {
   nixieArray.display(curMsec, &nixieDispData);
 
   loopCount++;
-  delay(loopDelay);
-}
+  delay(LOOP_DELAY);
+} // loop()
+//============================================================================

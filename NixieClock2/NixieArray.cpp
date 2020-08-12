@@ -45,33 +45,41 @@ uint8_t
 Nixie::get_pin(uint8_t digit) {
   return _pin[digit];
 }
-
 //============================================================================
 void
 NixieArray::init(uint8_t clk, uint8_t stobe, uint8_t data, uint8_t blank,
-		 uint8_t colon_r, uint8_t colon_l, uint8_t led,
-		 uint8_t nxa[NIXIE_N][DIGIT_N]) {
+		 uint8_t nxa[NIXIE_N][DIGIT_N],
+		 uint8_t colon[COLON_N],
+		 uint8_t led) {
+  //--------------------------------------------------------------------------
   _pin_clk = clk;
   _pin_stobe = stobe;
   _pin_data = data;
   _pin_blank = blank;
-  _pin_colon_r = colon_r;
-  _pin_colon_l = colon_l;
-  _pin_led = led;
-  
-  uint8_t pins_out[] = {_pin_clk, _pin_stobe, _pin_data, _pin_blank,
-			_pin_colon_r, _pin_colon_l, _pin_led};
 
-  for (int p=0; p < sizeof(pins_out)/sizeof(uint8_t); p++) {
+  uint8_t pins_out[] = {_pin_clk, _pin_stobe, _pin_data, _pin_blank};
+  for (int p=0; p < sizeof(pins_out) / sizeof(uint8_t); p++) {
     pinMode(pins_out[p], OUTPUT);
     digitalWrite(pins_out[p], LOW);
-  }
-  Serial.println("sizeof(nxa)=" + String(sizeof(nxa)));
-  Serial.println("sizeof(uint8_t)=" + String(sizeof(uint8_t)));
+  } // for(p)
 
   for (int i=0; i < NIXIE_N; i++) {
     _nx[i].init(nxa[i]);
   }
+  //--------------------------------------------------------------------------
+  for (int c=0; c < COLON_N; c++) {
+    _pin_colon[c] = colon[c];
+    digitalWrite(_pin_colon[c], LOW);
+  }
+  //--------------------------------------------------------------------------
+  _pin_led = led;
+  digitalWrite(_pin_led, LOW);    
+  //--------------------------------------------------------------------------
+}
+
+Nixie
+NixieArray::get_nixie(uint8_t i) {
+  return _nx[i];
 }
 
 uint8_t
@@ -83,25 +91,48 @@ NixieArray::get_pin(uint8_t nixie, uint8_t digit) {
 }
 
 void
+NixieArray::set_nixie(uint8_t blightness[NIXIE_N][DIGIT_N]) {
+  for (int nx=0; nx < NIXIE_N; nx++) {
+    _nx[nx].set_blightness(blightness[nx]);
+  }
+}
+
+void
+NixieArray::set_nixie(uint8_t nixie, uint8_t blightness[DIGIT_N]) {
+  _nx[nixie].set_blightness(blightness);
+}
+
+void
+NixieArray::set_nixie(uint8_t nixie, uint8_t digit, uint8_t blightness) {
+  _nx[nixie].set_blightness(digit, blightness);
+}
+
+void
+NixieArray::set_colon(uint8_t blightness[COLON_N]) {
+}
+
+void
+NixieArray::set_led(uint8_t blightness) {
+} 
+
+void
 NixieArray::display(unsigned long cur_ms, nixie_disp_data_t *nd) {
   const int pin_n = NIXIE_N * DIGIT_N;
   uint8_t nxa[pin_n]; // nixie array pin values
 
+  //--------------------------------------------------------------------------
+  /*
+   * ニキシー管の点灯
+   */
   for (int i=0; i < pin_n; i++) {
     nxa[i] = HIGH;
   }
-
+  
+  set_nixie(nd->nx_blightness);
+  
   for (int i=0; i < NIXIE_N; i++) {
     uint8_t *d = nd->nx_blightness[i];
-
-    // T.B.D. 明るさ制御方法を見直す
-    /***
-    if ( cur_ms % 10 < off_timing ) {
-      d = DIGIT_BLANK;
-    }
-    ***/
-
-    // T.B.D. 明るさ制御が必要
+    
     for (int dg=0; dg < DIGIT_N; dg++) {
       unsigned int timing = cur_ms % BLIGHTNESS_MAX;
 
@@ -110,18 +141,6 @@ NixieArray::display(unsigned long cur_ms, nixie_disp_data_t *nd) {
 	nxa[pin] = LOW;
       }
     } // for(dg)
-
-    /***
-    if ( d == DIGIT_BLANK ) {
-      continue;
-    }
-    if ( d == DIGIT_FOG ) {
-      for (int j=0; j < DIGIT_N; j++) {
-	nxa[_nx[i].get_pin(j)] = LOW;
-      }
-      continue;
-    }
-    ***/
   } // for(i)
   //--------------------------------------------------------------------------
   for (int i=(pin_n - 1); i >= 0; i--) {
@@ -137,13 +156,16 @@ NixieArray::display(unsigned long cur_ms, nixie_disp_data_t *nd) {
   digitalWrite(_pin_stobe, LOW);
   //delay(1);
   //--------------------------------------------------------------------------
-  // コロン
-  //
-  digitalWrite(_pin_colon_r, nd->colon_r);
-  digitalWrite(_pin_colon_l, nd->colon_l);
+  /*
+   * コロン
+   */
+  for (int c=0; c < COLON_N; c++) {
+    digitalWrite(_pin_colon[c], nd->colon[c]);
+  }
   //--------------------------------------------------------------------------
-  // LED
-  //
+  /*
+   * LED
+   */
   digitalWrite(_pin_led, nd->led);
 }
 
@@ -159,13 +181,13 @@ NixieArray::all_off() {
   for (int i=(pin_n - 1); i >= 0; i--) {
     digitalWrite(_pin_data, nxa[i]);
     digitalWrite(_pin_clk, HIGH);
-    //delay(1);
+    // delay(1);
     digitalWrite(_pin_clk, LOW);
-    //delay(1);
+    // delay(1);
   }
 
   digitalWrite(_pin_stobe, HIGH);
-  //delay(1);
+  // delay(1);
   digitalWrite(_pin_stobe, LOW);
-  //delay(1);
+  // delay(1);
 }
