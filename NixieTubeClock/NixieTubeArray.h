@@ -15,7 +15,7 @@
 #define NIXIE_TUBE_ARRAY_H
 #include <Arduino.h>
 
-#define BLIGHTNESS_MAX       10
+#define BLIGHTNESS_MAX        8
 
 #define NIXIE_TUBE_N          6
 #define NIXIE_TUBE_DIGIT_N   10

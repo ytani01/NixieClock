@@ -120,32 +120,61 @@ void setup() {
   //--------------------------------------------------------------------------
 } // setup()
 //============================================================================
-void timer100ms(unsigned long msec) {
-  
-}
-
 void inc_nixie() {
   static uint8_t cur_nx = NIXIE_TUBE_N - 1;
   static uint8_t cur_dg = NIXIE_TUBE_DIGIT_N - 1;
+  static uint8_t cur_bl = 0;
 
-  nixieTubeArray.set_tube_blightness(cur_nx, cur_dg, 0); 
-
-  cur_dg++;
-  if ( cur_dg >= NIXIE_TUBE_DIGIT_N ) {
-    cur_dg = 0;
-    cur_nx++;
-    if ( cur_nx >= NIXIE_TUBE_N ) {
-      cur_nx=0;
+  cur_bl++;
+  if ( cur_bl > BLIGHTNESS_MAX ) {
+    cur_bl = 0;
+    nixieTubeArray.set_tube_blightness(cur_nx, cur_dg, 0); 
+    cur_dg++;
+    if ( cur_dg >= NIXIE_TUBE_DIGIT_N ) {
+      cur_dg = 0;
+      cur_nx++;
+      if ( cur_nx >= NIXIE_TUBE_N ) {
+	cur_nx=0;
+      }
     }
   }
-  
-  nixieTubeArray.set_tube_blightness(cur_nx, cur_dg, BLIGHTNESS_MAX); 
+
+  uint8_t prev_nx = cur_nx;
+  uint8_t prev_dg = cur_dg - 1;
+
+  if ( prev_dg >= NIXIE_TUBE_DIGIT_N ) {
+    prev_dg = NIXIE_TUBE_DIGIT_N - 1;
+    prev_nx--;
+    if ( prev_nx >= NIXIE_TUBE_N ) {
+      prev_nx = NIXIE_TUBE_N - 1;
+    }
+  }
+
+  nixieTubeArray.set_tube_blightness(prev_nx, prev_dg,
+				     BLIGHTNESS_MAX - cur_bl); 
+  nixieTubeArray.set_tube_blightness(cur_nx, cur_dg, cur_bl); 
 }
 
-void timer1sec(unsigned long sec) {
-  Serial.println("sec=" + String(sec));
+void timer50ms(unsigned long msec) {
+  //inc_nixie();
+}
 
+void timer100ms(unsigned long msec) {
   inc_nixie();
+}
+
+void timer1sec(unsigned long msec) {
+  Serial.println("msec=" + String(msec));
+
+  unsigned long sec = msec / 1000;
+
+  if ( sec % 2 == 0 ) {
+    nixieTubeArray.set_colon_blightness(COLON_L, BLIGHTNESS_MAX);
+    nixieTubeArray.set_colon_blightness(COLON_R, 0);
+  } else {
+    nixieTubeArray.set_colon_blightness(COLON_L, 0);
+    nixieTubeArray.set_colon_blightness(COLON_R, BLIGHTNESS_MAX);
+  }
 }
 //============================================================================
 void loop() {
@@ -153,10 +182,13 @@ void loop() {
   curMsec = millis();
 
   if ( (curMsec / 1000) != (prevMsec / 1000) ) {
-    timer1sec(curMsec/1000);
+    timer1sec(curMsec);
   }
   if ( (curMsec / 100) != (prevMsec / 100) ) {
-    timer100ms(curMsec / 100 * 100);
+    timer100ms(curMsec);
+  }
+  if ( (curMsec / 50) != (prevMsec / 50) ) {
+    timer50ms(curMsec);
   }
 
   nixieTubeArray.display(curMsec);
