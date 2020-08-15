@@ -2,6 +2,7 @@
  * NixieTubeClock.ino
  */
 #include "NixieTubeArray.h"
+#include "CmdQueue.h"
 
 #define PIN_INTR           2 // ??
 #define DEBOUNCE         200 // msec
@@ -34,6 +35,7 @@ uint8_t nixiePins[NIXIE_TUBE_N][NIXIE_TUBE_DIGIT_N] =
 uint8_t colonPins[] = {PIN_COLON_R, PIN_COLON_L};
 
 NixieTubeArray nixieTubeArray;
+CmdQueue cmdQ;
 
 unsigned long loopCount  = 0;
 unsigned long curMsec    = 0; // msec
@@ -106,6 +108,7 @@ void setup() {
   nixieTubeArray.init(PIN_HV5812_CLK, PIN_HV5812_STOBE,
                       PIN_HV5812_DATA, PIN_HV5812_BLANK,
                       nixiePins, colonPins);
+  cmdQ.init(&nixieTubeArray);
 
   for (int i=0; i < sizeof(pinsIn) / sizeof(uint8_t); i++) {
     pinMode(pinsIn[i], INPUT);
@@ -191,6 +194,8 @@ void loop() {
     timer50ms(curMsec);
   }
 
+  cmdQ.loop();
+  
   nixieTubeArray.display(curMsec);
 
   loopCount++;
