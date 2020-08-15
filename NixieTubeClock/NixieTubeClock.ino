@@ -4,7 +4,7 @@
 #include "NixieTubeArray.h"
 
 #define PIN_INTR           2 // ??
-#define DEBOUNCE         100 // msec
+#define DEBOUNCE         200 // msec
 
 #define PIN_HV5812_CLK    26
 #define PIN_HV5812_STOBE  13
@@ -37,6 +37,10 @@ NixieTubeArray nixieTubeArray;
 
 unsigned long loopCount  = 0;
 unsigned long curMsec    = 0; // msec
+unsigned long prevMsec   = 0;
+
+int curTube = 0;
+int curDigit = 0;
 //============================================================================
 void btn_handler() {
   static unsigned long prev_msec = 0;
@@ -49,12 +53,49 @@ void btn_handler() {
   prev_msec = cur_msec;
 
   if ( digitalRead(PIN_SW1) == LOW ) {
+    curDigit--;
+    if ( curDigit < 0 ) {
+      curDigit = NIXIE_TUBE_DIGIT_N - 1;
+      curTube--;
+      if ( curTube < 0 ) {
+	curTube = NIXIE_TUBE_N - 1;
+      }
+    }
+    
+    Serial.print("curTube:" + String(curTube) + " ");
+    Serial.print("curDigit:" + String(curDigit) + " ");
+    Serial.println();
   }
 
   if ( digitalRead(PIN_SW2) == LOW) {
+    Serial.print("curTube:" + String(curTube) + " ");
+    Serial.print("curDigit:" + String(curDigit) + " ");
+
+    NixieTube *nt = nixieTubeArray.get_nx_tube();
+    NixieTubeDigit *nd = nt[curTube].get_nx_digit();
+    uint8_t bl = nd[curDigit].get_blightness();
+    bl++;
+    if ( bl > BLIGHTNESS_MAX ) {
+      bl=0;
+    }
+    nd[curDigit].set_blightness(bl);
+    Serial.print("bl=" + String(bl));
+    Serial.println();
   }
 
   if ( digitalRead(PIN_SW3) == LOW ) {
+    curDigit++;
+    if ( curDigit >= NIXIE_TUBE_DIGIT_N ) {
+      curDigit = 0;
+      curTube++;
+      if ( curTube >= NIXIE_TUBE_N ) {
+	curTube = 0;
+      }
+    }
+    
+    Serial.print("curTube:" + String(curTube) + " ");
+    Serial.print("curDigit:" + String(curDigit) + " ");
+    Serial.println();
   }
 } // btn_handler
 //============================================================================
@@ -79,8 +120,44 @@ void setup() {
   //--------------------------------------------------------------------------
 } // setup()
 //============================================================================
+void timer100ms(unsigned long msec) {
+  
+}
+
+void inc_nixie() {
+  static uint8_t cur_nx = NIXIE_TUBE_N - 1;
+  static uint8_t cur_dg = NIXIE_TUBE_DIGIT_N - 1;
+
+  nixieTubeArray.set_tube_blightness(cur_nx, cur_dg, 0); 
+
+  cur_dg++;
+  if ( cur_dg >= NIXIE_TUBE_DIGIT_N ) {
+    cur_dg = 0;
+    cur_nx++;
+    if ( cur_nx >= NIXIE_TUBE_N ) {
+      cur_nx=0;
+    }
+  }
+  
+  nixieTubeArray.set_tube_blightness(cur_nx, cur_dg, BLIGHTNESS_MAX); 
+}
+
+void timer1sec(unsigned long sec) {
+  Serial.println("sec=" + String(sec));
+
+  inc_nixie();
+}
+//============================================================================
 void loop() {
+  prevMsec = curMsec;
   curMsec = millis();
+
+  if ( (curMsec / 1000) != (prevMsec / 1000) ) {
+    timer1sec(curMsec/1000);
+  }
+  if ( (curMsec / 100) != (prevMsec / 100) ) {
+    timer100ms(curMsec / 100 * 100);
+  }
 
   nixieTubeArray.display(curMsec);
 
