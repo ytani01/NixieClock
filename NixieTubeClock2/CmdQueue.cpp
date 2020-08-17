@@ -45,34 +45,49 @@ CmdEnt *CmdQueue::get() {
   return &(this->cur_cmd);
 }
 
+void CmdQueue::done() {
+  this->cur_cmd.cmd = CMD_NULL;
+}
+
+void CmdQueue::set_digit(uint8_t nixie_i, uint8_t digit_i,
+                         uint8_t blightness) {
+  uint8_t param[NIXIE_TUBE_DIGIT_N];
+  param[0] = nixie_i;
+  param[1] = digit_i;
+  param[2] = blightness;
+  this->put(CMD_SET_DIGIT, param);
+}
+
 void CmdQueue::loop() {
-  while (cur_cmd.cmd != CMD_NULL && this->get() != (CmdEnt *)NULL) {
+  while (this->cur_cmd.cmd != CMD_NULL || this->get() != (CmdEnt *)NULL) {
     this->print_cur();
     
-    switch ( cur_cmd.cmd ) {
+    switch (this->cur_cmd.cmd) {
     case CMD_SET_DIGIT:
-      this->_nxa->set_tube_blightness((uint8_t)cur_cmd.param[0],
-				      (uint8_t)cur_cmd.param[1],
-				      (uint8_t)cur_cmd.param[2]);
-      cur_cmd.cmd = CMD_NULL;
+      this->_nxa->set_tube_blightness((uint8_t)this->cur_cmd.param[0],
+				      (uint8_t)this->cur_cmd.param[1],
+				      (uint8_t)this->cur_cmd.param[2]);
+      this->done();
       break;
 
     case CMD_SET_COLON:
-      this->_nxa->set_colon_blightness((uint8_t)cur_cmd.param[0],
-				       (uint8_t)cur_cmd.param[1]);
-      cur_cmd.cmd = CMD_NULL;
+      this->_nxa->set_colon_blightness((uint8_t)this->cur_cmd.param[0],
+				       (uint8_t)this->cur_cmd.param[1]);
+      this->done();
       break;
 
     default:
+      Serial.println("this->cur_cmd=0x"
+                     + String(this->cur_cmd.cmd, HEX) + "?");
       break;
     } // switch
   } // while
 }
  
 void CmdQueue::print_cur() {
-  Serial.print("cmd(" + String(cur_cmd.cmd) + ")");
+  Serial.print("cmd(0x" + String(this->cur_cmd.cmd, HEX) + ")");
   for (int p=0; p < CMD_Q_PARAM_N; p++) {
-    Serial.print(String(cur_cmd.param[p]) + " ");
+    Serial.print(String(this->cur_cmd.param[p]) + " ");
   }
   Serial.println();
 }

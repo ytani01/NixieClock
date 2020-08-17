@@ -5,12 +5,17 @@
 #define MODE_BASE_H
 #include <Arduino.h>
 #include "NixieTubeArray.h"
+#include "CmdQueue.h"
 
 class ModeBase {
  public:
-  ModeBase() {};
+  virtual void setup(int idx, NixieTubeArray *nxa, CmdQueue *cmd_q);
+  virtual void loop(unsigned long cur_ms);
 
-  virtual void setup();
-  virtual void loop(unsigned long cur_ms, NixieTubeArray *nxa);
+ protected:
+  String         _name;
+  int            _idx;
+  NixieTubeArray *_nxa;
+  CmdQueue       *_cmd_q;
 };
 #endif // MODE_BASE_H

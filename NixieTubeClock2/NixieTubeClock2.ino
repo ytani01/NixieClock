@@ -49,10 +49,8 @@ int curDigit = 0;
 //----------------------------------------------------------------------------
 #define MODE_TEST1 0
 ModeTest1 modeT1;
-#define MODE_TEST1A 1
-ModeTest1 modeT1a;
 
-ModeBase *Mode[] = {&modeT1, &modeT1a};
+ModeBase *Mode[] = {&modeT1};
 
 static unsigned long ModeN = sizeof(Mode) / sizeof(ModeBase *);
 
@@ -127,18 +125,18 @@ void btn_handler() {
 void setup() {
   Serial.begin(115200);
   Serial.println("begin");
-
+  //--------------------------------------------------------------------------
   nixieTubeArray.init(PIN_HV5812_CLK, PIN_HV5812_STOBE,
                       PIN_HV5812_DATA, PIN_HV5812_BLANK,
                       nixiePins, colonPins);
+  //--------------------------------------------------------------------------
   cmdQ.init(&nixieTubeArray);
-
+  //--------------------------------------------------------------------------
   for (int i=0; i < sizeof(pinsIn) / sizeof(uint8_t); i++) {
     pinMode(pinsIn[i], INPUT);
     int val = digitalRead(pinsIn[i]);
     Serial.println("SW[" + String(i) + "]=" + String(val) );
   }
-
   //--------------------------------------------------------------------------
   Serial.println("digitalPinToInterrupt:");
   Serial.println(" " + String(PIN_SW1) + ":" +
@@ -151,9 +149,8 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(PIN_SW2), btn_handler, CHANGE);
   attachInterrupt(digitalPinToInterrupt(PIN_SW3), btn_handler, CHANGE);
   //--------------------------------------------------------------------------
-
   for (int m=0; m < ModeN; m++) {
-    Mode[m]->setup();
+    Mode[m]->setup(m, &nixieTubeArray, &cmdQ);
   }
 } // setup()
 //============================================================================
@@ -228,7 +225,7 @@ void loop() {
     timer50ms(curMsec);
   }
 
-  Mode[curMode]->loop(curMsec, &nixieTubeArray);
+  Mode[curMode]->loop(curMsec);
   
   cmdQ.loop();
   

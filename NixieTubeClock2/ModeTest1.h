@@ -7,9 +7,7 @@
 
 class ModeTest1 : public ModeBase {
  public:
-  ModeTest1() {};
-  
-  void setup();
-  void loop(unsigned long cur_ms, NixieTubeArray *nxa);
+  void setup(int idx, NixieTubeArray *nxa, CmdQueue *cmd_q);
+  void loop(unsigned long cur_ms);
 };
 #endif // MODE_TEST1_H
