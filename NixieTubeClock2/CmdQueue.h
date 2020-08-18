@@ -14,7 +14,7 @@
 #define CMD_QUEUE_H
 #include <Arduino.h>
 #include <string.h>
-#include "NixieTubeArray.h"
+#include "NixieArray.h"
 
 #define CMD_NULL	0x00 // param: NONE
 #define CMD_SLEEP	0x01 // param: msec, start_msec
@@ -37,7 +37,7 @@ class CmdQueue {
 
   CmdQueue() {};
 
-  void init(NixieTubeArray *nxa);
+  void init(NixieArray *nxa);
   
   void put(uint8_t cmd, uint8_t param[CMD_Q_PARAM_N]); // put cmd at _tail
   CmdEnt *get(); // get and remove cmd at _head
@@ -55,7 +55,7 @@ class CmdQueue {
   int _head = 0;
   int _tail = 0;
 
-  NixieTubeArray *_nxa;
+  NixieArray *_nxa;
 };
 
 #endif // CMD_QUEUE_H

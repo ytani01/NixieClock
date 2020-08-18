@@ -4,7 +4,7 @@
 #include "CmdQueue.h"
 
 //============================================================================
-void CmdQueue::init(NixieTubeArray *nxa) {
+void CmdQueue::init(NixieArray *nxa) {
   this->cur_cmd.cmd = CMD_NULL;
 
   for (int ent=0; ent < CMD_Q_POOL_SIZE; ent++) {
@@ -51,7 +51,7 @@ void CmdQueue::done() {
 
 void CmdQueue::set_digit(uint8_t nixie_i, uint8_t digit_i,
                          uint8_t blightness) {
-  uint8_t param[NIXIE_TUBE_DIGIT_N];
+  uint8_t param[NIXIE_NUM_DIGIT_N];
   param[0] = nixie_i;
   param[1] = digit_i;
   param[2] = blightness;
@@ -64,9 +64,9 @@ void CmdQueue::loop() {
     
     switch (this->cur_cmd.cmd) {
     case CMD_SET_DIGIT:
-      this->_nxa->set_tube_blightness((uint8_t)this->cur_cmd.param[0],
-				      (uint8_t)this->cur_cmd.param[1],
-				      (uint8_t)this->cur_cmd.param[2]);
+      this->_nxa->set_num_blightness((uint8_t)this->cur_cmd.param[0],
+                                     (uint8_t)this->cur_cmd.param[1],
+                                     (uint8_t)this->cur_cmd.param[2]);
       this->done();
       break;
 
@@ -78,7 +78,9 @@ void CmdQueue::loop() {
 
     default:
       Serial.println("this->cur_cmd=0x"
-                     + String(this->cur_cmd.cmd, HEX) + "?");
+                     + String(this->cur_cmd.cmd, HEX)
+                     + "?");
+      this->done();
       break;
     } // switch
   } // while
