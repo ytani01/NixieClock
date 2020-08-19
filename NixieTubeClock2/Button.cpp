@@ -33,11 +33,11 @@ void Button::init(byte pin, String name)
 
   //pciSetup(_pin);
 }
-//
-// return:
-//	true	changed
-//	false	to be ignored
-//
+/*
+ * return:
+ *	true	changed
+ *	false	to be ignored
+ */
 boolean Button::get()
 {
   unsigned long cur_msec = millis();

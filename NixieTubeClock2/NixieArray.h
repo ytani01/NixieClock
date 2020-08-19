@@ -30,7 +30,7 @@ class NixieElement {
  public:
   NixieElement() {};
   
-  void init(uint8_t pin);
+  void setup(uint8_t pin);
   
   void set_blightness(uint8_t blightness);
   uint8_t get_blightness();
@@ -70,9 +70,9 @@ class NixieArray {
  public:
   NixieArray() {};
   
-  void init(uint8_t clk, uint8_t stobe, uint8_t data, uint8_t blank,
-            uint8_t num[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N],
-            uint8_t colon[NIXIE_COLON_N]);
+  void setup(uint8_t clk, uint8_t stobe, uint8_t data, uint8_t blank,
+             uint8_t num[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N],
+             uint8_t colon[NIXIE_COLON_N]);
     
   NixieNum *get_num();
   NixieNum *get_num(uint8_t num_i);

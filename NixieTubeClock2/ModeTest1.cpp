@@ -21,8 +21,8 @@ void ModeTest1::loop(unsigned long cur_ms) {
     Serial.println("ModeTest1::loop(" + String(cur_ms) + ")");
 
     for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
-      this->_cmd_q->set_digit(0, d, 0);
+      // this->_cmd_q->set_digit(0, d, 0);
     } // for(d)
-    this->_cmd_q->set_digit(0, cur_ms % 1000, BLIGHTNESS_MAX);
+    // this->_cmd_q->set_digit(0, cur_ms % 1000, BLIGHTNESS_MAX);
   }
 }

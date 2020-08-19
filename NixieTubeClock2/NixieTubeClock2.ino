@@ -1,8 +1,9 @@
 /*
- * NixieTubeClock.ino
+ * (c) 2020 Yoichi Tanibayashi
  */
 #include "NixieArray.h"
 #include "CmdQueue.h"
+#include "CmdWorker.h"
 #include "ModeBase.h"
 #include "ModeTest1.h"
 
@@ -38,6 +39,7 @@ uint8_t colonPins[] = {PIN_COLON_R, PIN_COLON_L};
 
 NixieArray nixieArray;
 CmdQueue cmdQ;
+CmdWorker cmdWorker;
 
 unsigned long loopCount  = 0;
 unsigned long curMsec    = 0; // msec
@@ -171,30 +173,39 @@ void setup() {
   Serial.begin(115200);
   Serial.println("begin");
   //--------------------------------------------------------------------------
-  nixieArray.init(PIN_HV5812_CLK, PIN_HV5812_STOBE,
-                      PIN_HV5812_DATA, PIN_HV5812_BLANK,
-                      nixiePins, colonPins);
-  cmdQ.init(&nixieArray);
+  // グローバルオブジェクトの初期化
+  //
+  nixieArray.setup(PIN_HV5812_CLK,  PIN_HV5812_STOBE,
+                   PIN_HV5812_DATA, PIN_HV5812_BLANK,
+                   nixiePins, colonPins);
+  cmdQ.setup();
+  cmdWorker.setup(&nixieArray, &cmdQ);
   //--------------------------------------------------------------------------
+  // 各モードの初期化
   for (int m=0; m < ModeN; m++) {
     Mode[m]->setup(m, &nixieArray, &cmdQ);
   }
   //--------------------------------------------------------------------------
+  // スイッチの初期化
   for (int i=0; i < sizeof(pinsIn) / sizeof(uint8_t); i++) {
     pinMode(pinsIn[i], INPUT);
     int val = digitalRead(pinsIn[i]);
     Serial.println("SW[" + String(i) + "]=" + String(val) );
   }
+  uint8_t intr_pin1 = digitalPinToInterrupt(PIN_SW1);
+  uint8_t intr_pin2 = digitalPinToInterrupt(PIN_SW2);
+  uint8_t intr_pin3 = digitalPinToInterrupt(PIN_SW3);
+
   Serial.println("digitalPinToInterrupt:");
-  Serial.println(" " + String(PIN_SW1) + ":" +
-                 String(digitalPinToInterrupt(PIN_SW1)));
-  Serial.println(" " + String(PIN_SW2) + ":" +
-                 String(digitalPinToInterrupt(PIN_SW2)));
-  Serial.println(" " + String(PIN_SW3) + ":" +
-                 String(digitalPinToInterrupt(PIN_SW3)));
-  attachInterrupt(digitalPinToInterrupt(PIN_SW1), btn_handler, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(PIN_SW2), btn_handler, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(PIN_SW3), btn_handler, CHANGE);
+  Serial.println(" " + String(PIN_SW1) + " --> " + String(intr_pin1));
+  Serial.println(" " + String(PIN_SW2) + " --> " + String(intr_pin2));
+  Serial.println(" " + String(PIN_SW3) + " --> " + String(intr_pin3));
+
+  attachInterrupt(intr_pin1, btn_handler, CHANGE);
+  attachInterrupt(intr_pin2, btn_handler, CHANGE);
+  attachInterrupt(intr_pin3, btn_handler, CHANGE);
+  //--------------------------------------------------------------------------
+  prevMsec = millis();
 } // setup()
 //============================================================================
 void loop() {
@@ -213,7 +224,8 @@ void loop() {
 
   Mode[curMode]->loop(curMsec);
   
-  cmdQ.loop();
+  cmdWorker.loop(curMsec);
+
   nixieArray.display(curMsec);
 
   loopCount++;

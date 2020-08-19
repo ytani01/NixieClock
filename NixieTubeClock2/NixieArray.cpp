@@ -6,7 +6,7 @@
 //============================================================================
 // class NixieElement
 //----------------------------------------------------------------------------
-void NixieElement::init(uint8_t pin) {
+void NixieElement::setup(uint8_t pin) {
   //this->set_blightness(BLIGHTNESS_MAX);
   this->set_blightness(0);
   this->set_pin(pin);
@@ -58,7 +58,7 @@ void NixieNum::onoff(uint8_t timing) {
 //============================================================================
 // class NixieArray
 //----------------------------------------------------------------------------
-void NixieArray::init(uint8_t clk, uint8_t stobe,
+void NixieArray::setup(uint8_t clk, uint8_t stobe,
                           uint8_t data, uint8_t blank,
                           uint8_t num[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N],
                           uint8_t colon[NIXIE_COLON_N]) {
@@ -76,14 +76,14 @@ void NixieArray::init(uint8_t clk, uint8_t stobe,
 
   for (int n=0; n < NIXIE_NUM_N; n++) {
     for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
-      (this->_num[n].get_digit())[d].init(num[n][d]);
+      (this->_num[n].get_digit())[d].setup(num[n][d]);
     } // for(d)
   } // for(n)
 
   for (int c=0; c < NIXIE_COLON_N; c++) {
     pinMode(colon[c], OUTPUT);
     digitalWrite(colon[c], LOW);
-    this->_colon[c].init(colon[c]);
+    this->_colon[c].setup(colon[c]);
   } // for(c)
 }
 
