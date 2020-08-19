@@ -16,11 +16,11 @@
 #include <string.h>
 #include "Cmd.h"
 
-#define CMD_Q_POOL_SIZE 256
+#define CMD_Q_POOL_SIZE 512
 
 struct CmdEnt {
-  uint8_t cmd;
-  uint8_t param[CMD_PARAM_N];
+  cmd_t   cmd;
+  param_t param[CMD_PARAM_N];
 };
 
 class CmdQueue {
@@ -29,8 +29,8 @@ class CmdQueue {
 
   void setup();
   
-  boolean put(uint8_t cmd, uint8_t param[CMD_PARAM_N]);
-  boolean get(uint8_t *cmd, uint8_t param[CMD_PARAM_N]);
+  boolean put(cmd_t cmd, param_t param[CMD_PARAM_N]);
+  boolean get(cmd_t *cmd, param_t param[CMD_PARAM_N]);
 
   void print_all();
   

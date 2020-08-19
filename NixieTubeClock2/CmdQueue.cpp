@@ -13,7 +13,7 @@ void CmdQueue::setup() {
   this->_head = this->_tail = 0;
 }
 
-boolean CmdQueue::put(uint8_t cmd, uint8_t param[CMD_PARAM_N]) {
+boolean CmdQueue::put(cmd_t cmd, param_t param[CMD_PARAM_N]) {
   if (this->_ent[this->_tail].cmd != CMD_NULL ) {
     Serial.println("CmdQueue::put> full");
     return false;
@@ -28,7 +28,7 @@ boolean CmdQueue::put(uint8_t cmd, uint8_t param[CMD_PARAM_N]) {
   return true;
 }
 
-boolean CmdQueue::get(uint8_t *cmd, uint8_t param[CMD_PARAM_N]) {
+boolean CmdQueue::get(cmd_t *cmd, param_t param[CMD_PARAM_N]) {
   if ( this->_ent[this->_head].cmd == CMD_NULL ) {
     Serial.println("CmdQueue::get> empty");
     return false;
