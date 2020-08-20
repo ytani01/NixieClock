@@ -7,23 +7,26 @@
 #include "ModeBase.h"
 #include "ModeTest1.h"
 
-#define PIN_INTR           2 // ??
-#define DEBOUNCE         200 // msec
+#define PIN_INTR            2 // ??
+#define DEBOUNCE          200 // msec
 
-#define PIN_HV5812_CLK    26
-#define PIN_HV5812_STOBE  13
-#define PIN_HV5812_DATA   14
-#define PIN_HV5812_BLANK   4
+#define PIN_HV5812_CLK     26
+#define PIN_HV5812_STOBE   13
+#define PIN_HV5812_DATA    14
+#define PIN_HV5812_BLANK    4
 
-#define PIN_COLON_R       16
-#define PIN_COLON_L       17
-#define PIN_LED           27
+#define PIN_COLON_R_TOP    16
+#define PIN_COLON_R_BOTTOM 16
+#define PIN_COLON_L_TOP    17
+#define PIN_COLON_L_BOTTOM 17
 
-#define PIN_SW1           33
-#define PIN_SW2           34
-#define PIN_SW3           35
+#define PIN_LED            27
 
-#define LOOP_DELAY         0 // msec
+#define PIN_SW1            33
+#define PIN_SW2            34
+#define PIN_SW3            35
+
+#define LOOP_DELAY          0 // msec
 //============================================================================
 uint8_t pinsIn[] = {PIN_SW1, PIN_SW2, PIN_SW3};
 
@@ -35,7 +38,9 @@ uint8_t nixiePins[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N] =
    {49, 40, 41, 42, 43, 44, 45, 46, 47, 48},
    {59, 50, 51, 52, 53, 54, 55, 56, 57, 58} };
 
-uint8_t colonPins[] = {PIN_COLON_R, PIN_COLON_L};
+uint8_t colonPins[NIXIE_COLON_N][NIXIE_COLON_DOT_N] =
+  {{PIN_COLON_R_TOP, PIN_COLON_R_BOTTOM},
+   {PIN_COLON_L_TOP, PIN_COLON_L_BOTTOM} };
 
 NixieArray nixieArray;
 CmdQueue cmdQ;
@@ -160,12 +165,14 @@ void timer1sec(unsigned long msec) {
 
   unsigned long sec = msec / 1000;
 
+  uint8_t bl_max[] = {BLIGHTNESS_MAX, BLIGHTNESS_MAX};
+  uint8_t bl_zero[] = {BLIGHTNESS_MAX, BLIGHTNESS_MAX};
   if ( sec % 2 == 0 ) {
-    nixieArray.set_colon_blightness(COLON_L, BLIGHTNESS_MAX);
-    nixieArray.set_colon_blightness(COLON_R, 0);
+    nixieArray.set_colon_blightness(COLON_L, bl_max);
+    nixieArray.set_colon_blightness(COLON_R, bl_zero);
   } else {
-    nixieArray.set_colon_blightness(COLON_L, 0);
-    nixieArray.set_colon_blightness(COLON_R, BLIGHTNESS_MAX);
+    nixieArray.set_colon_blightness(COLON_L, bl_zero);
+    nixieArray.set_colon_blightness(COLON_R, bl_max);
   }
 }
 //============================================================================

@@ -16,7 +16,7 @@ void ModeBase::setup(int idx, NixieArray *nxa, CmdQueue *cmd_q) {
 }
 
 void ModeBase::loop(unsigned long cur_ms) {
-  static unsigned long = prev_ms = 0;
+  static unsigned long prev_ms = 0;
   
   if (cur_ms / 5000 != prev_ms / 5000) {
     prev_ms = cur_ms;

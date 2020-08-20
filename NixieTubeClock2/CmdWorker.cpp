@@ -43,7 +43,7 @@ void CmdWorker::loop(unsigned long cur_ms) {
       // start()だけで完了した場合、curCmdをリセット
       curCmd = &cmdNull;
     }
-  } while()
+  } // while
 
   curCmd->loop(cur_ms);
   if (! curCmd->is_working()) {
