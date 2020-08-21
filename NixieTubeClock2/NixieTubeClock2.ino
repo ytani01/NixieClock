@@ -3,7 +3,7 @@
  */
 #include "NixieArray.h"
 #include "CmdQueue.h"
-#include "CmdWorker.h"
+#include "CmdDispatcher.h"
 #include "ModeBase.h"
 #include "ModeTest1.h"
 
@@ -44,7 +44,7 @@ uint8_t colonPins[NIXIE_COLON_N][NIXIE_COLON_DOT_N] =
 
 NixieArray nixieArray;
 CmdQueue cmdQ;
-CmdWorker cmdWorker;
+CmdDispatcher cmdDispatcher;
 
 unsigned long loopCount  = 0;
 unsigned long curMsec    = 0; // msec
@@ -186,7 +186,7 @@ void setup() {
                    PIN_HV5812_DATA, PIN_HV5812_BLANK,
                    nixiePins, colonPins);
   cmdQ.setup();
-  cmdWorker.setup(&nixieArray, &cmdQ);
+  cmdDispatcher.setup(&nixieArray, &cmdQ);
   //--------------------------------------------------------------------------
   // 各モードの初期化
   for (int m=0; m < ModeN; m++) {
@@ -231,7 +231,7 @@ void loop() {
 
   Mode[curMode]->loop(curMsec);
   
-  cmdWorker.loop(curMsec);
+  cmdDispatcher.loop(curMsec);
 
   nixieArray.display(curMsec);
 

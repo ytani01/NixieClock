@@ -22,36 +22,47 @@ typedef long    param_t;
 //============================================================================
 class Cmd {
  public:
-  Cmd() {};
-  virtual void init(NixieArray *nxa, cmd_t cmd, param_t param[CMD_PARAM_N]);
-  virtual void start();
+  Cmd(NixieArray *nxa, cmd_t cmd, param_t param[CMD_PARAM_N]);
+
+  virtual void start(unsigned long start_ms);
   virtual void end();
+  virtual void loop(unsigned long cur_ms);
+
+  virtual cmd_t get_cmd();
+  virtual param_t *get_param();
+  virtual param_t get_param(int param_i);
+
   virtual boolean is_null();
   virtual boolean is_working();
-  virtual void loop(unsigned long cur_ms);
+
   virtual String toString();
 
  protected:
-  NixieArray *_nxa;
-  cmd_t       _cmd = CMD_NULL;
-  param_t     _param[CMD_PARAM_N];
-  boolean     _working = false;
+  NixieArray   *_nxa;
+  cmd_t         _cmd = CMD_NULL; // 実行中は、CMD_NULL以外
+  param_t       _param[CMD_PARAM_N];
+  unsigned long _start_ms;
 }; // class Cmd
 //============================================================================
 class CmdSleep : public Cmd {
  public:
-  void start();
+  static const unsigned long SLEEP_DELAY = 1; // ms
+
+  CmdSleep(NixieArray *nxa, cmd_t cmd, param_t param[CMD_PARAM_N]);
+
+  void start(unsigned long start_ms);
   void loop(unsigned long cur_ms);
 
  private:
-  unsigned long _start_ms;
   unsigned long _cur_ms;
   unsigned long _interval_ms;
 }; // class CmdSleep
 //============================================================================
 class CmdSetDigit : public Cmd {
  public:
-  void start();
+  CmdSetDigit(NixieArray *nxa, cmd_t cmd, param_t param[CMD_PARAM_N]);
+
+  void start(unsigned long start_ms);
 }; // class CmdSetDigit
 //============================================================================
 #endif // CMD_H

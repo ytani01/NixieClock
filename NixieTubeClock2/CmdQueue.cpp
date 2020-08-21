@@ -59,3 +59,11 @@ void CmdQueue::print_all() {
     if ( qi == this->_tail ) break;
   } // while
 }
+
+int CmdQueue::get_head() {
+  return this->_head;
+}
+
+int CmdQueue::get_tail() {
+  return this->_tail;
+}

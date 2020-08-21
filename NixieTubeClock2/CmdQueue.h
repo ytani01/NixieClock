@@ -32,6 +32,9 @@ class CmdQueue {
   boolean put(cmd_t cmd, param_t param[CMD_PARAM_N]);
   boolean get(cmd_t *cmd, param_t param[CMD_PARAM_N]);
 
+  int get_head();
+  int get_tail();
+
   void print_all();
   
  private:
