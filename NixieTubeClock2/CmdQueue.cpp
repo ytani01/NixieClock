@@ -1,6 +1,4 @@
 /*
- * CmdQueue.cpp
- *
  * (c) 2020 Yoichi Tanibayashi
  */
 #include "CmdQueue.h"
@@ -67,3 +65,7 @@ int CmdQueue::get_head() {
 int CmdQueue::get_tail() {
   return this->_tail;
 }
+// Local Variables:
+// Mode: arduino
+// Coding: utf-8-unix
+// End:

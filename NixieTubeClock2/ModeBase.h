@@ -19,3 +19,7 @@ class ModeBase {
   CmdQueue   *_cmd_q;
 };
 #endif // MODE_BASE_H
+// Local Variables:
+// Mode: arduino
+// Coding: utf-8-unix
+// End:

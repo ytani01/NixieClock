@@ -163,3 +163,7 @@ class NixieArray {
 };
 //============================================================================
 #endif // NIXIE_ARRAY_H
+// Local Variables:
+// Mode: arduino
+// Coding: utf-8-unix
+// End:

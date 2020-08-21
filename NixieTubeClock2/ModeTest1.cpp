@@ -1,5 +1,5 @@
 /*
- *
+ * (c) 2020 Yoichi Tanibayashi
  */
 #include "ModeTest1.h"
 
@@ -49,3 +49,7 @@ void ModeTest1::loop(unsigned long cur_ms) {
     this->_cmd_q->put(CMD_SET_DIGIT, param);
   }
 }
+// Local Variables:
+// Mode: arduino
+// Coding: utf-8-unix
+// End:

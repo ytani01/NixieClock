@@ -1,5 +1,5 @@
 /*
- *
+ * (c) 2020 Yoichi Tanibayashi
  */
 #ifndef CMD_H
 #define CMD_H
@@ -66,3 +66,7 @@ class CmdSetDigit : public Cmd {
 }; // class CmdSetDigit
 //============================================================================
 #endif // CMD_H
+// Local Variables:
+// Mode: arduino
+// Coding: utf-8-unix
+// End:

@@ -89,3 +89,7 @@ void CmdSetDigit::start(unsigned long start_ms) {
   this->end();
 }
 //============================================================================
+// Local Variables:
+// Mode: arduino
+// Coding: utf-8-unix
+// End:

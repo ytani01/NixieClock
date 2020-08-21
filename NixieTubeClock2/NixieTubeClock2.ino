@@ -4,8 +4,11 @@
 #include "NixieArray.h"
 #include "CmdQueue.h"
 #include "CmdDispatcher.h"
+#include "Button.h"
 #include "ModeBase.h"
 #include "ModeTest1.h"
+
+#define LOOP_DELAY          0 // msec
 
 #define PIN_INTR            2 // ??
 #define DEBOUNCE          200 // msec
@@ -22,13 +25,12 @@
 
 #define PIN_LED            27
 
-#define PIN_SW1            33
-#define PIN_SW2            34
-#define PIN_SW3            35
-
-#define LOOP_DELAY          0 // msec
+#define PIN_BTN1           33
+#define PIN_BTN2           34
+#define PIN_BTN3           35
+#define BTN_N               3
 //============================================================================
-uint8_t pinsIn[] = {PIN_SW1, PIN_SW2, PIN_SW3};
+uint8_t pinsIn[] = {PIN_BTN1, PIN_BTN2, PIN_BTN3};
 
 uint8_t nixiePins[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N] =
   {{ 9,  0,  1,  2,  3,  4,  5,  6,  7,  8},
@@ -41,18 +43,19 @@ uint8_t nixiePins[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N] =
 uint8_t colonPins[NIXIE_COLON_N][NIXIE_COLON_DOT_N] =
   {{PIN_COLON_R_TOP, PIN_COLON_R_BOTTOM},
    {PIN_COLON_L_TOP, PIN_COLON_L_BOTTOM} };
-
+//----------------------------------------------------------------------------
 NixieArray nixieArray;
 CmdQueue cmdQ;
 CmdDispatcher cmdDispatcher;
-
+Button btnObj1, btnObj2, btnObj3;
+Button *btnObj[] = {&btnObj1, &btnObj2, &btnObj3};
+//----------------------------------------------------------------------------
 unsigned long loopCount  = 0;
 unsigned long curMsec    = 0; // msec
 unsigned long prevMsec   = 0;
-
+//----------------------------------------------------------------------------
 int curTube = 0;
 int curDigit = 0;
-
 //----------------------------------------------------------------------------
 #define MODE_TEST1 0
 ModeTest1 modeT1;
@@ -72,7 +75,13 @@ void btn_handler() {
   }
   prev_msec = cur_msec;
 
-  if ( digitalRead(PIN_SW1) == LOW ) {
+  for (int b=0; b < BTN_N; b++) {
+    if ( btnObj[b]->get() ) {
+      btnObj[b]->print();
+    }
+  }
+
+  if ( digitalRead(PIN_BTN1) == LOW ) {
     curDigit--;
     if ( curDigit < 0 ) {
       curDigit = NIXIE_NUM_DIGIT_N - 1;
@@ -87,7 +96,7 @@ void btn_handler() {
     Serial.println();
   }
 
-  if ( digitalRead(PIN_SW2) == LOW) {
+  if ( digitalRead(PIN_BTN2) == LOW) {
     Serial.print("curTube:" + String(curTube) + " ");
     Serial.print("curDigit:" + String(curDigit) + " ");
 
@@ -101,7 +110,7 @@ void btn_handler() {
     Serial.println();
   }
 
-  if ( digitalRead(PIN_SW3) == LOW ) {
+  if ( digitalRead(PIN_BTN3) == LOW ) {
     curDigit++;
     if ( curDigit >= NIXIE_NUM_DIGIT_N ) {
       curDigit = 0;
@@ -193,20 +202,24 @@ void setup() {
     Mode[m]->setup(m, &nixieArray, &cmdQ);
   }
   //--------------------------------------------------------------------------
-  // スイッチの初期化
+  // ボタンの初期化
+  btnObj1.setup(PIN_BTN1, "BTN1");
+  btnObj2.setup(PIN_BTN2, "BTN2");
+  btnObj3.setup(PIN_BTN3, "BTN3");
+  //--------------------------------------------------------------------------
   for (int i=0; i < sizeof(pinsIn) / sizeof(uint8_t); i++) {
     pinMode(pinsIn[i], INPUT);
     int val = digitalRead(pinsIn[i]);
     Serial.println("SW[" + String(i) + "]=" + String(val) );
   }
-  uint8_t intr_pin1 = digitalPinToInterrupt(PIN_SW1);
-  uint8_t intr_pin2 = digitalPinToInterrupt(PIN_SW2);
-  uint8_t intr_pin3 = digitalPinToInterrupt(PIN_SW3);
+  uint8_t intr_pin1 = digitalPinToInterrupt(PIN_BTN1);
+  uint8_t intr_pin2 = digitalPinToInterrupt(PIN_BTN2);
+  uint8_t intr_pin3 = digitalPinToInterrupt(PIN_BTN3);
 
   Serial.println("digitalPinToInterrupt:");
-  Serial.println(" " + String(PIN_SW1) + " --> " + String(intr_pin1));
-  Serial.println(" " + String(PIN_SW2) + " --> " + String(intr_pin2));
-  Serial.println(" " + String(PIN_SW3) + " --> " + String(intr_pin3));
+  Serial.println(" " + String(PIN_BTN1) + " --> " + String(intr_pin1));
+  Serial.println(" " + String(PIN_BTN2) + " --> " + String(intr_pin2));
+  Serial.println(" " + String(PIN_BTN3) + " --> " + String(intr_pin3));
 
   attachInterrupt(intr_pin1, btn_handler, CHANGE);
   attachInterrupt(intr_pin2, btn_handler, CHANGE);
@@ -229,6 +242,12 @@ void loop() {
     timer50ms(curMsec);
   }
 
+  for (int b=0; b < BTN_N; b++) {
+    if ( btnObj[b]->get() ) {
+      btnObj[b]->print();
+    }
+  }
+
   Mode[curMode]->loop(curMsec);
   
   cmdDispatcher.loop(curMsec);
@@ -238,3 +257,8 @@ void loop() {
   loopCount++;
   delay(LOOP_DELAY);
 } // loop()
+//============================================================================
+// Local Variables:
+// Mode: arduino
+// Coding: utf-8-unix
+// End:

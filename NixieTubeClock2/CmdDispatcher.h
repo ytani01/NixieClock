@@ -29,3 +29,7 @@ class CmdDispatcher {
 }; // class CmdDispatcher
 
 #endif // CMD_DISPATCHER_H
+// Local Variables:
+// Mode: arduino
+// Coding: utf-8-unix
+// End:

@@ -1,5 +1,5 @@
 /*
- *
+ * (c) 2020 Yoichi Tanibayashi
  */
 #ifndef MODE_TEST1_H
 #define MODE_TEST1_H
@@ -11,3 +11,7 @@ class ModeTest1 : public ModeBase {
   void loop(unsigned long cur_ms);
 };
 #endif // MODE_TEST1_H
+// Local Variables:
+// Mode: arduino
+// Coding: utf-8-unix
+// End:

@@ -8,7 +8,7 @@ void CmdDispatcher::setup(NixieArray *nxa, CmdQueue *cmd_q) {
   this->_nxa = nxa;
   this->_cmd_q = cmd_q;
   param_t *param = new param_t[CMD_PARAM_N];
-
+  
   for (int w=0; w < CMD_WORKER_N; w++) {
     this->_worker[w] = new Cmd(nxa, CMD_NULL, param);
   } // for (w)
@@ -30,7 +30,7 @@ int CmdDispatcher::get_free_worker() {
 cmd_t CmdDispatcher::set_worker_cmd(int wi, cmd_t cmd,
                                     param_t param[CMD_PARAM_N]) {
   delete this->_worker[wi];
-
+  
   switch (cmd) {
   case CMD_NULL:
     this->_worker[wi] = new Cmd(this->_nxa, cmd, param);
@@ -86,3 +86,7 @@ void CmdDispatcher::loop(unsigned long cur_ms) {
     }
   } // for (w)
 }
+// Local Variables:
+// Mode: arduino
+// Coding: utf-8-unix
+// End:

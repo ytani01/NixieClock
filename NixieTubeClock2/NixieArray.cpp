@@ -1,5 +1,5 @@
 /*
- * NixieArray.cpp
+ * (c) Yoichi Tanibayashi
  */
 #include "NixieArray.h"
 
@@ -377,3 +377,7 @@ void NixieArray::display(unsigned long cur_ms) {
   //--------------------------------------------------------------------------
 }
 //============================================================================
+// Local Variables:
+// Mode: arduino
+// Coding: utf-8-unix
+// End:

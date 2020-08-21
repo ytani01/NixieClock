@@ -1,4 +1,5 @@
 /*
+ * (c) 2020 Yoichi Tanibayashi
  *
  * ring buffer: CmdEnt[]
  *
@@ -44,3 +45,7 @@ class CmdQueue {
 }; // class CmdQueue
 
 #endif // CMD_QUEUE_H
+// Local Variables:
+// Mode: arduino
+// Coding: utf-8-unix
+// End:
