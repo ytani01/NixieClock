@@ -2,6 +2,8 @@
 
 ## 
 
+```
 [Mode..] -> [CmdQueue] -> [CmdDispatcher] -> [Cmd..]
+```
 
 * Wrapperクラスを作る？
