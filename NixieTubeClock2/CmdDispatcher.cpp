@@ -41,6 +41,18 @@ cmd_t CmdDispatcher::set_worker_cmd(int wi, cmd_t cmd,
   case CMD_SET_DIGIT:
     this->_worker[wi] = new CmdSetDigit(this->_nxa, cmd, param);
     break;
+  case CMD_FADE_IN:
+    this->_worker[wi] = new CmdFadeIn(this->_nxa, cmd, param);
+    break;
+  case CMD_FADE_OUT:
+    this->_worker[wi] = new CmdFadeOut(this->_nxa, cmd, param);
+    break;
+  case CMD_FOG_IN:
+    this->_worker[wi] = new CmdFogIn(this->_nxa, cmd, param);
+    break;
+  case CMD_FOG_OUT:
+    this->_worker[wi] = new CmdFogOut(this->_nxa, cmd, param);
+    break;
   default:
     Serial.println("! invalid cmd=" + String(cmd, HEX));
     this->_worker[wi] = new Cmd(this->_nxa, CMD_NULL, param);
@@ -59,6 +71,7 @@ void CmdDispatcher::reset_worker(int wi) {
 void CmdDispatcher::loop(unsigned long cur_ms) {
   // コマンド・キューから get & start
   int wi;
+  
   while ( (wi=this->get_free_worker()) >= 0 ) {
     // 実行中のコマンドが無い場合
     cmd_t   cmd;
@@ -68,7 +81,7 @@ void CmdDispatcher::loop(unsigned long cur_ms) {
     if (! this->_cmd_q->get(&cmd, param)) {
       break;      // キューが空の場合は、取出し終了
     }
-    
+
     // コマンドに応じてworkerオブジェクトを設定する
     if ( this->set_worker_cmd(wi, cmd, param) != CMD_NULL ) {
       this->_worker[wi]->start(cur_ms);  // コマンド実行開始

@@ -28,7 +28,7 @@ boolean CmdQueue::put(cmd_t cmd, param_t param[CMD_PARAM_N]) {
 
 boolean CmdQueue::get(cmd_t *cmd, param_t param[CMD_PARAM_N]) {
   if ( this->_ent[this->_head].cmd == CMD_NULL ) {
-    Serial.println("CmdQueue::get> empty");
+    //Serial.println("CmdQueue::get> empty");
     return false;
   }
 
@@ -47,7 +47,7 @@ void CmdQueue::print_all() {
   
   while (this->_ent[qi].cmd != CMD_NULL) {
     Serial.print("[" + String(qi) + "]");
-    Serial.print(String(this->_ent[qi].cmd) + ":");
+    Serial.print("0x" + String(this->_ent[qi].cmd, HEX) + ":");
     for (int p=0; p < CMD_PARAM_N; p++) {
       Serial.print(String(this->_ent[qi].param[p]) + " ");
     } // for(p)

@@ -193,6 +193,14 @@ NixieColon *NixieArray::get_colon() { return _colon; }
 // 数字: 個別
 void NixieArray::set_num_blightness(uint8_t num_i, uint8_t digit_i,
                                     uint8_t blightness) {
+  /*
+  String str = "NixieArray::set_num_blightness(";
+  str += String(num_i) + ",";
+  str += String(digit_i) + ",";
+  str += String(blightness) + ")";
+  Serial.println(str);
+  */
+
   this->_num[num_i].set_blightness(digit_i, blightness);
 }
 void NixieArray::set_num_blightness_zero(uint8_t num_i, uint8_t digit_i) {
@@ -324,7 +332,6 @@ void NixieArray::display(unsigned long cur_ms) {
   uint8_t pin_n = NIXIE_NUM_N * NIXIE_NUM_DIGIT_N;
   uint8_t val[pin_n];
 
-  //Serial.println("cur_ms=" + String(cur_ms) + ", timing=" + String(timing));
   this->onoff(timing);
 
   //--------------------------------------------------------------------------

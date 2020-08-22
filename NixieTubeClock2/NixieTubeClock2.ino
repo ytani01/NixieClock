@@ -8,7 +8,7 @@
 #include "ModeBase.h"
 #include "ModeTest1.h"
 
-#define LOOP_DELAY          0 // msec
+#define LOOP_DELAY          1 // msec
 
 #define PIN_INTR            2 // ??
 #define DEBOUNCE          200 // msec
@@ -126,65 +126,6 @@ void btn_handler() {
   }
 } // btn_handler
 //============================================================================
-void inc_nixie() {
-  static uint8_t cur_num = NIXIE_NUM_N - 1;
-  static uint8_t cur_dg = NIXIE_NUM_DIGIT_N - 1;
-  static uint8_t cur_bl = 0;
-
-  cur_bl++;
-  if ( cur_bl > BLIGHTNESS_MAX ) {
-    cur_bl = 0;
-    nixieArray.set_num_blightness(cur_num, cur_dg, 0); 
-    cur_dg++;
-    if ( cur_dg >= NIXIE_NUM_DIGIT_N ) {
-      cur_dg = 0;
-      cur_num++;
-      if ( cur_num >= NIXIE_NUM_N ) {
-	cur_num=0;
-      }
-    }
-  }
-
-  uint8_t prev_nx = cur_num;
-  uint8_t prev_dg = cur_dg - 1;
-
-  if ( prev_dg >= NIXIE_NUM_DIGIT_N ) {
-    prev_dg = NIXIE_NUM_DIGIT_N - 1;
-    prev_nx--;
-    if ( prev_nx >= NIXIE_NUM_N ) {
-      prev_nx = NIXIE_NUM_N - 1;
-    }
-  }
-
-  nixieArray.set_num_blightness(prev_nx, prev_dg,
-				     BLIGHTNESS_MAX - cur_bl); 
-  nixieArray.set_num_blightness(cur_num, cur_dg, cur_bl); 
-}
-
-void timer50ms(unsigned long msec) {
-  //inc_nixie();
-}
-
-void timer100ms(unsigned long msec) {
-  inc_nixie();
-}
-
-void timer1sec(unsigned long msec) {
-  Serial.println("msec=" + String(msec));
-
-  unsigned long sec = msec / 1000;
-
-  uint8_t bl_max[] = {BLIGHTNESS_MAX, BLIGHTNESS_MAX};
-  uint8_t bl_zero[] = {BLIGHTNESS_MAX, BLIGHTNESS_MAX};
-  if ( sec % 2 == 0 ) {
-    nixieArray.set_colon_blightness(COLON_L, bl_max);
-    nixieArray.set_colon_blightness(COLON_R, bl_zero);
-  } else {
-    nixieArray.set_colon_blightness(COLON_L, bl_zero);
-    nixieArray.set_colon_blightness(COLON_R, bl_max);
-  }
-}
-//============================================================================
 void setup() {
   Serial.begin(115200);
   Serial.println("begin");
@@ -201,6 +142,7 @@ void setup() {
   for (int m=0; m < ModeN; m++) {
     Mode[m]->setup(m, &nixieArray, &cmdQ);
   }
+  cmdDispatcher.loop(millis()); // セットアップ時に投入したコマンドを実行
   //--------------------------------------------------------------------------
   // ボタンの初期化
   btnObj1.setup(PIN_BTN1, "BTN1");
@@ -231,16 +173,6 @@ void setup() {
 void loop() {
   prevMsec = curMsec;
   curMsec = millis();
-
-  if ( (curMsec / 1000) != (prevMsec / 1000) ) {
-    timer1sec(curMsec);
-  }
-  if ( (curMsec / 100) != (prevMsec / 100) ) {
-    timer100ms(curMsec);
-  }
-  if ( (curMsec / 50) != (prevMsec / 50) ) {
-    timer50ms(curMsec);
-  }
 
   for (int b=0; b < BTN_N; b++) {
     if ( btnObj[b]->get() ) {

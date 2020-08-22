@@ -29,26 +29,56 @@ void ModeTest1::setup(int idx, NixieArray *nxa, CmdQueue *cmd_q) {
 void ModeTest1::loop(unsigned long cur_ms) {
   ModeBase::loop(cur_ms);
 
-  static unsigned long prev_ms = 0;
-  
-  if (cur_ms / 1000 != prev_ms / 1000) {
-    prev_ms = cur_ms;
-    Serial.println("ModeTest1::loop(" + String(cur_ms) + ")");
+  static unsigned long prev_n = 0;
+  static unsigned long a = 2000; // ms
+  unsigned long cur_n = cur_ms / a % 10;
 
-    int prev_n = (prev_ms / 1000) % 10;
-    int cur_n = (cur_ms / 1000) % 10;
-    param_t *param = new param_t[10];
+  if ( cur_n != prev_n ) {
+    param_t *param = new param_t[CMD_PARAM_N];
 
     param[0] = 0;
     param[1] = prev_n;
     param[2] = 0;
     this->_cmd_q->put(CMD_SET_DIGIT, param);
 
+    param[0] = 0;
     param[1] = cur_n;
     param[2] = BLIGHTNESS_MAX;
     this->_cmd_q->put(CMD_SET_DIGIT, param);
+
+    param[0] = 1;
+    param[1] = cur_n;
+    param[2] = 200;
+    this->_cmd_q->put(CMD_FADE_IN, param);
+
+    param[0] = 2;
+    param[1] = cur_n;
+    param[2] = 300;
+    this->_cmd_q->put(CMD_FADE_OUT, param);
+
+    for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
+      param[0] = 3;
+      param[1] = d;
+      if ( d == cur_n ) {
+        param[2] = BLIGHTNESS_MAX;
+      } else {
+        param[2] = 0;
+      }
+      this->_cmd_q->put(CMD_SET_DIGIT, param);
+    } // for(d)
+
+    param[0] = 3;
+    param[1] = 200;
+    this->_cmd_q->put(CMD_FOG_IN, param);
+
+    param[0] = 4;
+    param[1] = cur_n;
+    param[2] = 200;
+    this->_cmd_q->put(CMD_FOG_OUT, param);
+
+    prev_n = cur_n;
   }
-}
+} // ModeTest1::loop()
 // Local Variables:
 // Mode: arduino
 // Coding: utf-8-unix
