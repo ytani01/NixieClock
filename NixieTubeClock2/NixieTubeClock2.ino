@@ -8,7 +8,7 @@
 #include "ModeBase.h"
 #include "ModeTest1.h"
 
-#define LOOP_DELAY          1 // msec
+#define LOOP_DELAY_US       1 // micro seconds
 
 #define PIN_INTR            2 // ??
 #define DEBOUNCE          200 // msec
@@ -142,7 +142,6 @@ void setup() {
   for (int m=0; m < ModeN; m++) {
     Mode[m]->setup(m, &nixieArray, &cmdQ);
   }
-  cmdDispatcher.loop(millis()); // セットアップ時に投入したコマンドを実行
   //--------------------------------------------------------------------------
   // ボタンの初期化
   btnObj1.setup(PIN_BTN1, "BTN1");
@@ -167,27 +166,29 @@ void setup() {
   attachInterrupt(intr_pin2, btn_handler, CHANGE);
   attachInterrupt(intr_pin3, btn_handler, CHANGE);
   //--------------------------------------------------------------------------
+  // セットアップ時に投入したコマンドを実行
   prevMsec = millis();
+  curMsec = millis();
+  cmdDispatcher.loop(curMsec);
 } // setup()
 //============================================================================
 void loop() {
   prevMsec = curMsec;
   curMsec = millis();
 
+  // ボタン
   for (int b=0; b < BTN_N; b++) {
     if ( btnObj[b]->get() ) {
       btnObj[b]->print();
     }
   }
 
-  Mode[curMode]->loop(curMsec);
-  
-  cmdDispatcher.loop(curMsec);
-
-  nixieArray.display(curMsec);
+  Mode[curMode]->loop(curMsec); // コマンドは全てキューイングされる
+  cmdDispatcher.loop(curMsec);  // コマンド実行
+  nixieArray.display(curMsec);  // 表示
 
   loopCount++;
-  delay(LOOP_DELAY);
+  delayMicroseconds(LOOP_DELAY_US);
 } // loop()
 //============================================================================
 // Local Variables:

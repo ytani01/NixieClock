@@ -16,15 +16,17 @@ Cmd::Cmd(NixieArray *nxa, cmd_t cmd, param_t param[CMD_PARAM_N]) {
 void Cmd::start(unsigned long start_ms) {
   this->_start_ms = start_ms;
 }
+
 void Cmd::end() {
   //Serial.println("Cmd::end()");
   this->_cmd = CMD_NULL;
 }
+
 void Cmd::loop(unsigned long cur_ms) {
   if ( this->is_working() ) {
     Serial.println("!? Cmd[" + String(this->_cmd, HEX)
                    + "::loop(" + String(cur_ms) + ")");
-    delay(1000);
+    delay(2000);
   }
 }
 
@@ -54,48 +56,42 @@ String Cmd::toString() {
   return str;
 }
 //============================================================================
-CmdSleep::CmdSleep(NixieArray *nxa, cmd_t cmd,
-                   param_t param[CMD_PARAM_N]) :
-  Cmd::Cmd(nxa, cmd, param) {
-}
-
-void CmdSleep::start(unsigned long start_ms) {
-  Cmd::start(start_ms);
-
-  this->_interval_ms = (unsigned long)this->get_param(0);
-}
-
-void CmdSleep::loop(unsigned long cur_ms) {
-  if ( cur_ms - this->_start_ms >= this->_interval_ms ) {
-    this->end();
-  } else {
-    delay(CmdSleep::SLEEP_DELAY);
-  }
-}
-//============================================================================
-CmdSetDigit::CmdSetDigit(NixieArray *nxa, cmd_t cmd,
+CmdSetNumDigit::CmdSetNumDigit(NixieArray *nxa, cmd_t cmd,
                          param_t param[CMD_PARAM_N]) :
   Cmd::Cmd(nxa, cmd, param) {
 }
 
-void CmdSetDigit::start(unsigned long start_ms) {
+void CmdSetNumDigit::start(unsigned long start_ms) {
   Cmd::start(start_ms);
 
   uint8_t num_i = (uint8_t)this->get_param(0);
   uint8_t digit_i = (uint8_t)this->get_param(1);
   uint8_t blightness = (uint8_t)this->get_param(2);
-
   this->_nxa->set_num_blightness(num_i, digit_i, blightness);
 
   this->end();
 }
 //============================================================================
-CmdFadeIn::CmdFadeIn(NixieArray *nxa, cmd_t cmd,
+CmdClearNum::CmdClearNum(NixieArray *nxa, cmd_t cmd,
                          param_t param[CMD_PARAM_N]) :
   Cmd::Cmd(nxa, cmd, param) {
 }
 
-void CmdFadeIn::start(unsigned long start_ms) {
+void CmdClearNum::start(unsigned long start_ms) {
+  Cmd::start(start_ms);
+
+  uint8_t num_i = (uint8_t)this->get_param(0);
+  this->_nxa->set_num_blightness_zero(num_i);
+
+  this->end();
+}
+//============================================================================
+CmdFadeInNumDigit::CmdFadeInNumDigit(NixieArray *nxa, cmd_t cmd,
+                             param_t param[CMD_PARAM_N]) :
+  Cmd::Cmd(nxa, cmd, param) {
+}
+
+void CmdFadeInNumDigit::start(unsigned long start_ms) {
   Cmd::start(start_ms);
 
   this->_num_i = (uint8_t)this->get_param(0);
@@ -109,7 +105,7 @@ void CmdFadeIn::start(unsigned long start_ms) {
                                  this->_blightness);
 }
 
-void CmdFadeIn::loop(unsigned long cur_ms) {
+void CmdFadeInNumDigit::loop(unsigned long cur_ms) {
   boolean endflag = false;
   
   if (cur_ms - this->_prev_ms >= this->_delay_ms) {
@@ -129,12 +125,12 @@ void CmdFadeIn::loop(unsigned long cur_ms) {
   }
 }
 //============================================================================
-CmdFadeOut::CmdFadeOut(NixieArray *nxa, cmd_t cmd,
-                         param_t param[CMD_PARAM_N]) :
+CmdFadeOutNumDigit::CmdFadeOutNumDigit(NixieArray *nxa, cmd_t cmd,
+                                       param_t param[CMD_PARAM_N]) :
   Cmd::Cmd(nxa, cmd, param) {
 }
 
-void CmdFadeOut::start(unsigned long start_ms) {
+void CmdFadeOutNumDigit::start(unsigned long start_ms) {
   Cmd::start(start_ms);
 
   this->_num_i = (uint8_t)this->get_param(0);
@@ -148,7 +144,7 @@ void CmdFadeOut::start(unsigned long start_ms) {
                                  this->_blightness);
 }
 
-void CmdFadeOut::loop(unsigned long cur_ms) {
+void CmdFadeOutNumDigit::loop(unsigned long cur_ms) {
   if ((cur_ms - this->_prev_ms) >= this->_delay_ms) {
     /*
     Serial.println("cur_ms=" + String(cur_ms) + ","
@@ -166,17 +162,16 @@ void CmdFadeOut::loop(unsigned long cur_ms) {
   }
 }
 //============================================================================
-CmdFogIn::CmdFogIn(NixieArray *nxa, cmd_t cmd,
-                         param_t param[CMD_PARAM_N]) :
+CmdFogInNumDigit::CmdFogInNumDigit(NixieArray *nxa, cmd_t cmd,
+                           param_t param[CMD_PARAM_N]) :
   Cmd::Cmd(nxa, cmd, param) {
 }
 
-void CmdFogIn::start(unsigned long start_ms) {
+void CmdFogInNumDigit::start(unsigned long start_ms) {
   Cmd::start(start_ms);
 
   this->_num_i = (uint8_t)this->get_param(0);
   this->_delay_ms = (unsigned long)this->get_param(1);
-
   this->_nxa->get_num_blightness(this->_num_i, this->_blightness);
 
   String str = "blightness={";
@@ -189,7 +184,7 @@ void CmdFogIn::start(unsigned long start_ms) {
   this->_prev_ms = start_ms;
 }
 
-void CmdFogIn::loop(unsigned long cur_ms) {
+void CmdFogInNumDigit::loop(unsigned long cur_ms) {
   int full_count = 0;
   
   if (cur_ms - this->_prev_ms >= this->_delay_ms) {
@@ -212,12 +207,12 @@ void CmdFogIn::loop(unsigned long cur_ms) {
   }
 }
 //============================================================================
-CmdFogOut::CmdFogOut(NixieArray *nxa, cmd_t cmd,
-                         param_t param[CMD_PARAM_N]) :
+CmdFogOutNumDigit::CmdFogOutNumDigit(NixieArray *nxa, cmd_t cmd,
+                                     param_t param[CMD_PARAM_N]) :
   Cmd::Cmd(nxa, cmd, param) {
 }
 
-void CmdFogOut::start(unsigned long start_ms) {
+void CmdFogOutNumDigit::start(unsigned long start_ms) {
   Cmd::start(start_ms);
 
   this->_num_i = (uint8_t)this->get_param(0);
@@ -228,18 +223,20 @@ void CmdFogOut::start(unsigned long start_ms) {
     this->_blightness[d] = BLIGHTNESS_MAX;
   }
 
-  String str = "CmdfogOut::start>blightness={";
+  /*
+  String str = "CmdfogOutNumDigit::start>blightness={";
   for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
     str += String(this->_blightness[d]) + " ";
   } // for(d)
   str += "}";
   Serial.println(str);
+  */
   
   this->_nxa->set_num_blightness(this->_num_i, this->_blightness);
   this->_prev_ms = start_ms;
 }
 
-void CmdFogOut::loop(unsigned long cur_ms) {
+void CmdFogOutNumDigit::loop(unsigned long cur_ms) {
   int zero_count = 0;
 
   if (cur_ms - this->_prev_ms >= this->_delay_ms) {

@@ -105,6 +105,8 @@ class NixieColon {
 //============================================================================
 class NixieArray {
  public:
+  static const unsigned int DISP_DELAY_US = 1; // microsec
+
   NixieArray() {};
   
   void setup(uint8_t clk, uint8_t stobe, uint8_t data, uint8_t blank,

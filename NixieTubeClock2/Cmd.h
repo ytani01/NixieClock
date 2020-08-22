@@ -7,17 +7,24 @@
 #include <Arduino.h>
 #include "NixieArray.h"
 
-#define CMD_NULL	0x00 // param: NONE
-#define CMD_SLEEP	0x01 // param: interval_ms
-#define CMD_SET_DIGIT	0x11 // param: num_i, digit_i, blightness
-#define CMD_SET_COLON	0x12 // param: colon_rl, colon_dot_i, blightness
-#define CMD_FADE_IN     0x21 // param: num_i, digit_i, delay_ms
-#define CMD_FADE_OUT    0x22 // param: num_i, digit_i, delay_ms
-#define CMD_FOG_IN      0x23 // param: num_i, delay_ms
-#define CMD_FOG_OUT     0x24 // param: num_i, digit_i, delay_ms
+#define CMD_NULL               0x00 // ()
+
+#define CMD_SET_NUM_DIGIT      0x11 // (num_i, digit_i, blightness)
+#define CMD_SET_COLON_DOT      0x12 // (colon_i, dot_i, blightness)
+
+#define CMD_CLEAR_NUM          0x13 // (num_i)
+#define CMD_CLEAR_COLON        0x14 // (colon_i)
+
+#define CMD_FADE_IN_NUM_DIGIT  0x21 // (num_i, digit_i, delay_ms)
+#define CMD_FADE_IN_COLON_DOT  0x22 // (colon_i, dot_i, delay_ms)
+#define CMD_FADE_OUT_NUM_DIGIT 0x23 // (num_i, digit_i, delay_ms)
+#define CMD_FADE_OUT_COLON_DOT 0x24 // (colon_i, dot_i, delay_ms)
+
+#define CMD_FOG_IN_NUM_DIGIT   0x31 // (num_i, delay_ms)
+#define CMD_FOG_OUT_NUM_DIGIT  0x32 // (num_i, digit_i, delay_ms)
 
 #define CMD_N           0xff
-#define CMD_PARAM_N     32
+#define CMD_PARAM_N     16
 
 typedef uint8_t cmd_t;
 typedef long    param_t;
@@ -46,28 +53,21 @@ class Cmd {
   unsigned long _start_ms;
 }; // class Cmd
 //============================================================================
-class CmdSleep : public Cmd {
+class CmdSetNumDigit : public Cmd {
  public:
-  static const unsigned long SLEEP_DELAY = 1; // ms
-
-  CmdSleep(NixieArray *nxa, cmd_t cmd, param_t param[CMD_PARAM_N]);
+  CmdSetNumDigit(NixieArray *nxa, cmd_t cmd, param_t param[CMD_PARAM_N]);
   void start(unsigned long start_ms);
-  void loop(unsigned long cur_ms);
-
- private:
-  unsigned long _cur_ms;
-  unsigned long _interval_ms;
-}; // class CmdSleep
+}; // class CmdSetNumDigit
 //============================================================================
-class CmdSetDigit : public Cmd {
+class CmdClearNum : public Cmd {
  public:
-  CmdSetDigit(NixieArray *nxa, cmd_t cmd, param_t param[CMD_PARAM_N]);
+  CmdClearNum(NixieArray *nxa, cmd_t cmd, param_t param[CMD_PARAM_N]);
   void start(unsigned long start_ms);
-}; // class CmdSetDigit
+}; // class CmdClearNum
 //============================================================================
-class CmdFadeIn : public Cmd {
+class CmdFadeInNumDigit : public Cmd {
  public:
-  CmdFadeIn(NixieArray *nxa, cmd_t cmd, param_t param[CMD_PARAM_N]);
+  CmdFadeInNumDigit(NixieArray *nxa, cmd_t cmd, param_t param[CMD_PARAM_N]);
   void start(unsigned long start_ms);
   void loop(unsigned long cur_ms);
 
@@ -78,11 +78,11 @@ class CmdFadeIn : public Cmd {
 
   uint8_t _blightness;
   unsigned long _prev_ms;
-}; // class CmdFadeIn
+}; // class CmdFadeInNumDigit
 //============================================================================
-class CmdFadeOut : public Cmd {
+class CmdFadeOutNumDigit : public Cmd {
  public:
-  CmdFadeOut(NixieArray *nxa, cmd_t cmd, param_t param[CMD_PARAM_N]);
+  CmdFadeOutNumDigit(NixieArray *nxa, cmd_t cmd, param_t param[CMD_PARAM_N]);
   void start(unsigned long start_ms);
   void loop(unsigned long cur_ms);
 
@@ -95,9 +95,9 @@ class CmdFadeOut : public Cmd {
   unsigned long _prev_ms;
 }; // class CmdFadeOut
 //============================================================================
-class CmdFogIn : public Cmd {
+class CmdFogInNumDigit : public Cmd {
  public:
-  CmdFogIn(NixieArray *nxa, cmd_t cmd, param_t param[CMD_PARAM_N]);
+  CmdFogInNumDigit(NixieArray *nxa, cmd_t cmd, param_t param[CMD_PARAM_N]);
   void start(unsigned long start_ms);
   void loop(unsigned long cur_ms);
 
@@ -109,9 +109,9 @@ class CmdFogIn : public Cmd {
   unsigned long _prev_ms;
 }; // class CmdFogIn
 //============================================================================
-class CmdFogOut : public Cmd {
+class CmdFogOutNumDigit : public Cmd {
  public:
-  CmdFogOut(NixieArray *nxa, cmd_t cmd, param_t param[CMD_PARAM_N]);
+  CmdFogOutNumDigit(NixieArray *nxa, cmd_t cmd, param_t param[CMD_PARAM_N]);
   void start(unsigned long start_ms);
   void loop(unsigned long cur_ms);
 

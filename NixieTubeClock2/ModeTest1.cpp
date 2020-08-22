@@ -19,7 +19,7 @@ void ModeTest1::setup(int idx, NixieArray *nxa, CmdQueue *cmd_q) {
       param[0] = nn;
       param[1] = nnd;
       param[3] = 0;
-      this->_cmd_q->put(CMD_SET_DIGIT, param);
+      this->_cmd_q->put(CMD_SET_NUM_DIGIT, param);
     } // for(nnd)
   } // for(nd)
 
@@ -34,27 +34,27 @@ void ModeTest1::loop(unsigned long cur_ms) {
   unsigned long cur_n = cur_ms / a % 10;
 
   if ( cur_n != prev_n ) {
-    param_t *param = new param_t[CMD_PARAM_N];
+    param_t param[CMD_PARAM_N];
 
     param[0] = 0;
     param[1] = prev_n;
     param[2] = 0;
-    this->_cmd_q->put(CMD_SET_DIGIT, param);
+    this->_cmd_q->put(CMD_SET_NUM_DIGIT, param);
 
     param[0] = 0;
     param[1] = cur_n;
     param[2] = BLIGHTNESS_MAX;
-    this->_cmd_q->put(CMD_SET_DIGIT, param);
+    this->_cmd_q->put(CMD_SET_NUM_DIGIT, param);
 
     param[0] = 1;
     param[1] = cur_n;
     param[2] = 200;
-    this->_cmd_q->put(CMD_FADE_IN, param);
+    this->_cmd_q->put(CMD_FADE_IN_NUM_DIGIT, param);
 
     param[0] = 2;
     param[1] = cur_n;
     param[2] = 300;
-    this->_cmd_q->put(CMD_FADE_OUT, param);
+    this->_cmd_q->put(CMD_FADE_OUT_NUM_DIGIT, param);
 
     for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
       param[0] = 3;
@@ -64,17 +64,17 @@ void ModeTest1::loop(unsigned long cur_ms) {
       } else {
         param[2] = 0;
       }
-      this->_cmd_q->put(CMD_SET_DIGIT, param);
+      this->_cmd_q->put(CMD_SET_NUM_DIGIT, param);
     } // for(d)
 
     param[0] = 3;
     param[1] = 200;
-    this->_cmd_q->put(CMD_FOG_IN, param);
+    this->_cmd_q->put(CMD_FOG_IN_NUM_DIGIT, param);
 
     param[0] = 4;
     param[1] = cur_n;
     param[2] = 200;
-    this->_cmd_q->put(CMD_FOG_OUT, param);
+    this->_cmd_q->put(CMD_FOG_OUT_NUM_DIGIT, param);
 
     prev_n = cur_n;
   }

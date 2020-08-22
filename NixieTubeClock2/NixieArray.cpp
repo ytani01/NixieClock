@@ -356,16 +356,19 @@ void NixieArray::display(unsigned long cur_ms) {
     
     digitalWrite(_pin_data, val[p]);
     digitalWrite(_pin_clk, HIGH);
-    //delay(1);
+    delayMicroseconds(NixieArray::DISP_DELAY_US);
+
     digitalWrite(_pin_clk, LOW);
-    //delay(1);
+    delayMicroseconds(NixieArray::DISP_DELAY_US);
   }
   //Serial.println();
   
   digitalWrite(_pin_stobe, HIGH);
-  //delay(1);
+  delayMicroseconds(NixieArray::DISP_DELAY_US);
+
   digitalWrite(_pin_stobe, LOW);
-  //delay(1);
+  delayMicroseconds(NixieArray::DISP_DELAY_US);
+
   //--------------------------------------------------------------------------
   // コロン
   for (int c=0; c < NIXIE_COLON_N; c++) {

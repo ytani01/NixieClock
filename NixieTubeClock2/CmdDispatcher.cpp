@@ -35,24 +35,36 @@ cmd_t CmdDispatcher::set_worker_cmd(int wi, cmd_t cmd,
   case CMD_NULL:
     this->_worker[wi] = new Cmd(this->_nxa, cmd, param);
     break;
-  case CMD_SLEEP:
-    this->_worker[wi] = new CmdSleep(this->_nxa, cmd, param);
+    
+  case CMD_SET_NUM_DIGIT:
+    this->_worker[wi] = new CmdSetNumDigit(this->_nxa, cmd, param);
     break;
-  case CMD_SET_DIGIT:
-    this->_worker[wi] = new CmdSetDigit(this->_nxa, cmd, param);
+  case CMD_SET_COLON_DOT:
     break;
-  case CMD_FADE_IN:
-    this->_worker[wi] = new CmdFadeIn(this->_nxa, cmd, param);
+
+  case CMD_CLEAR_NUM:
     break;
-  case CMD_FADE_OUT:
-    this->_worker[wi] = new CmdFadeOut(this->_nxa, cmd, param);
+  case CMD_CLEAR_COLON:
     break;
-  case CMD_FOG_IN:
-    this->_worker[wi] = new CmdFogIn(this->_nxa, cmd, param);
+
+  case CMD_FADE_IN_NUM_DIGIT:
+    this->_worker[wi] = new CmdFadeInNumDigit(this->_nxa, cmd, param);
     break;
-  case CMD_FOG_OUT:
-    this->_worker[wi] = new CmdFogOut(this->_nxa, cmd, param);
+  case CMD_FADE_IN_COLON_DOT:
     break;
+  case CMD_FADE_OUT_NUM_DIGIT:
+    this->_worker[wi] = new CmdFadeOutNumDigit(this->_nxa, cmd, param);
+    break;
+  case CMD_FADE_OUT_COLON_DOT:
+    break;
+
+  case CMD_FOG_IN_NUM_DIGIT:
+    this->_worker[wi] = new CmdFogInNumDigit(this->_nxa, cmd, param);
+    break;
+  case CMD_FOG_OUT_NUM_DIGIT:
+    this->_worker[wi] = new CmdFogOutNumDigit(this->_nxa, cmd, param);
+    break;
+
   default:
     Serial.println("! invalid cmd=" + String(cmd, HEX));
     this->_worker[wi] = new Cmd(this->_nxa, CMD_NULL, param);
