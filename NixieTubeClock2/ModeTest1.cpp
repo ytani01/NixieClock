@@ -13,6 +13,11 @@ void ModeTest1::setup(int idx, NixieArray *nxa, CmdQueue *cmd_q) {
   Serial.print(", _idx=" + String(this->_idx));
   Serial.println();
 
+}
+
+void ModeTest1::init() {
+  ModeBase::init();
+
   for (int nn=0; nn < NIXIE_NUM_N; nn++) {
     for (int nnd=0; nnd < NIXIE_NUM_DIGIT_N; nnd++) {
       param_t param[CMD_PARAM_N];
@@ -36,14 +41,14 @@ void ModeTest1::loop(unsigned long cur_ms) {
   if ( cur_n != prev_n ) {
     param_t param[CMD_PARAM_N];
 
-    param[0] = 0;
-    param[1] = prev_n;
-    param[2] = 0;
+    param[0] = 0; // num_i
+    param[1] = prev_n; // digit_i
+    param[2] = 0; // blightness
     this->_cmd_q->put(CMD_SET_NUM_DIGIT, param);
 
-    param[0] = 0;
-    param[1] = cur_n;
-    param[2] = BLIGHTNESS_MAX;
+    param[0] = 0; // num_i
+    param[1] = cur_n; // digit_i
+    param[2] = BLIGHTNESS_MAX; // blightness
     this->_cmd_q->put(CMD_SET_NUM_DIGIT, param);
 
     param[0] = 1;
@@ -79,6 +84,7 @@ void ModeTest1::loop(unsigned long cur_ms) {
     prev_n = cur_n;
   }
 } // ModeTest1::loop()
+
 // Local Variables:
 // Mode: arduino
 // Coding: utf-8-unix

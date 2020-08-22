@@ -57,14 +57,16 @@ unsigned long prevMsec   = 0;
 int curTube = 0;
 int curDigit = 0;
 //----------------------------------------------------------------------------
+#define MODE_NONE -1
 #define MODE_TEST1 0
 ModeTest1 modeT1;
 
 ModeBase *Mode[] = {&modeT1};
 
-static unsigned long ModeN = sizeof(Mode) / sizeof(ModeBase *);
+static unsigned long MODE_N = sizeof(Mode) / sizeof(ModeBase *);
 
-unsigned long curMode = MODE_TEST1;
+long curMode = MODE_TEST1;
+long prevMode = MODE_NONE;
 //============================================================================
 void btn_handler() {
   static unsigned long prev_msec = 0;
@@ -139,7 +141,7 @@ void setup() {
   cmdDispatcher.setup(&nixieArray, &cmdQ);
   //--------------------------------------------------------------------------
   // 各モードの初期化
-  for (int m=0; m < ModeN; m++) {
+  for (int m=0; m < MODE_N; m++) {
     Mode[m]->setup(m, &nixieArray, &cmdQ);
   }
   //--------------------------------------------------------------------------
@@ -183,8 +185,15 @@ void loop() {
     }
   }
 
+  if (curMode != prevMode) {
+    Mode[curMode]->init();       // モード変更時の初期化
+    cmdDispatcher.loop(curMsec); // キューイングされたコマンドの実行
+    prevMode = curMode;
+  }
+
   Mode[curMode]->loop(curMsec); // コマンドは全てキューイングされる
-  cmdDispatcher.loop(curMsec);  // コマンド実行
+  cmdDispatcher.loop(curMsec);  // キューイングされたコマンド実行
+
   nixieArray.display(curMsec);  // 表示
 
   loopCount++;

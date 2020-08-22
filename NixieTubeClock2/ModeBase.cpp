@@ -15,6 +15,10 @@ void ModeBase::setup(int idx, NixieArray *nxa, CmdQueue *cmd_q) {
   Serial.println();
 }
 
+void ModeBase::init() {
+  Serial.println("ModeBase::init()");
+}
+
 void ModeBase::loop(unsigned long cur_ms) {
   static unsigned long prev_ms = 0;
   

@@ -9,7 +9,13 @@
 
 class ModeBase {
  public:
+  // setup()内での初期化
   virtual void setup(int idx, NixieArray *nxa, CmdQueue *cmd_q);
+
+  // モード変更時の初期化: loop()内
+  virtual void init();
+
+  // loop()内での処理
   virtual void loop(unsigned long cur_ms);
 
  protected:
