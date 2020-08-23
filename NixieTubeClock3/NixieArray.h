@@ -1,15 +1,17 @@
 /*
+ * (c) 2020 Yoichi Tanibayashi
  *
- * Data structure ( not class tree )
+ * [ Data structure ( not class tree ) ]
  *
  *  NixieArray
  *   |
  *   +- NixieNum[NIXIE_NUM_N]
  *   |   |
- *   |   +- NixieNumDigit[NIXIE_NUM_DIGIT_N]
+ *   |   +- NixieElement _digit[NIXIE_NUM_DIGIT_N]
  *   |
  *   +- NixieColon[NIXIE_COLON_N]
- *
+ *       |
+ *       +- NixieElement _dot[NIXIE_COLON_DOT_N]
  */
 #ifndef NIXIE_ARRAY_H
 #define NIXIE_ARRAY_H
@@ -49,9 +51,13 @@ class NixieElement {
   boolean _on = true;
 };
 //============================================================================
-class NixieNumDigit : public NixieElement {};
-//============================================================================
-class NixieColonDot : public NixieElement {};
+class NixieTube {
+ public:
+  NixieTube() {};
+
+  void setup(uint8_t element_n, uint8 pin[], NixieElement element);
+  
+}; // class NixieTube
 //============================================================================
 class NixieNum {
  public:
@@ -59,8 +65,8 @@ class NixieNum {
 
   void setup(uint8_t pin[NIXIE_NUM_DIGIT_N]);
   
-  NixieNumDigit *get_digit();
-  NixieNumDigit *get_digit(uint8_t digit_i);
+  NixieElement *get_digit();
+  NixieElement *get_digit(uint8_t digit_i);
 
   void set_blightness(uint8_t digit_i, uint8_t blightness);
   void set_blightness_zero(uint8_t digit_i);
@@ -75,7 +81,7 @@ class NixieNum {
   void onoff(uint8_t timing);
   
  private:
-  NixieNumDigit _digit[NIXIE_NUM_DIGIT_N];
+  NixieElement _digit[NIXIE_NUM_DIGIT_N];
 };
 //============================================================================
 class NixieColon {
@@ -100,7 +106,7 @@ class NixieColon {
   void onoff(uint8_t timing);
 
  private:
-  NixieColonDot _dot[NIXIE_COLON_DOT_N];
+  NixieElement _dot[NIXIE_COLON_DOT_N];
 }; // NixieColon
 //============================================================================
 class NixieArray {
@@ -165,6 +171,8 @@ class NixieArray {
 };
 //============================================================================
 #endif // NIXIE_ARRAY_H
+
+// for emacs ..
 // Local Variables:
 // Mode: arduino
 // Coding: utf-8-unix
