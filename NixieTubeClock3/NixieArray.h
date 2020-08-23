@@ -27,6 +27,8 @@
 #define COLON_R              0
 #define COLON_L              1
 
+#define NIXIE_ELEMENT_N_MAX  (NIXIE_NUM_DIGIT_N > NIXIE_COLON_DOT_N ? NIXIE_NUM_DIGIT_N : NIXIE_COLON_DOT_N)
+
 //============================================================================
 class NixieElement {
  public:
@@ -48,66 +50,33 @@ class NixieElement {
  protected:
   uint8_t _pin = 0;
   uint8_t _blightness = BLIGHTNESS_MAX;
-  boolean _on = true;
-};
+  boolean _on = false;
+}; // class NixieElement
 //============================================================================
 class NixieTube {
  public:
   NixieTube() {};
 
-  void setup(uint8_t element_n, uint8 pin[], NixieElement element);
+  void setup(int element_n, uint8_t *pin);
   
+  NixieElement *get_element();
+  NixieElement *get_element(uint8_t element_i);
+
+  void set_blightness(uint8_t element_i, uint8_t blightness);
+  void set_blightness_zero(uint8_t element_i);
+  void set_blightness_max(uint8_t element_i);
+  uint8_t get_blightness(uint8_t element_i);
+
+  void set_blightness(uint8_t *blightness);
+  void set_blightness_zero();
+  void set_blightness_max();
+  void get_blightness(uint8_t *blightness);
+  
+  void onoff(uint8_t timing);
+  
+ private:
+  NixieElement *_element;
 }; // class NixieTube
-//============================================================================
-class NixieNum {
- public:
-  NixieNum() {};
-
-  void setup(uint8_t pin[NIXIE_NUM_DIGIT_N]);
-  
-  NixieElement *get_digit();
-  NixieElement *get_digit(uint8_t digit_i);
-
-  void set_blightness(uint8_t digit_i, uint8_t blightness);
-  void set_blightness_zero(uint8_t digit_i);
-  void set_blightness_max(uint8_t digit_i);
-  uint8_t get_blightness(uint8_t digit_i);
-
-  void set_blightness(uint8_t blightness[NIXIE_NUM_DIGIT_N]);
-  void set_blightness_zero();
-  void set_blightness_max();
-  void get_blightness(uint8_t blightness[NIXIE_NUM_DIGIT_N]);
-  
-  void onoff(uint8_t timing);
-  
- private:
-  NixieElement _digit[NIXIE_NUM_DIGIT_N];
-};
-//============================================================================
-class NixieColon {
- public:
-  NixieColon() {};
-
-  void setup(uint8_t pin[NIXIE_COLON_DOT_N]);
-
-  NixieColonDot *get_dot();
-  NixieColonDot *get_dot(uint8_t dot_i);
-
-  void set_blightness(uint8_t dot_i, uint8_t blightness);
-  void set_blightness_zero(uint8_t dot_i);
-  void set_blightness_max(uint8_t dot_i);
-  uint8_t get_blightness(uint8_t dot_i);
-
-  void set_blightness(uint8_t blightness[NIXIE_COLON_DOT_N]);
-  void set_blightness_zero();
-  void set_blightness_max();
-  void get_blightness(uint8_t blightness[NIXIE_COLON_DOT_N]);
-
-  void onoff(uint8_t timing);
-
- private:
-  NixieElement _dot[NIXIE_COLON_DOT_N];
-}; // NixieColon
 //============================================================================
 class NixieArray {
  public:
@@ -119,15 +88,16 @@ class NixieArray {
              uint8_t num[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N],
              uint8_t colon[NIXIE_COLON_N][NIXIE_COLON_DOT_N]);
     
-  NixieNum *get_num();
-  NixieNum *get_num(uint8_t num_i);
+  NixieTube *get_num();
+  NixieTube *get_num(uint8_t num_i);
   
-  NixieColon *get_colon();
+  NixieTube *get_colon();
 
-  void set_num_blightness(uint8_t num_i, uint8_t digit_i, uint8_t blightness);
-  void set_num_blightness_zero(uint8_t num_i, uint8_t digit_i);
-  void set_num_blightness_max(uint8_t num_i, uint8_t digit_i);
-  uint8_t get_num_blightness(uint8_t num_i, uint8_t digit_i);
+  void set_num_blightness(uint8_t num_i, uint8_t element_i,
+                          uint8_t blightness);
+  void set_num_blightness_zero(uint8_t num_i, uint8_t element_i);
+  void set_num_blightness_max(uint8_t num_i, uint8_t element_i);
+  uint8_t get_num_blightness(uint8_t num_i, uint8_t element_i);
 
   void set_num_blightness(uint8_t num_i,
                           uint8_t blightness[NIXIE_NUM_DIGIT_N]);
@@ -166,8 +136,8 @@ class NixieArray {
 
  private:
   uint8_t    _pin_clk, _pin_stobe, _pin_data, _pin_blank;
-  NixieNum   _num[NIXIE_NUM_N];
-  NixieColon _colon[NIXIE_COLON_N];
+  NixieTube  _num[NIXIE_NUM_N];
+  NixieTube  _colon[NIXIE_COLON_N];
 };
 //============================================================================
 #endif // NIXIE_ARRAY_H

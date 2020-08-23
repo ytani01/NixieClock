@@ -43,117 +43,61 @@ boolean NixieElement::is_on() {
   return this->_on;
 }
 //============================================================================
-// class NixieNum
+// class NixieTube
 //----------------------------------------------------------------------------
-void NixieNum::setup(uint8_t pin[NIXIE_NUM_DIGIT_N]) {
-  for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
-    this->_digit[d].setup(pin[d]);
+void NixieTube::setup(int element_n, uint8_t *pin) {
+  this->_element = new NixieElement[element_n];
+  for (int d=0; d < element_n; d++) {
+    this->_element[d].setup(pin[d]);
   } // for (d)
 }
 
-NixieNumDigit *NixieNum::get_digit() {
-  return this->_digit;
+NixieElement *NixieTube::get_element() {
+  return this->_element;
 }
-NixieNumDigit *NixieNum::get_digit(uint8_t digit_i) {
-  return &(this->_digit[digit_i]);
-}
-
-// 個別
-void NixieNum::set_blightness(uint8_t digit_i, uint8_t blightness) {
-  this->_digit[digit_i].set_blightness(blightness);
-}
-void NixieNum::set_blightness_zero(uint8_t digit_i) {
-  this->_digit[digit_i].set_blightness_zero();
-}
-void NixieNum::set_blightness_max(uint8_t digit_i) {
-  this->_digit[digit_i].set_blightness_max();
-}
-uint8_t NixieNum::get_blightness(uint8_t digit_i) {
-  return this->_digit[digit_i].get_blightness();
-}
-
-// 一括
-void NixieNum::set_blightness(uint8_t blightness[NIXIE_NUM_DIGIT_N]) {
-  for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
-    this->_digit[d].set_blightness(blightness[d]);
-  } // for(d)
-}
-void NixieNum::set_blightness_zero() {
-  for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
-    this->_digit[d].set_blightness_zero();
-  } // for(d)
-}
-void NixieNum::set_blightness_max() {
-  for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
-    this->_digit[d].set_blightness_max();
-  } // for(d)
-}
-void NixieNum::get_blightness(uint8_t blightness[NIXIE_NUM_DIGIT_N]) {
-  for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
-    blightness[d] = this->_digit[d].get_blightness();
-  } // for(d)
-}
-
-void NixieNum::onoff(uint8_t timing) {
-  for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
-    this->_digit[d].onoff(timing);
-  } // for(d)
-}
-//============================================================================
-// class NixieColon
-//----------------------------------------------------------------------------
-void NixieColon::setup(uint8_t pin[NIXIE_COLON_DOT_N]) {
-  for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
-    this->_dot[d].setup(pin[d]);
-  } // for (d)
-}
-
-NixieColonDot *NixieColon::get_dot(void) {
-  return this->_dot;
-}
-NixieColonDot *NixieColon::get_dot(uint8_t dot_i) {
-  return &(this->_dot[dot_i]);
+NixieElement *NixieTube::get_element(uint8_t element_i) {
+  return &(this->_element[element_i]);
 }
 
 // 個別
-void NixieColon::set_blightness(uint8_t dot_i, uint8_t blightness) {
-  this->_dot[dot_i].set_blightness(blightness);
+void NixieTube::set_blightness(uint8_t element_i, uint8_t blightness) {
+  this->_element[element_i].set_blightness(blightness);
 }
-void NixieColon::set_blightness_zero(uint8_t dot_i) {
-  this->_dot[dot_i].set_blightness_zero();
+void NixieTube::set_blightness_zero(uint8_t element_i) {
+  this->_element[element_i].set_blightness_zero();
 }
-void NixieColon::set_blightness_max(uint8_t dot_i) {
-  this->_dot[dot_i].set_blightness_max();
+void NixieTube::set_blightness_max(uint8_t element_i) {
+  this->_element[element_i].set_blightness_max();
 }
-uint8_t NixieColon::get_blightness(uint8_t dot_i) {
-  return this->_dot[dot_i].get_blightness();
+uint8_t NixieTube::get_blightness(uint8_t element_i) {
+  return this->_element[element_i].get_blightness();
 }
 
 // 一括
-void NixieColon::set_blightness(uint8_t blightness[NIXIE_COLON_DOT_N]) {
-  for (int d=0; d < NIXIE_COLON_DOT_N; d++) {
-    this->_dot[d].set_blightness(blightness[d]);
+void NixieTube::set_blightness(uint8_t blightness[NIXIE_NUM_DIGIT_N]) {
+  for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
+    this->_element[d].set_blightness(blightness[d]);
   } // for(d)
 }
-void NixieColon::set_blightness_zero() {
-  for (int d=0; d < NIXIE_COLON_DOT_N; d++) {
-    this->_dot[d].set_blightness_zero();
+void NixieTube::set_blightness_zero() {
+  for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
+    this->_element[d].set_blightness_zero();
   } // for(d)
 }
-void NixieColon::set_blightness_max() {
-  for (int d=0; d < NIXIE_COLON_DOT_N; d++) {
-    this->_dot[d].set_blightness_max();
+void NixieTube::set_blightness_max() {
+  for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
+    this->_element[d].set_blightness_max();
   } // for(d)
 }
-void NixieColon::get_blightness(uint8_t blightness[NIXIE_COLON_DOT_N]) {
-  for (int d=0; d < NIXIE_COLON_DOT_N; d++) {
-    blightness[d] = this->_dot[d].get_blightness();
+void NixieTube::get_blightness(uint8_t blightness[NIXIE_NUM_DIGIT_N]) {
+  for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
+    blightness[d] = this->_element[d].get_blightness();
   } // for(d)
 }
 
-void NixieColon::onoff(uint8_t timing) {
-  for (int d=0; d < NIXIE_COLON_DOT_N; d++) {
-    this->_dot[d].onoff(timing);
+void NixieTube::onoff(uint8_t timing) {
+  for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
+    this->_element[d].onoff(timing);
   } // for(d)
 }
 //============================================================================
@@ -174,11 +118,11 @@ void NixieArray::setup(uint8_t clk, uint8_t stobe, uint8_t data, uint8_t blank,
   this->_pin_blank = blank;
 
   for (int n=0; n < NIXIE_NUM_N; n++) {
-    this->_num[n].setup(num[n]);
+    this->_num[n].setup(NIXIE_NUM_DIGIT_N, num[n]);
   } // for(n)
 
   for (int c=0; c < NIXIE_COLON_N; c++) {
-    this->_colon[c].setup(colon[c]);
+    this->_colon[c].setup(NIXIE_COLON_DOT_N, colon[c]);
     for (int d=0; d < NIXIE_COLON_DOT_N; d++) {
       pinMode(colon[c][d], OUTPUT);
       digitalWrite(colon[c][d], LOW);
@@ -186,31 +130,39 @@ void NixieArray::setup(uint8_t clk, uint8_t stobe, uint8_t data, uint8_t blank,
   } // for(c)
 }
 
-NixieNum *NixieArray::get_num() { return _num; }
-NixieNum *NixieArray::get_num(uint8_t num_i) { return &(_num[num_i]); }
-NixieColon *NixieArray::get_colon() { return _colon; }
+NixieTube *NixieArray::get_num() {
+  return _num;
+}
+
+NixieTube *NixieArray::get_num(uint8_t num_i) {
+  return &(_num[num_i]);
+}
+
+NixieTube *NixieArray::get_colon() {
+  return _colon;
+}
 
 // 数字: 個別
-void NixieArray::set_num_blightness(uint8_t num_i, uint8_t digit_i,
+void NixieArray::set_num_blightness(uint8_t num_i, uint8_t element_i,
                                     uint8_t blightness) {
   /*
   String str = "NixieArray::set_num_blightness(";
   str += String(num_i) + ",";
-  str += String(digit_i) + ",";
+  str += String(element_i) + ",";
   str += String(blightness) + ")";
   Serial.println(str);
   */
 
-  this->_num[num_i].set_blightness(digit_i, blightness);
+  this->_num[num_i].set_blightness(element_i, blightness);
 }
-void NixieArray::set_num_blightness_zero(uint8_t num_i, uint8_t digit_i) {
-  this->_num[num_i].set_blightness_zero(digit_i);
+void NixieArray::set_num_blightness_zero(uint8_t num_i, uint8_t element_i) {
+  this->_num[num_i].set_blightness_zero(element_i);
 }
-void NixieArray::set_num_blightness_max(uint8_t num_i, uint8_t digit_i) {
-  this->_num[num_i].set_blightness_max(digit_i);
+void NixieArray::set_num_blightness_max(uint8_t num_i, uint8_t element_i) {
+  this->_num[num_i].set_blightness_max(element_i);
 }
-uint8_t NixieArray::get_num_blightness(uint8_t num_i, uint8_t digit_i) {
-  return this->_num[num_i].get_blightness(digit_i);
+uint8_t NixieArray::get_num_blightness(uint8_t num_i, uint8_t element_i) {
+  return this->_num[num_i].get_blightness(element_i);
 }
 
 // 数字: [num_i] 一括
@@ -341,14 +293,14 @@ void NixieArray::display(unsigned long cur_ms) {
   }
 
   for (int t=0; t < NIXIE_NUM_N; t++) {
-    for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
-      NixieNumDigit *nd = this->_num[t].get_digit(d);
-      uint8_t pin = nd->get_pin();
+    for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
+      NixieElement *ne = this->_num[t].get_element(e);
+      uint8_t pin = ne->get_pin();
 
-      if ( nd->is_on() ) {
+      if ( ne->is_on() ) {
         val[pin] = LOW;
       }
-    } // for(d)
+    } // for(e)
   } // for(t)
 
   for (int p=(pin_n - 1); p >=0; p--) {
@@ -373,7 +325,7 @@ void NixieArray::display(unsigned long cur_ms) {
   // コロン
   for (int c=0; c < NIXIE_COLON_N; c++) {
     for (int d=0; d < NIXIE_COLON_DOT_N; d++) {
-      NixieColonDot *cd = this->_colon[c].get_dot(d);
+      NixieElement *cd = this->_colon[c].get_element(d);
       uint8_t pin = cd->get_pin();
 
       //Serial.print("pin[" + String(pin) + "]:");
