@@ -2,8 +2,6 @@
  * (c) 2020 Yoichi Tanibayashi
  */
 #include "NixieArray.h"
-#include "CmdQueue.h"
-#include "CmdDispatcher.h"
 #include "Button.h"
 #include "ModeBase.h"
 #include "ModeTest1.h"
@@ -45,8 +43,6 @@ uint8_t colonPins[NIXIE_COLON_N][NIXIE_COLON_DOT_N] =
    {PIN_COLON_L_TOP, PIN_COLON_L_BOTTOM} };
 //----------------------------------------------------------------------------
 NixieArray nixieArray;
-CmdQueue cmdQ;
-CmdDispatcher cmdDispatcher;
 Button btnObj1, btnObj2, btnObj3;
 Button *btnObj[] = {&btnObj1, &btnObj2, &btnObj3};
 //----------------------------------------------------------------------------
@@ -102,12 +98,12 @@ void btn_handler() {
     Serial.print("curTube:" + String(curTube) + " ");
     Serial.print("curDigit:" + String(curDigit) + " ");
 
-    uint8_t bl = nixieArray.get_num_blightness(curTube, curDigit);
+    uint8_t bl = nixieArray.num[curTube].element[curDigit].get_blightness();
     bl++;
     if ( bl > BLIGHTNESS_MAX ) {
       bl=0;
     }
-    nixieArray.set_num_blightness(curTube, curDigit, bl);
+    nixieArray.num[curTube].element[curDigit].set_blightness(bl);
     Serial.print("bl=" + String(bl));
     Serial.println();
   }
@@ -137,12 +133,10 @@ void setup() {
   nixieArray.setup(PIN_HV5812_CLK,  PIN_HV5812_STOBE,
                    PIN_HV5812_DATA, PIN_HV5812_BLANK,
                    nixiePins, colonPins);
-  cmdQ.setup();
-  cmdDispatcher.setup(&nixieArray, &cmdQ);
   //--------------------------------------------------------------------------
   // 各モードの初期化
   for (int m=0; m < MODE_N; m++) {
-    Mode[m]->setup(m, &nixieArray, &cmdQ);
+    Mode[m]->setup(m, &nixieArray);
   }
   //--------------------------------------------------------------------------
   // ボタンの初期化
@@ -168,15 +162,16 @@ void setup() {
   attachInterrupt(intr_pin2, btn_handler, CHANGE);
   attachInterrupt(intr_pin3, btn_handler, CHANGE);
   //--------------------------------------------------------------------------
-  // セットアップ時に投入したコマンドを実行
   prevMsec = millis();
   curMsec = millis();
-  cmdDispatcher.loop(curMsec);
+
+  nixieArray.display(curMsec); // セットアップ時のコマンドを実行
 } // setup()
 //============================================================================
 void loop() {
   prevMsec = curMsec;
   curMsec = millis();
+  loopCount++;
 
   // ボタン
   for (int b=0; b < BTN_N; b++) {
@@ -187,16 +182,13 @@ void loop() {
 
   if (curMode != prevMode) {
     Mode[curMode]->init();       // モード変更時の初期化
-    cmdDispatcher.loop(curMsec); // キューイングされたコマンドの実行
     prevMode = curMode;
+  } else {
+    Mode[curMode]->loop(curMsec);
   }
-
-  Mode[curMode]->loop(curMsec); // コマンドは全てキューイングされる
-  cmdDispatcher.loop(curMsec);  // キューイングされたコマンド実行
 
   nixieArray.display(curMsec);  // 表示
 
-  loopCount++;
   delayMicroseconds(LOOP_DELAY_US);
 } // loop()
 //============================================================================

@@ -5,12 +5,11 @@
 #define MODE_BASE_H
 #include <Arduino.h>
 #include "NixieArray.h"
-#include "CmdQueue.h"
 
 class ModeBase {
  public:
   // setup()内での初期化
-  virtual void setup(int idx, NixieArray *nxa, CmdQueue *cmd_q);
+  virtual void setup(int idx, NixieArray *nxa);
 
   // モード変更時の初期化: loop()内
   virtual void init();
@@ -22,7 +21,6 @@ class ModeBase {
   String     _name;
   int        _idx;
   NixieArray *_nxa;
-  CmdQueue   *_cmd_q;
 };
 #endif // MODE_BASE_H
 

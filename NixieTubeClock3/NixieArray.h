@@ -5,17 +5,19 @@
  *
  *  NixieArray
  *   |
- *   +- NixieNum[NIXIE_NUM_N]
+ *   +- NixieTube[NIXIE_NUM_N]
  *   |   |
  *   |   +- NixieElement _digit[NIXIE_NUM_DIGIT_N]
  *   |
- *   +- NixieColon[NIXIE_COLON_N]
+ *   +- NixieTube[NIXIE_COLON_N]
  *       |
  *       +- NixieElement _dot[NIXIE_COLON_DOT_N]
  */
 #ifndef NIXIE_ARRAY_H
 #define NIXIE_ARRAY_H
 #include <Arduino.h>
+
+typedef uint8_t effect_t;
 
 #define BLIGHTNESS_MAX       8
 
@@ -29,6 +31,15 @@
 
 #define NIXIE_ELEMENT_N_MAX  (NIXIE_NUM_DIGIT_N > NIXIE_COLON_DOT_N ? NIXIE_NUM_DIGIT_N : NIXIE_COLON_DOT_N)
 
+#define EFFECT_NONE          0
+#define EFFECT_FADE_IN       1
+#define EFFECT_FADE_OUT      2
+#define EFFECT_X_FADE        3
+#define EFFECT_FOG_IN        4
+#define EFFECT_FOG_OUT       5
+#define EFFECT_SHUFFLE       6
+#define EFFECT_BLINK         7
+
 //============================================================================
 class NixieElement {
  public:
@@ -39,12 +50,15 @@ class NixieElement {
   void set_blightness(uint8_t blightness);
   void set_blightness_zero();
   void set_blightness_max();
+  void inc_blightness();
+  void dec_blightness();
   uint8_t get_blightness();
   
   void set_pin(uint8_t pin);
   uint8_t get_pin();
   
-  void onoff(uint8_t timing);
+  void on();
+  void off();
   boolean is_on();
   
  protected:
@@ -55,32 +69,27 @@ class NixieElement {
 //============================================================================
 class NixieTube {
  public:
+  int           element_n;
+  NixieElement  *element;
+
   NixieTube() {};
 
   void setup(int element_n, uint8_t *pin);
   
-  NixieElement *get_element();
-  NixieElement *get_element(uint8_t element_i);
+  void loop(unsigned long cur_msec);
 
-  void set_blightness(uint8_t element_i, uint8_t blightness);
-  void set_blightness_zero(uint8_t element_i);
-  void set_blightness_max(uint8_t element_i);
-  uint8_t get_blightness(uint8_t element_i);
-
-  void set_blightness(uint8_t *blightness);
-  void set_blightness_zero();
-  void set_blightness_max();
-  void get_blightness(uint8_t *blightness);
-  
-  void onoff(uint8_t timing);
-  
  private:
-  NixieElement *_element;
+  effect_t      _effect = EFFECT_NONE;
+  uint8_t       _effect_param_element1, _effect_param_element2;
+  unsigned long _effect_param_msec1;
 }; // class NixieTube
 //============================================================================
 class NixieArray {
  public:
   static const unsigned int DISP_DELAY_US = 1; // microsec
+
+  NixieTube  num[NIXIE_NUM_N];
+  NixieTube  colon[NIXIE_COLON_N];
 
   NixieArray() {};
   
@@ -88,56 +97,14 @@ class NixieArray {
              uint8_t num[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N],
              uint8_t colon[NIXIE_COLON_N][NIXIE_COLON_DOT_N]);
     
-  NixieTube *get_num();
-  NixieTube *get_num(uint8_t num_i);
-  
-  NixieTube *get_colon();
+  void loop(unsigned long cur_ms);
 
-  void set_num_blightness(uint8_t num_i, uint8_t element_i,
-                          uint8_t blightness);
-  void set_num_blightness_zero(uint8_t num_i, uint8_t element_i);
-  void set_num_blightness_max(uint8_t num_i, uint8_t element_i);
-  uint8_t get_num_blightness(uint8_t num_i, uint8_t element_i);
+  void set_onoff(unsigned long cur_ms);
 
-  void set_num_blightness(uint8_t num_i,
-                          uint8_t blightness[NIXIE_NUM_DIGIT_N]);
-  void set_num_blightness_zero(uint8_t num_i);
-  void set_num_blightness_max(uint8_t num_i);
-  void get_num_blightness(uint8_t num_i, uint8_t blightness[NIXIE_NUM_DIGIT_N]);
-
-  void set_num_blightness(uint8_t blightness[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N]);
-  void set_num_blightness_zero();
-  void set_num_blightness_max();
-  void get_num_blightness(uint8_t blightness[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N]);
-
-  void set_colon_blightness(uint8_t colon_i, uint8_t dot_i, uint8_t blightness);
-  void set_colon_blightness_zero(uint8_t colon_i, uint8_t dot_i);
-  void set_colon_blightness_max(uint8_t colon_i, uint8_t dot_i);
-  uint8_t get_colon_blightness(uint8_t colon_i, uint8_t dot_i);
-
-  void set_colon_blightness(uint8_t colon_i,
-                            uint8_t blightness[NIXIE_COLON_DOT_N]);
-  void set_colon_blightness_zero(uint8_t colon_i);
-  void set_colon_blightness_max(uint8_t colon_i);
-  void get_colon_blightness(uint8_t colon_i,
-                            uint8_t blightness[NIXIE_COLON_DOT_N]);
-
-  void set_colon_blightness(uint8_t blightness[NIXIE_COLON_N][NIXIE_COLON_DOT_N]);
-  void set_colon_blightness_zero();
-  void set_colon_blightness_max();
-  void get_colon_blightness(uint8_t blightness[NIXIE_COLON_N][NIXIE_COLON_DOT_N]);
-
-  void set_all_blightness_zero();
-  void set_all_blightness_max();
-                            
-  void onoff(uint8_t timing);
-
-  void display(unsigned long cur_msec);
+  void display(unsigned long cur_ms);
 
  private:
   uint8_t    _pin_clk, _pin_stobe, _pin_data, _pin_blank;
-  NixieTube  _num[NIXIE_NUM_N];
-  NixieTube  _colon[NIXIE_COLON_N];
 };
 //============================================================================
 #endif // NIXIE_ARRAY_H

@@ -3,10 +3,9 @@
  */
 #include "ModeBase.h"
 
-void ModeBase::setup(int idx, NixieArray *nxa, CmdQueue *cmd_q) {
+void ModeBase::setup(int idx, NixieArray *nxa) {
   this->_idx = idx;
   this->_nxa = nxa;
-  this->_cmd_q = cmd_q;
   this->_name = "ModeBase";
 
   Serial.print("ModeBase::setup()");
