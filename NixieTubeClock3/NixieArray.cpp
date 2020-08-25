@@ -63,8 +63,71 @@ void NixieTube::setup(int element_n, uint8_t *pin) {
   } // for (d)
 }
 
+unsigned long NixieTube::calc_effect_count(unsigned long cur_ms) {
+  return (cur_ms - this->_effect_start_ms) / this->_effect_ms1;
+}
+
+effect_t NixieTube::get_effect() {
+  return this->_effect;
+}
+void NixieTube::start_fade_in(unsigned long cur_ms,
+                              int element_i, unsigned long ms) {
+  this->_effect = EFFECT_FADE_IN;
+  this->_effect_element1 = element_i;
+  this->_effect_start_ms = cur_ms;
+  this->_effect_ms1 = ms;
+  this->_effect_count = this->calc_effect_count(cur_ms);
+  this->_effect_prev_count = this->_effect_count;
+
+  this->element[this->_effect_element1].set_blightness_zero();
+}
+
+void NixieTube::start_fade_out(unsigned long cur_ms,
+                               int element_i, unsigned long ms) {
+  this->_effect = EFFECT_FADE_OUT;
+  this->_effect_element1 = element_i;
+  this->_effect_start_ms = cur_ms;
+  this->_effect_ms1 = ms;
+  this->_effect_count = this->calc_effect_count(cur_ms);
+  this->_effect_prev_count = this->_effect_count;
+
+  this->element[this->_effect_element1].set_blightness_max();
+}
+
 void NixieTube::loop(unsigned long cur_ms) {
   if (this->_effect == EFFECT_NONE) {
+    return;
+  }
+
+  if (this->_effect == EFFECT_FADE_IN) {
+    this->_effect_count = this->calc_effect_count(cur_ms);
+    if (this->_effect_count == this->_effect_prev_count) {
+      return;
+    }
+
+    uint8_t bl = this->element[this->_effect_element1].get_blightness();
+    if ( bl >= BLIGHTNESS_MAX ) {
+      this->_effect = EFFECT_NONE;
+    }
+    this->element[this->_effect_element1].set_blightness(++bl);
+    
+    this->_effect_prev_count = this->_effect_count;
+    return;
+  }
+
+  if (this->_effect == EFFECT_FADE_OUT) {
+    this->_effect_count = this->calc_effect_count(cur_ms);
+    if (this->_effect_count == this->_effect_prev_count) {
+      return;
+    }
+
+    uint8_t bl = this->element[this->_effect_element1].get_blightness();
+    if ( bl <= 0 ) {
+      this->_effect = EFFECT_NONE;
+    }
+    this->element[this->_effect_element1].set_blightness(--bl);
+    
+    this->_effect_prev_count = this->_effect_count;
     return;
   }
 

@@ -10,6 +10,9 @@ class ModeTest1 : public ModeBase {
   void setup(int idx, NixieArray *nxa);
   void init();
   void loop(unsigned long cur_ms);
+
+ private:
+  int _digit = 0;
 };
 #endif // MODE_TEST1_H
 // Local Variables:
