@@ -54,13 +54,8 @@ void ModeTest1::loop(unsigned long cur_ms) {
 
   // num ---------------------------------------------------------------------
   int num=0;
-  for (int digit=0; digit < NIXIE_NUM_DIGIT_N; digit++) {
-    if (digit == disp_digit) {
-      this->_nxa->num[num].element[digit].set_blightness_max();
-    } else {
-      this->_nxa->num[num].element[digit].set_blightness_zero();
-    }
-  } // for (digit)
+  this->_nxa->num[num].element[prev_disp_digit].set_blightness_zero();
+  this->_nxa->num[num].element[disp_digit].set_blightness_max();
   
   num=1;
   this->_nxa->num[num].start_fade_out(cur_ms, prev_disp_digit, 200);
