@@ -1,7 +1,7 @@
 /*
  * (c) 2020 Yoichi Tanibayashi
  */
-#include "NixieArray.h"
+#include "Nixie.h"
 #include "Button.h"
 #include "ModeBase.h"
 #include "ModeTest1.h"
@@ -76,51 +76,8 @@ void btn_handler() {
   for (int b=0; b < BTN_N; b++) {
     if ( btnObj[b]->get() ) {
       btnObj[b]->print();
+      Mode[curMode]->btn_intr(curMsec, btnObj[b]);
     }
-  }
-
-  if ( digitalRead(PIN_BTN1) == LOW ) {
-    curDigit--;
-    if ( curDigit < 0 ) {
-      curDigit = NIXIE_NUM_DIGIT_N - 1;
-      curTube--;
-      if ( curTube < 0 ) {
-	curTube = NIXIE_NUM_N - 1;
-      }
-    }
-    
-    Serial.print("curTube:" + String(curTube) + " ");
-    Serial.print("curDigit:" + String(curDigit) + " ");
-    Serial.println();
-  }
-
-  if ( digitalRead(PIN_BTN2) == LOW) {
-    Serial.print("curTube:" + String(curTube) + " ");
-    Serial.print("curDigit:" + String(curDigit) + " ");
-
-    uint8_t bl = nixieArray.num[curTube].element[curDigit].get_blightness();
-    bl++;
-    if ( bl > BLIGHTNESS_MAX ) {
-      bl=0;
-    }
-    nixieArray.num[curTube].element[curDigit].set_blightness(bl);
-    Serial.print("bl=" + String(bl));
-    Serial.println();
-  }
-
-  if ( digitalRead(PIN_BTN3) == LOW ) {
-    curDigit++;
-    if ( curDigit >= NIXIE_NUM_DIGIT_N ) {
-      curDigit = 0;
-      curTube++;
-      if ( curTube >= NIXIE_NUM_N ) {
-	curTube = 0;
-      }
-    }
-    
-    Serial.print("curTube:" + String(curTube) + " ");
-    Serial.print("curDigit:" + String(curDigit) + " ");
-    Serial.println();
   }
 } // btn_handler
 //============================================================================
@@ -128,27 +85,22 @@ void setup() {
   Serial.begin(115200);
   Serial.println("begin");
   //--------------------------------------------------------------------------
-  // グローバルオブジェクトの初期化
-  //
+  // グローバルオブジェクト・変数の初期化
+  //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   nixieArray.setup(PIN_HV5812_CLK,  PIN_HV5812_STOBE,
                    PIN_HV5812_DATA, PIN_HV5812_BLANK,
                    nixiePins, colonPins);
-  //--------------------------------------------------------------------------
+  //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // 各モードの初期化
   for (int m=0; m < MODE_N; m++) {
     Mode[m]->setup(m, &nixieArray);
   }
-  //--------------------------------------------------------------------------
+  //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // ボタンの初期化
   btnObj1.setup(PIN_BTN1, "BTN1");
   btnObj2.setup(PIN_BTN2, "BTN2");
   btnObj3.setup(PIN_BTN3, "BTN3");
   //--------------------------------------------------------------------------
-  for (int i=0; i < sizeof(pinsIn) / sizeof(uint8_t); i++) {
-    pinMode(pinsIn[i], INPUT);
-    int val = digitalRead(pinsIn[i]);
-    Serial.println("SW[" + String(i) + "]=" + String(val) );
-  }
   uint8_t intr_pin1 = digitalPinToInterrupt(PIN_BTN1);
   uint8_t intr_pin2 = digitalPinToInterrupt(PIN_BTN2);
   uint8_t intr_pin3 = digitalPinToInterrupt(PIN_BTN3);
@@ -161,34 +113,38 @@ void setup() {
   attachInterrupt(intr_pin1, btn_handler, CHANGE);
   attachInterrupt(intr_pin2, btn_handler, CHANGE);
   attachInterrupt(intr_pin3, btn_handler, CHANGE);
-  //--------------------------------------------------------------------------
+  //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  // 時間
   prevMsec = millis();
   curMsec = millis();
-
-  nixieArray.display(curMsec); // セットアップ時のコマンドを実行
+  //--------------------------------------------------------------------------
+  nixieArray.display(curMsec); // 初期状態表示
 } // setup()
 //============================================================================
 void loop() {
   prevMsec = curMsec;
   curMsec = millis();
   loopCount++;
-
-  // ボタン
-  for (int b=0; b < BTN_N; b++) {
-    if ( btnObj[b]->get() ) {
-      btnObj[b]->print();
-    }
-  }
-
+  //--------------------------------------------------------------------------
+  // モード実行
   if (curMode != prevMode) {
-    Mode[curMode]->init();       // モード変更時の初期化
+    Mode[curMode]->init(curMsec);       // モード変更時の初期化
     prevMode = curMode;
   } else {
     Mode[curMode]->loop(curMsec);
   }
-
-  nixieArray.display(curMsec);  // 表示
-
+  //--------------------------------------------------------------------------
+  // ボタン
+  for (int b=0; b < BTN_N; b++) {
+    if ( btnObj[b]->get() ) {
+      btnObj[b]->print();
+      Mode[curMode]->btn_intr(curMsec, btnObj[b]);
+    }
+  }
+  //--------------------------------------------------------------------------
+  // 表示
+  nixieArray.display(curMsec);
+  //--------------------------------------------------------------------------
   delayMicroseconds(LOOP_DELAY_US);
 } // loop()
 //============================================================================

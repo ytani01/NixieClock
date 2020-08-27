@@ -1,7 +1,7 @@
 /*
  * (c) Yoichi Tanibayashi
  */
-#include "NixieArray.h"
+#include "Nixie.h"
 
 //============================================================================
 // class NixieElement
@@ -15,12 +15,6 @@ void NixieElement::setup(uint8_t pin) {
 
 void NixieElement::set_blightness(uint8_t blightness) {
   this->_blightness = blightness;
-}
-void NixieElement::set_blightness_zero() {
-  this->_blightness = 0;
-}
-void NixieElement::set_blightness_max() {
-  this->_blightness = BLIGHTNESS_MAX;
 }
 void NixieElement::inc_blightness() {
   if (this->_blightness < BLIGHTNESS_MAX) {
@@ -63,76 +57,77 @@ void NixieTube::setup(int element_n, uint8_t *pin) {
   } // for (d)
 }
 
-unsigned long NixieTube::calc_effect_count(unsigned long cur_ms) {
-  return (cur_ms - this->_effect_start_ms) / this->_effect_ms1;
-}
-
-effect_t NixieTube::get_effect() {
+effect_type_t NixieTube::get_effect() {
   return this->_effect;
 }
-void NixieTube::start_fade_in(unsigned long cur_ms,
-                              int element_i, unsigned long ms) {
-  this->_effect = EFFECT_FADE_IN;
-  this->_effect_element1 = element_i;
-  this->_effect_start_ms = cur_ms;
-  this->_effect_ms1 = ms;
-  this->_effect_count = this->calc_effect_count(cur_ms);
-  this->_effect_prev_count = this->_effect_count;
 
-  this->element[this->_effect_element1].set_blightness_zero();
+unsigned long NixieTube::calc_effect_tick(unsigned long cur_ms) {
+  if ( this->_effect_tick_ms == 0 ) {
+    return 0;
+  }
+  return (cur_ms - this->_effect_start_ms) / this->_effect_tick_ms;
 }
 
-void NixieTube::start_fade_out(unsigned long cur_ms,
-                               int element_i, unsigned long ms) {
-  this->_effect = EFFECT_FADE_OUT;
-  this->_effect_element1 = element_i;
-  this->_effect_start_ms = cur_ms;
-  this->_effect_ms1 = ms;
-  this->_effect_count = this->calc_effect_count(cur_ms);
-  this->_effect_prev_count = this->_effect_count;
+void NixieTube::effect_start(effect_type_t etype,
+                             unsigned long start_ms, unsigned long tick_ms) {
+  this->_effect           = etype;
+  this->_effect_start_ms  = start_ms;
+  this->_effect_tick_ms   = tick_ms;
+  this->_effect_tick      = this->calc_effect_tick(this->_effect_start_ms);
+  this->_effect_prev_tick = this->_effect_tick;
+} // NixieTube::effect_start()
 
-  this->element[this->_effect_element1].set_blightness_max();
-}
+void NixieTube::effect_end() {
+  this->_effect = EFFECT_NONE;
+} // NixieTube::effect_end()
+
+void NixieTube::fadein_start(unsigned long start_ms, unsigned long ms,
+                             int element_i) {
+  this->effect_start(EFFECT_FADEIN, start_ms, ms);
+  this->_effect_element_i1 = element_i;
+
+  this->element[this->_effect_element_i1].set_blightness(0);
+} // NixieTube::fadein_start()
+
+void NixieTube::fadeout_start(unsigned long start_ms, unsigned long ms,
+                             int element_i) {
+  this->effect_start(EFFECT_FADEOUT, start_ms, ms);
+  this->_effect_element_i1 = element_i;
+
+  this->element[this->_effect_element_i1].set_blightness(BLIGHTNESS_MAX);
+} // NixieTube::fadeout_start()
 
 void NixieTube::loop(unsigned long cur_ms) {
-  if (this->_effect == EFFECT_NONE) {
+  if ( this->_effect == EFFECT_NONE ) {
     return;
   }
 
-  if (this->_effect == EFFECT_FADE_IN) {
-    this->_effect_count = this->calc_effect_count(cur_ms);
-    if (this->_effect_count == this->_effect_prev_count) {
-      return;
-    }
+  this->_effect_prev_tick = this->_effect_tick;
+  this->_effect_tick      = this->calc_effect_tick(cur_ms);
+  if ( this->_effect_tick == this->_effect_prev_tick ) {
+    return;
+  }
 
-    uint8_t bl = this->element[this->_effect_element1].get_blightness();
+  if ( this->_effect == EFFECT_FADEIN ) {
+    uint8_t bl = this->element[this->_effect_element_i1].get_blightness();
     if ( bl >= BLIGHTNESS_MAX ) {
-      this->_effect = EFFECT_NONE;
-    }
-    this->element[this->_effect_element1].set_blightness(++bl);
-    
-    this->_effect_prev_count = this->_effect_count;
-    return;
-  }
-
-  if (this->_effect == EFFECT_FADE_OUT) {
-    this->_effect_count = this->calc_effect_count(cur_ms);
-    if (this->_effect_count == this->_effect_prev_count) {
+      this->effect_end();
       return;
     }
-
-    uint8_t bl = this->element[this->_effect_element1].get_blightness();
-    if ( bl <= 0 ) {
-      this->_effect = EFFECT_NONE;
-    }
-    this->element[this->_effect_element1].set_blightness(--bl);
-    
-    this->_effect_prev_count = this->_effect_count;
+    this->element[this->_effect_element_i1].inc_blightness();
     return;
   }
 
-  // XXX TBD
-}
+  if ( this->_effect == EFFECT_FADEOUT ) {
+    uint8_t bl = this->element[this->_effect_element_i1].get_blightness();
+    if ( bl <= 0 ) {
+      this->effect_end();
+      return;
+    }
+    this->element[this->_effect_element_i1].dec_blightness();
+    return;
+  }
+} // NixieTube::loop()
 //============================================================================
 // class NixieArray
 //----------------------------------------------------------------------------
@@ -170,7 +165,7 @@ void NixieArray::loop(unsigned long cur_ms) {
   for (int ti=0; ti < NIXIE_COLON_N; ti++) {
     this->colon[ti].loop(cur_ms);
   } // for(ti)
-}
+} // NixieArray::loop()
 
 void NixieArray::set_onoff(unsigned long cur_ms) {
   uint8_t timing = cur_ms % BLIGHTNESS_MAX;
@@ -201,7 +196,7 @@ void NixieArray::display(unsigned long cur_ms) {
   //--------------------------------------------------------------------------
   this->loop(cur_ms); // ニキシー管 全て
   //--------------------------------------------------------------------------
-  this->set_onoff(cur_ms); // エレメント 全て
+  this->set_onoff(cur_ms); // 全エレメントの表示状態更新
   //--------------------------------------------------------------------------
   // 数字部の表示処理
   for (int p=0; p < pin_n; p++) {
@@ -247,8 +242,7 @@ void NixieArray::display(unsigned long cur_ms) {
       }
     } // for(d)
   } // for(c)
-  //--------------------------------------------------------------------------
-}
+} // NixieArray::display()
 //============================================================================
 // Local Variables:
 // Mode: arduino

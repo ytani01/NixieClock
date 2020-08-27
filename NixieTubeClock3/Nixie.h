@@ -1,23 +1,25 @@
 /*
  * (c) 2020 Yoichi Tanibayashi
  *
+ *----------------------------------------------------------------------------
  * [ Data structure ( not class tree ) ]
  *
  *  NixieArray
  *   |
- *   +- NixieTube[NIXIE_NUM_N]
+ *   +- NixieTube num[NIXIE_NUM_N]
  *   |   |
- *   |   +- NixieElement _digit[NIXIE_NUM_DIGIT_N]
+ *   |   +- NixieElement element[NIXIE_NUM_DIGIT_N]
  *   |
- *   +- NixieTube[NIXIE_COLON_N]
+ *   +- NixieTube colon[NIXIE_COLON_N]
  *       |
- *       +- NixieElement _dot[NIXIE_COLON_DOT_N]
+ *       +- NixieElement element[NIXIE_COLON_DOT_N]
+ *----------------------------------------------------------------------------
  */
 #ifndef NIXIE_ARRAY_H
 #define NIXIE_ARRAY_H
 #include <Arduino.h>
 
-typedef unsigned char effect_t;
+typedef unsigned char effect_type_t;
 
 #define BLIGHTNESS_MAX       8
 
@@ -34,11 +36,10 @@ typedef unsigned char effect_t;
 #define NIXIE_ELEMENT_N_MAX  (NIXIE_NUM_DIGIT_N > NIXIE_COLON_DOT_N ? NIXIE_NUM_DIGIT_N : NIXIE_COLON_DOT_N)
 
 #define EFFECT_NONE          0
-#define EFFECT_FADE_IN       1
-#define EFFECT_FADE_OUT      2
-#define EFFECT_X_FADE        3
-#define EFFECT_FOG_IN        4
-#define EFFECT_FOG_OUT       5
+#define EFFECT_FADEIN        1
+#define EFFECT_FADEOUT       2
+#define EFFECT_FOGIN         4
+#define EFFECT_FOGOUT        5
 #define EFFECT_SHUFFLE       6
 #define EFFECT_BLINK         7
 
@@ -50,8 +51,6 @@ class NixieElement {
   void setup(uint8_t pin);
   
   void set_blightness(uint8_t blightness);
-  void set_blightness_zero();
-  void set_blightness_max();
   void inc_blightness();
   void dec_blightness();
   uint8_t get_blightness();
@@ -72,25 +71,32 @@ class NixieElement {
 class NixieTube {
  public:
   int           element_n;
-  NixieElement  *element;
+  NixieElement *element;
 
   NixieTube() {};
 
   void setup(int element_n, uint8_t *pin);
 
-  unsigned long calc_effect_count(unsigned long cur_ms);
-  effect_t get_effect();
-  void start_fade_in(unsigned long cur_ms, int element_i, unsigned long ms);
-  void start_fade_out(unsigned long cur_ms, int element_i, unsigned long ms);
+  effect_type_t get_effect();
+  unsigned long calc_effect_tick(unsigned long cur_ms);
+  void effect_start(effect_type_t etype,
+                    unsigned long start_ms, unsigned long tick_ms);
+  void effect_end();
+
+  void fadein_start(unsigned long start_ms, unsigned long ms, int element_i);
+  void fadeout_start(unsigned long start_ms, unsigned long ms, int element_i);
   
   void loop(unsigned long cur_msec);
 
  private:
-  effect_t      _effect = EFFECT_NONE;
-  uint8_t       _effect_element1, _effect_element2;
-  uint8_t       _effect_blightness1, _effect_blightness2;
-  unsigned long _effect_start_ms, _effect_ms1;
-  unsigned long _effect_count, _effect_prev_count;
+  effect_type_t _effect = EFFECT_NONE;
+  unsigned long _effect_start_ms;
+  unsigned long _effect_tick_ms;
+  unsigned long _effect_tick;        // ticks per _effect_tick_ms
+  unsigned long _effect_prev_tick;
+  int           _effect_element_i1;
+  int           _effect_element_i2;
+  int           _effect_n;
 }; // class NixieTube
 //============================================================================
 class NixieArray {

@@ -94,7 +94,7 @@ boolean Button::get()
   }
 
   return ret;
-}
+} // Button::get()
 
 void Button::enable()
 {
