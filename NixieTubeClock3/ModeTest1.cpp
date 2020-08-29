@@ -53,10 +53,19 @@ void ModeTest1::loop(unsigned long cur_ms) {
   this->_nxa->num[num].element[this->_digit].set_blightness(BLIGHTNESS_MAX);
   
   num=1;
-  this->_nxa->num[num].fadeout_start(cur_ms, this->EFFECT_TICK_MS,
-                                     this->_prev_digit);
-  this->_nxa->num[num].fadein_start(cur_ms, this->EFFECT_TICK_MS,
+  this->_nxa->num[num].element[this->_prev_digit].set_blightness(0);
+  this->_nxa->num[num].fadein_start(cur_ms, this->FADE_TICK_MS,
                                     this->_digit);
+
+  num=2;
+  this->_nxa->num[num].fadeout_start(cur_ms, this->FADE_TICK_MS,
+                                     this->_prev_digit);
+  this->_nxa->num[num].element[this->_digit].set_blightness(BLIGHTNESS_MAX);
+  
+  num=3;
+  this->_nxa->num[num].xfade_start(cur_ms, this->FADE_TICK_MS,
+                                   this->_digit, this->_prev_digit);
+
   // -------------------------------------------------------------------------
   // colon
   if (num % 2 == 0) {

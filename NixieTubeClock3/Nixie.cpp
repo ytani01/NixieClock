@@ -78,24 +78,32 @@ void NixieTube::effect_start(effect_type_t etype,
 } // NixieTube::effect_start()
 
 void NixieTube::effect_end() {
+  Serial.println("NixieTube::effect_end():" + String(this->_effect));
   this->_effect = EFFECT_NONE;
 } // NixieTube::effect_end()
 
 void NixieTube::fadein_start(unsigned long start_ms, unsigned long ms,
                              int element_i) {
   this->effect_start(EFFECT_FADEIN, start_ms, ms);
-  this->_effect_element_i1 = element_i;
-
-  this->element[this->_effect_element_i1].set_blightness(0);
+  this->_effect_el1 = element_i;
+  this->element[this->_effect_el1].set_blightness(0);
 } // NixieTube::fadein_start()
 
 void NixieTube::fadeout_start(unsigned long start_ms, unsigned long ms,
                              int element_i) {
   this->effect_start(EFFECT_FADEOUT, start_ms, ms);
-  this->_effect_element_i1 = element_i;
-
-  this->element[this->_effect_element_i1].set_blightness(BLIGHTNESS_MAX);
+  this->_effect_el1 = element_i;
+  this->element[this->_effect_el1].set_blightness(BLIGHTNESS_MAX);
 } // NixieTube::fadeout_start()
+
+void NixieTube::xfade_start(unsigned long start_ms, unsigned long ms,
+                            int el_in, int el_out) {
+  this->effect_start(EFFECT_XFADE, start_ms, ms);
+  this->_effect_el1 = el_in;
+  this->_effect_el2 = el_out;
+  this->element[this->_effect_el1].set_blightness(0);
+  this->element[this->_effect_el2].set_blightness(BLIGHTNESS_MAX);
+}
 
 void NixieTube::loop(unsigned long cur_ms) {
   if ( this->_effect == EFFECT_NONE ) {
@@ -109,22 +117,43 @@ void NixieTube::loop(unsigned long cur_ms) {
   }
 
   if ( this->_effect == EFFECT_FADEIN ) {
-    uint8_t bl = this->element[this->_effect_element_i1].get_blightness();
-    if ( bl >= BLIGHTNESS_MAX ) {
+    uint8_t bl = this->element[this->_effect_el1].get_blightness();
+    if ( bl < BLIGHTNESS_MAX ) {
+      this->element[this->_effect_el1].inc_blightness();
+    } else {
       this->effect_end();
-      return;
     }
-    this->element[this->_effect_element_i1].inc_blightness();
     return;
   }
 
   if ( this->_effect == EFFECT_FADEOUT ) {
-    uint8_t bl = this->element[this->_effect_element_i1].get_blightness();
-    if ( bl <= 0 ) {
+    uint8_t bl = this->element[this->_effect_el1].get_blightness();
+    if ( bl > 0 ) {
+      this->element[this->_effect_el1].dec_blightness();
+    } else {
       this->effect_end();
-      return;
     }
-    this->element[this->_effect_element_i1].dec_blightness();
+    return;
+  }
+
+  if ( this->_effect == EFFECT_XFADE ) {
+    uint8_t bl1 = this->element[this->_effect_el1].get_blightness();
+    uint8_t bl2 = this->element[this->_effect_el1].get_blightness();
+    int end_count = 0;
+
+    if ( bl1 < BLIGHTNESS_MAX ) {
+      this->element[this->_effect_el1].inc_blightness();
+    } else {
+      end_count++;
+    }
+    if ( bl2 > 0 ) {
+      this->element[this->_effect_el2].dec_blightness();
+    } else {
+      end_count++;
+    }
+    if ( end_count >= 2 ) {
+      this->effect_end();
+    }
     return;
   }
 } // NixieTube::loop()

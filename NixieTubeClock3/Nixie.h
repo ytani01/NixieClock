@@ -38,6 +38,7 @@ typedef unsigned char effect_type_t;
 #define EFFECT_NONE          0
 #define EFFECT_FADEIN        1
 #define EFFECT_FADEOUT       2
+#define EFFECT_XFADE         3
 #define EFFECT_FOGIN         4
 #define EFFECT_FOGOUT        5
 #define EFFECT_SHUFFLE       6
@@ -85,6 +86,7 @@ class NixieTube {
 
   void fadein_start(unsigned long start_ms, unsigned long ms, int element_i);
   void fadeout_start(unsigned long start_ms, unsigned long ms, int element_i);
+  void xfade_start(unsigned long start_ms, unsigned long ms, int el_in, int el_out);
   
   void loop(unsigned long cur_msec);
 
@@ -94,8 +96,8 @@ class NixieTube {
   unsigned long _effect_tick_ms;
   unsigned long _effect_tick;        // ticks per _effect_tick_ms
   unsigned long _effect_prev_tick;
-  int           _effect_element_i1;
-  int           _effect_element_i2;
+  int           _effect_el1;
+  int           _effect_el2;
   int           _effect_n;
 }; // class NixieTube
 //============================================================================

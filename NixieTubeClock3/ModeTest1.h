@@ -7,8 +7,9 @@
 
 class ModeTest1 : public ModeBase {
  public:
-  static const unsigned long TICK_MS = 2000; // ms
-  static const unsigned long EFFECT_TICK_MS = 150; // ms
+  static const unsigned long TICK_MS = 1000; // ms
+  static const unsigned long FADE_TICK_MS = 100; // ms
+  static const unsigned long SLOT_TICK_MS = 100; // ms
   
   void setup(int idx, NixieArray *nxa);
   void init(unsigned long start_ms);
