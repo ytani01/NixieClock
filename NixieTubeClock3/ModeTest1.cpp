@@ -3,15 +3,13 @@
  */
 #include "ModeTest1.h"
 
-void ModeTest1::setup(int idx, NixieArray *nxa) {
-  ModeBase::setup(idx, nxa);
+void ModeTest1::setup(NixieArray *nxa) {
+  ModeBase::setup(nxa);
 
   this->_name = "ModeTest1";
   this->_tick_ms = ModeTest1::TICK_MS;
 
   String msg = "ModeTest1::setup(): ";
-  msg += "_idx = " + String(this->_idx);
-  msg += ", ";
   msg += "_name = " + this->_name;
   msg += ", ";
   msg += "_tick_ms = " + this->_tick_ms;
@@ -42,8 +40,7 @@ void ModeTest1::init(unsigned long start_ms) {
 }
 
 void ModeTest1::loop(unsigned long cur_ms) {
-  ModeBase::loop(cur_ms);
-  if ( this->_tick == this->_prev_tick ) {
+  if ( ! this->tick(cur_ms) ) {
     return;
   }
   // -------------------------------------------------------------------------
@@ -73,7 +70,7 @@ void ModeTest1::loop(unsigned long cur_ms) {
   */
   // -------------------------------------------------------------------------
   // colon
-  if (num % 2 == 0) {
+  if (this->_digit % 2 == 0) {
     this->_nxa->colon[NIXIE_COLON_L].element[NIXIE_COLON_DOT_UP].
       set_blightness(BLIGHTNESS_MAX);
     this->_nxa->colon[NIXIE_COLON_L].element[NIXIE_COLON_DOT_DOWN].
@@ -98,10 +95,10 @@ void ModeTest1::loop(unsigned long cur_ms) {
 } // ModeTest1::loop()
 
 void ModeTest1::btn_intr(unsigned long cur_ms, Button *btn) {
-  ModeBase::btn_intr(cur_ms, btn);
-
-  // XXX
+  Serial.println("ModeTest1::btn_intr()");
 } // ModeTest1::btn_intr()
+
+// for emacs
 // Local Variables:
 // Mode: arduino
 // Coding: utf-8-unix

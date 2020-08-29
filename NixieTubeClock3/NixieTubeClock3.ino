@@ -7,8 +7,6 @@
 #include "ModeTest1.h"
 
 #define LOOP_DELAY_US       1 // micro seconds
-
-#define PIN_INTR            2 // ??
 #define DEBOUNCE          200 // msec
 
 #define PIN_HV5812_CLK     26
@@ -94,18 +92,17 @@ void setup() {
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // 各モードの初期化
   for (int m=0; m < MODE_N; m++) {
-    Mode[m]->setup(m, &nixieArray);
+    Mode[m]->setup(&nixieArray);
   }
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // ボタンの初期化
   btnObj1.setup(PIN_BTN1, "BTN1");
   btnObj2.setup(PIN_BTN2, "BTN2");
   btnObj3.setup(PIN_BTN3, "BTN3");
-  //--------------------------------------------------------------------------
+  //-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
   uint8_t intr_pin1 = digitalPinToInterrupt(PIN_BTN1);
   uint8_t intr_pin2 = digitalPinToInterrupt(PIN_BTN2);
   uint8_t intr_pin3 = digitalPinToInterrupt(PIN_BTN3);
-
   Serial.println("digitalPinToInterrupt:");
   Serial.println(" " + String(PIN_BTN1) + " --> " + String(intr_pin1));
   Serial.println(" " + String(PIN_BTN2) + " --> " + String(intr_pin2));
