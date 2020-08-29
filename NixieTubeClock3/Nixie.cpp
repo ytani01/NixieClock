@@ -262,7 +262,7 @@ void NixieTube::xfade_start(unsigned long start_ms,
 //============================================================================
 // class NixieArray
 //----------------------------------------------------------------------------
-void NixieArray::setup(uint8_t clk, uint8_t stobe, uint8_t data, uint8_t blank,
+NixieArray::NixieArray(uint8_t clk, uint8_t stobe, uint8_t data, uint8_t blank,
                        uint8_t num_pin[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N],
                        uint8_t colon_pin[NIXIE_COLON_N][NIXIE_COLON_DOT_N]) {
   uint8_t pout[] = {clk, stobe, data, blank};

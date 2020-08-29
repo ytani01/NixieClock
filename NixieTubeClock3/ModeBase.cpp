@@ -8,7 +8,7 @@ boolean ModeBase::tick(unsigned long cur_ms) {
     Serial.println("!? _tick_ms=" + String(this->_tick_ms));
     return false;
   }
-  this->_prev_tick = this->tick;
+  this->_prev_tick = this->_tick;
   this->_tick = (cur_ms - this->_start_ms) / this->_tick_ms;
   if ( this->_tick == this->_prev_tick ) {
     return false;

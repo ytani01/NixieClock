@@ -40,7 +40,7 @@ uint8_t colonPins[NIXIE_COLON_N][NIXIE_COLON_DOT_N] =
   {{PIN_COLON_R_TOP, PIN_COLON_R_BOTTOM},
    {PIN_COLON_L_TOP, PIN_COLON_L_BOTTOM} };
 //----------------------------------------------------------------------------
-NixieArray nixieArray;
+NixieArray *nixieArray;
 Button btnObj1, btnObj2, btnObj3;
 Button *btnObj[] = {&btnObj1, &btnObj2, &btnObj3};
 //----------------------------------------------------------------------------
@@ -86,13 +86,13 @@ void setup() {
   //--------------------------------------------------------------------------
   // グローバルオブジェクト・変数の初期化
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  nixieArray.setup(PIN_HV5812_CLK,  PIN_HV5812_STOBE,
-                   PIN_HV5812_DATA, PIN_HV5812_BLANK,
-                   nixiePins, colonPins);
+  nixieArray = new NixieArray(PIN_HV5812_CLK,  PIN_HV5812_STOBE,
+                              PIN_HV5812_DATA, PIN_HV5812_BLANK,
+                              nixiePins, colonPins);
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // 各モードの初期化
   for (int m=0; m < MODE_N; m++) {
-    Mode[m]->setup(&nixieArray);
+    Mode[m]->setup(nixieArray);
   }
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // ボタンの初期化
@@ -116,7 +116,7 @@ void setup() {
   prevMsec = millis();
   curMsec = millis();
   //--------------------------------------------------------------------------
-  nixieArray.display(curMsec); // 初期状態表示
+  nixieArray->display(curMsec); // 初期状態表示
 } // setup()
 //============================================================================
 void loop() {
@@ -141,7 +141,7 @@ void loop() {
   }
   //--------------------------------------------------------------------------
   // 表示
-  nixieArray.display(curMsec);
+  nixieArray->display(curMsec);
   //--------------------------------------------------------------------------
   delayMicroseconds(LOOP_DELAY_US);
 } // loop()
