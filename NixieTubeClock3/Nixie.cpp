@@ -57,97 +57,104 @@ void NixieTube::setup(int element_n, uint8_t *pin) {
   } // for (d)
 }
 
-effect_type_t NixieTube::get_effect() {
-  return this->_effect;
+effect *NixieTube::get_effect() {
+  return &(this->_ef);
 }
 
 unsigned long NixieTube::calc_effect_tick(unsigned long cur_ms) {
-  if ( this->_effect_tick_ms == 0 ) {
+  if ( this->_ef.tick_ms == 0 ) {
     return 0;
   }
-  return (cur_ms - this->_effect_start_ms) / this->_effect_tick_ms;
+  return (cur_ms - this->_ef.start_ms) / this->_ef.tick_ms;
 }
 
-void NixieTube::effect_start(effect_type_t etype,
+void NixieTube::effect_start(effect_id_t eid,
                              unsigned long start_ms, unsigned long tick_ms) {
-  this->_effect           = etype;
-  this->_effect_start_ms  = start_ms;
-  this->_effect_tick_ms   = tick_ms;
-  this->_effect_tick      = this->calc_effect_tick(this->_effect_start_ms);
-  this->_effect_prev_tick = this->_effect_tick;
+  this->_ef.id        = eid;
+  this->_ef.start_ms  = start_ms;
+  this->_ef.tick_ms   = tick_ms;
+  this->_ef.tick      = this->calc_effect_tick(this->_ef.start_ms);
+  this->_ef.prev_tick = this->_ef.tick;
 } // NixieTube::effect_start()
 
 void NixieTube::effect_end() {
-  Serial.println("NixieTube::effect_end():" + String(this->_effect));
-  this->_effect = EFFECT_NONE;
+  Serial.println("NixieTube::effect_end():" + String(this->_ef.id));
+  this->_ef.id = EFFECT_NONE;
 } // NixieTube::effect_end()
 
 void NixieTube::fadein_start(unsigned long start_ms, unsigned long ms,
                              int element_i) {
   this->effect_start(EFFECT_FADEIN, start_ms, ms);
-  this->_effect_el1 = element_i;
-  this->element[this->_effect_el1].set_blightness(0);
+  this->_ef.el1 = element_i;
+  this->element[this->_ef.el1].set_blightness(0);
 } // NixieTube::fadein_start()
 
 void NixieTube::fadeout_start(unsigned long start_ms, unsigned long ms,
                              int element_i) {
   this->effect_start(EFFECT_FADEOUT, start_ms, ms);
-  this->_effect_el1 = element_i;
-  this->element[this->_effect_el1].set_blightness(BLIGHTNESS_MAX);
+  this->_ef.el1 = element_i;
+  this->element[this->_ef.el1].set_blightness(BLIGHTNESS_MAX);
 } // NixieTube::fadeout_start()
 
 void NixieTube::xfade_start(unsigned long start_ms, unsigned long ms,
                             int el_in, int el_out) {
   this->effect_start(EFFECT_XFADE, start_ms, ms);
-  this->_effect_el1 = el_in;
-  this->_effect_el2 = el_out;
-  this->element[this->_effect_el1].set_blightness(0);
-  this->element[this->_effect_el2].set_blightness(BLIGHTNESS_MAX);
+  this->_ef.el1 = el_in;
+  this->_ef.el2 = el_out;
+  this->element[this->_ef.el1].set_blightness(0);
+  this->element[this->_ef.el2].set_blightness(BLIGHTNESS_MAX);
+}
+
+void NixieTube::shuffle_start(unsigned long start_ms, unsigned long tick,
+                              int count, int element_i) {
+  this->effect_start(EFFECT_SHUFFLE, start_ms, tick);
+  this->_ef.n1 = count;
+  this->_ef.el1 = element_i;
 }
 
 void NixieTube::loop(unsigned long cur_ms) {
-  if ( this->_effect == EFFECT_NONE ) {
+  if ( this->_ef.id == EFFECT_NONE ) {
     return;
   }
 
-  this->_effect_prev_tick = this->_effect_tick;
-  this->_effect_tick      = this->calc_effect_tick(cur_ms);
-  if ( this->_effect_tick == this->_effect_prev_tick ) {
+  this->_ef.prev_tick = this->_ef.tick;
+  this->_ef.tick      = this->calc_effect_tick(cur_ms);
+  if ( this->_ef.tick == this->_ef.prev_tick ) {
     return;
   }
 
-  if ( this->_effect == EFFECT_FADEIN ) {
-    uint8_t bl = this->element[this->_effect_el1].get_blightness();
+  if ( this->_ef.id == EFFECT_FADEIN ) {
+    uint8_t bl = this->element[this->_ef.el1].get_blightness();
     if ( bl < BLIGHTNESS_MAX ) {
-      this->element[this->_effect_el1].inc_blightness();
+      this->element[this->_ef.el1].inc_blightness();
     } else {
       this->effect_end();
     }
     return;
-  }
+  } // FADEIN
 
-  if ( this->_effect == EFFECT_FADEOUT ) {
-    uint8_t bl = this->element[this->_effect_el1].get_blightness();
+  if ( this->_ef.id == EFFECT_FADEOUT ) {
+    uint8_t bl = this->element[this->_ef.el1].get_blightness();
     if ( bl > 0 ) {
-      this->element[this->_effect_el1].dec_blightness();
+      this->element[this->_ef.el1].dec_blightness();
     } else {
       this->effect_end();
     }
     return;
-  }
+  } // FADEOUT
 
-  if ( this->_effect == EFFECT_XFADE ) {
-    uint8_t bl1 = this->element[this->_effect_el1].get_blightness();
-    uint8_t bl2 = this->element[this->_effect_el1].get_blightness();
+  if ( this->_ef.id == EFFECT_XFADE ) {
+    uint8_t bl1 = this->element[this->_ef.el1].get_blightness();
+    uint8_t bl2 = this->element[this->_ef.el1].get_blightness();
     int end_count = 0;
 
     if ( bl1 < BLIGHTNESS_MAX ) {
-      this->element[this->_effect_el1].inc_blightness();
+      this->element[this->_ef.el1].inc_blightness();
     } else {
       end_count++;
     }
     if ( bl2 > 0 ) {
-      this->element[this->_effect_el2].dec_blightness();
+      this->element[this->_ef.el2].dec_blightness();
     } else {
       end_count++;
     }
@@ -155,7 +162,21 @@ void NixieTube::loop(unsigned long cur_ms) {
       this->effect_end();
     }
     return;
-  }
+  } // XFADE
+
+  if ( this->_ef.id == EFFECT_SHUFFLE ) {
+    for (int e=0; e < this->element_n; e++) {
+      this->element[e].set_blightness(0);
+    } // for(e)
+
+    if ( this->_ef.tick < this->_ef.n1 ) {
+      int e = random(this->element_n);
+      this->element[e].set_blightness(BLIGHTNESS_MAX);
+      return;
+    }
+
+    this->element[this->_ef.el1].set_blightness(BLIGHTNESS_MAX);
+  } // SHUFFLE
 } // NixieTube::loop()
 //============================================================================
 // class NixieArray

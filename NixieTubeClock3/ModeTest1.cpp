@@ -48,24 +48,27 @@ void ModeTest1::loop(unsigned long cur_ms) {
   }
   // -------------------------------------------------------------------------
   // num
-  int num=0;
+  int num = 0;
   this->_nxa->num[num].element[this->_prev_digit].set_blightness(0);
   this->_nxa->num[num].element[this->_digit].set_blightness(BLIGHTNESS_MAX);
   
-  num=1;
+  num = 1;
   this->_nxa->num[num].element[this->_prev_digit].set_blightness(0);
   this->_nxa->num[num].fadein_start(cur_ms, this->FADE_TICK_MS,
                                     this->_digit);
 
-  num=2;
+  num = 2;
   this->_nxa->num[num].fadeout_start(cur_ms, this->FADE_TICK_MS,
                                      this->_prev_digit);
   this->_nxa->num[num].element[this->_digit].set_blightness(BLIGHTNESS_MAX);
   
-  num=3;
+  num = 3;
   this->_nxa->num[num].xfade_start(cur_ms, this->FADE_TICK_MS,
                                    this->_digit, this->_prev_digit);
 
+  num = 4;
+  this->_nxa->num[num].shuffle_start(cur_ms, this->SHUFFLE_TICK_MS,
+                                     this->SHUFFLE_COUNT, this->_digit);
   // -------------------------------------------------------------------------
   // colon
   if (num % 2 == 0) {

@@ -19,7 +19,19 @@
 #define NIXIE_ARRAY_H
 #include <Arduino.h>
 
-typedef unsigned char effect_type_t;
+typedef unsigned char effect_id_t;
+
+struct effect {
+  effect_id_t  id;
+  unsigned long  start_ms;
+  unsigned long  tick_ms;
+  unsigned long  tick;
+  unsigned long  prev_tick;
+  int            el1;        // element index 1
+  int            el2;        // element index 2
+  int            n1;         // general integer
+  int            n2;         // general integer
+};
 
 #define BLIGHTNESS_MAX       8
 
@@ -78,27 +90,23 @@ class NixieTube {
 
   void setup(int element_n, uint8_t *pin);
 
-  effect_type_t get_effect();
+  effect *get_effect();
   unsigned long calc_effect_tick(unsigned long cur_ms);
-  void effect_start(effect_type_t etype,
+  void effect_start(effect_id_t eid,
                     unsigned long start_ms, unsigned long tick_ms);
   void effect_end();
 
   void fadein_start(unsigned long start_ms, unsigned long ms, int element_i);
   void fadeout_start(unsigned long start_ms, unsigned long ms, int element_i);
-  void xfade_start(unsigned long start_ms, unsigned long ms, int el_in, int el_out);
+  void xfade_start(unsigned long start_ms, unsigned long ms,
+                   int el_in, int el_out);
+  void shuffle_start(unsigned long start_ms, unsigned long tick, int count,
+                     int element_i);
   
   void loop(unsigned long cur_msec);
 
  private:
-  effect_type_t _effect = EFFECT_NONE;
-  unsigned long _effect_start_ms;
-  unsigned long _effect_tick_ms;
-  unsigned long _effect_tick;        // ticks per _effect_tick_ms
-  unsigned long _effect_prev_tick;
-  int           _effect_el1;
-  int           _effect_el2;
-  int           _effect_n;
+  effect        _ef;
 }; // class NixieTube
 //============================================================================
 class NixieArray {
