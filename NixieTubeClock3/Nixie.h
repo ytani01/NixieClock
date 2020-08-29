@@ -15,23 +15,9 @@
  *       +- NixieElement element[NIXIE_COLON_DOT_N]
  *----------------------------------------------------------------------------
  */
-#ifndef NIXIE_ARRAY_H
-#define NIXIE_ARRAY_H
+#ifndef NIXIE_H
+#define NIXIE_H
 #include <Arduino.h>
-
-typedef unsigned char effect_id_t;
-
-struct effect {
-  effect_id_t  id;
-  unsigned long  start_ms;
-  unsigned long  tick_ms;
-  unsigned long  tick;
-  unsigned long  prev_tick;
-  int            el1;        // element index 1
-  int            el2;        // element index 2
-  int            n1;         // general integer
-  int            n2;         // general integer
-};
 
 #define BLIGHTNESS_MAX       8
 
@@ -47,6 +33,7 @@ struct effect {
 
 #define NIXIE_ELEMENT_N_MAX  (NIXIE_NUM_DIGIT_N > NIXIE_COLON_DOT_N ? NIXIE_NUM_DIGIT_N : NIXIE_COLON_DOT_N)
 
+typedef unsigned char effect_id_t;
 #define EFFECT_NONE          0
 #define EFFECT_FADEIN        1
 #define EFFECT_FADEOUT       2
@@ -79,7 +66,69 @@ class NixieElement {
   uint8_t _pin = 0;
   uint8_t _blightness = BLIGHTNESS_MAX;
   boolean _on = false;
+
 }; // class NixieElement
+//============================================================================
+class Effect {
+ public:
+  Effect(effect_id_t eid, NixieElement *element);
+  virtual void  start(unsigned long start_ms, unsigned long tick_ms);
+  virtual void  start(unsigned long start_ms, unsigned long tick_ms,
+                      int element);
+  virtual void  start(unsigned long start_ms, unsigned long tick_ms,
+                      int el1, int el2);
+  virtual void  loop(unsigned long cur_ms);
+  virtual void  end();
+
+  effect_id_t get_id();
+  boolean     is_active();
+  boolean     tick(unsigned long cur_ms);
+    
+ protected:
+  NixieElement *_Element;
+  boolean       _active    = false;
+  effect_id_t   _id        = EFFECT_NONE;
+  unsigned long _start_ms  = 0;
+  unsigned long _tick_ms   = 0;
+  unsigned long _tick      = 0;
+  unsigned long _prev_tick = 0;
+
+}; // class Effect
+//============================================================================
+class EffectFadeIn : public Effect {
+ public:
+  EffectFadeIn(NixieElement *element);
+  void start(unsigned long start_ms, unsigned long tick_ms, int element);
+  void loop(unsigned long cur_ms);
+
+ private:
+  int _el;
+
+}; // class EffectFadeIn
+//============================================================================
+class EffectFadeOut : public Effect {
+ public:
+  EffectFadeOut(NixieElement *element);
+  void start(unsigned long start_ms, unsigned long tick_ms, int element);
+  void loop(unsigned long cur_ms);
+
+ private:
+  int _el;
+
+}; // class EffectFadeOut
+//============================================================================
+class EffectXFade : public Effect {
+ public:
+  EffectXFade(NixieElement *element);
+  void start(unsigned long start_ms, unsigned long tick_ms,
+             int el_in, int el_out);
+  void loop(unsigned long cur_ms);
+
+ private:
+  int _el_in;
+  int _el_out;
+
+}; // class EffectXFade
 //============================================================================
 class NixieTube {
  public:
@@ -89,12 +138,9 @@ class NixieTube {
   NixieTube() {};
 
   void setup(int element_n, uint8_t *pin);
+  void loop(unsigned long cur_msec);
 
-  effect *get_effect();
-  unsigned long calc_effect_tick(unsigned long cur_ms);
-  void effect_start(effect_id_t eid,
-                    unsigned long start_ms, unsigned long tick_ms);
-  void effect_end();
+  Effect *init_effect(effect_id_t eid);
 
   void fadein_start(unsigned long start_ms, unsigned long ms, int element_i);
   void fadeout_start(unsigned long start_ms, unsigned long ms, int element_i);
@@ -102,11 +148,9 @@ class NixieTube {
                    int el_in, int el_out);
   void shuffle_start(unsigned long start_ms, unsigned long tick, int count,
                      int element_i);
-  
-  void loop(unsigned long cur_msec);
 
  private:
-  effect        _ef;
+  Effect *_ef;
 }; // class NixieTube
 //============================================================================
 class NixieArray {
@@ -128,7 +172,7 @@ class NixieArray {
   uint8_t    _pin_clk, _pin_stobe, _pin_data, _pin_blank;
 };
 //============================================================================
-#endif // NIXIE_ARRAY_H
+#endif // NIXIE_H
 
 // for emacs ..
 // Local Variables:

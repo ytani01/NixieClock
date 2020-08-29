@@ -47,6 +47,156 @@ boolean NixieElement::is_on() {
   return this->_on;
 }
 //============================================================================
+// class Effect
+//----------------------------------------------------------------------------
+Effect::Effect(effect_id_t eid, NixieElement *element) {
+  this->_id = eid;
+  this->_Element = element;
+}
+
+void Effect::start(unsigned long start_ms, unsigned long tick_ms) {
+  this->_start_ms = start_ms;
+  this->_tick_ms = tick_ms;
+  (void)this->tick(this->_start_ms);
+  this->_active = true;
+}
+void Effect::start(unsigned long start_ms, unsigned long tick_ms, int el) {
+  this->start(start_ms, tick_ms);
+}
+void Effect::start(unsigned long start_ms, unsigned long tick_ms,
+                   int el1, int el2) {
+  this->start(start_ms, tick_ms);
+}
+
+void Effect::loop(unsigned long cur_ms) {
+  if ( ! tick(cur_ms) ) {
+    return;
+  }
+}
+
+void Effect::end() {
+  Serial.println("Effect::end():_id=" + String(this->_id));
+  this->_active = false;
+} // Effect::end()
+
+effect_id_t Effect::get_id() {
+  return this->_id;
+} // Effect::get_id()
+
+boolean Effect::is_active() {
+  return this->_active;
+} // Effect::is_active()
+
+boolean Effect::tick(unsigned long cur_ms) {
+  if ( this->_tick_ms == 0 ) {
+    return false;
+  }
+  this->_prev_tick = this->_tick;
+  this->_tick = (cur_ms - this->_start_ms) / this->_tick_ms;
+  if ( this->_tick == this->_prev_tick ) {
+    return false;
+  }
+  return true;
+} // Effect::tick()
+//============================================================================
+// class EffectFadeIn
+//----------------------------------------------------------------------------
+EffectFadeIn::EffectFadeIn(NixieElement *element)
+: Effect::Effect(EFFECT_FADEIN, element) {
+}
+
+void EffectFadeIn::start(unsigned long start_ms,
+                    unsigned long tick_ms,
+                    int element) {
+  Effect::start(start_ms, tick_ms);
+
+  this->_el = element;
+  this->_Element[this->_el].set_blightness(0);
+} // EffectFadeIn::start()
+
+void EffectFadeIn::loop(unsigned long cur_ms) {
+  if ( ! this->tick(cur_ms) ) {
+    return;
+  }
+
+  NixieElement e = this->_Element[this->_el];
+  uint8_t bl = e.get_blightness();
+  if ( bl < BLIGHTNESS_MAX ) {
+    e.inc_blightness();
+  } else {
+    this->end();
+  }
+} // EffectFadeIn::loop()
+//============================================================================
+// class EffectFadeOut
+//----------------------------------------------------------------------------
+EffectFadeOut::EffectFadeOut(NixieElement *element)
+: Effect::Effect(EFFECT_FADEOUT, element) {
+}
+
+void EffectFadeOut::start(unsigned long start_ms, unsigned long tick_ms,
+                    int element) {
+  Effect::start(start_ms, tick_ms);
+
+  this->_el = element;
+  this->_Element[this->_el].set_blightness(0);
+}
+
+void EffectFadeOut::loop(unsigned long cur_ms) {
+  if ( ! this->tick(cur_ms) ) {
+    return;
+  }
+
+  NixieElement e = this->_Element[this->_el];
+  uint8_t bl = e.get_blightness();
+  if ( bl > 0 ) {
+    e.dec_blightness();
+  } else {
+    this->end();
+  }
+} // EffectFadeOut::loop()
+//============================================================================
+// class EffectXFade
+//----------------------------------------------------------------------------
+EffectXFade::EffectXFade(NixieElement *element)
+: Effect::Effect(EFFECT_XFADE, element) {
+}
+
+void EffectXFade::start(unsigned long start_ms, unsigned long tick_ms,
+                   int el_in, int el_out) {
+  Effect::start(start_ms, tick_ms);
+
+  this->_el_in  = el_in;
+  this->_el_out = el_out;
+  this->_Element[this->_el_in].set_blightness(0);
+  this->_Element[this->_el_out].set_blightness(BLIGHTNESS_MAX);
+} // EffectXFade::start()
+
+void EffectXFade::loop(unsigned long cur_ms) {
+  if ( ! this->tick(cur_ms) ) {
+    return;
+  }
+
+  NixieElement e_in  = this->_Element[this->_el_in];
+  NixieElement e_out = this->_Element[this->_el_out];
+  uint8_t bl_in  = e_in.get_blightness();
+  uint8_t bl_out = e_out.get_blightness();
+  int end_count = 0;
+  if ( bl_in < BLIGHTNESS_MAX ) {
+    e_in.inc_blightness();
+  } else {
+    end_count++;
+  }
+  if ( bl_out > 0 ) {
+    e_out.dec_blightness();
+  } else {
+    end_count++;
+  }
+  if ( end_count >= 2 ) {
+    this->end();
+  }
+} // EffectXFade::loop()
+//============================================================================
 // class NixieTube
 //----------------------------------------------------------------------------
 void NixieTube::setup(int element_n, uint8_t *pin) {
@@ -55,129 +205,60 @@ void NixieTube::setup(int element_n, uint8_t *pin) {
   for (int d=0; d < element_n; d++) {
     this->element[d].setup(pin[d]);
   } // for (d)
-}
-
-effect *NixieTube::get_effect() {
-  return &(this->_ef);
-}
-
-unsigned long NixieTube::calc_effect_tick(unsigned long cur_ms) {
-  if ( this->_ef.tick_ms == 0 ) {
-    return 0;
-  }
-  return (cur_ms - this->_ef.start_ms) / this->_ef.tick_ms;
-}
-
-void NixieTube::effect_start(effect_id_t eid,
-                             unsigned long start_ms, unsigned long tick_ms) {
-  this->_ef.id        = eid;
-  this->_ef.start_ms  = start_ms;
-  this->_ef.tick_ms   = tick_ms;
-  this->_ef.tick      = this->calc_effect_tick(this->_ef.start_ms);
-  this->_ef.prev_tick = this->_ef.tick;
-} // NixieTube::effect_start()
-
-void NixieTube::effect_end() {
-  Serial.println("NixieTube::effect_end():" + String(this->_ef.id));
-  this->_ef.id = EFFECT_NONE;
-} // NixieTube::effect_end()
-
-void NixieTube::fadein_start(unsigned long start_ms, unsigned long ms,
-                             int element_i) {
-  this->effect_start(EFFECT_FADEIN, start_ms, ms);
-  this->_ef.el1 = element_i;
-  this->element[this->_ef.el1].set_blightness(0);
-} // NixieTube::fadein_start()
-
-void NixieTube::fadeout_start(unsigned long start_ms, unsigned long ms,
-                             int element_i) {
-  this->effect_start(EFFECT_FADEOUT, start_ms, ms);
-  this->_ef.el1 = element_i;
-  this->element[this->_ef.el1].set_blightness(BLIGHTNESS_MAX);
-} // NixieTube::fadeout_start()
-
-void NixieTube::xfade_start(unsigned long start_ms, unsigned long ms,
-                            int el_in, int el_out) {
-  this->effect_start(EFFECT_XFADE, start_ms, ms);
-  this->_ef.el1 = el_in;
-  this->_ef.el2 = el_out;
-  this->element[this->_ef.el1].set_blightness(0);
-  this->element[this->_ef.el2].set_blightness(BLIGHTNESS_MAX);
-}
-
-void NixieTube::shuffle_start(unsigned long start_ms, unsigned long tick,
-                              int count, int element_i) {
-  this->effect_start(EFFECT_SHUFFLE, start_ms, tick);
-  this->_ef.n1 = count;
-  this->_ef.el1 = element_i;
-}
+  this->_ef = (Effect *)NULL;
+} // NixieTube::setup()
 
 void NixieTube::loop(unsigned long cur_ms) {
-  if ( this->_ef.id == EFFECT_NONE ) {
+  if ( this->_ef == (Effect *)NULL ) {
     return;
   }
-
-  this->_ef.prev_tick = this->_ef.tick;
-  this->_ef.tick      = this->calc_effect_tick(cur_ms);
-  if ( this->_ef.tick == this->_ef.prev_tick ) {
+  if ( ! this->_ef->is_active() ) {
+    delete this->_ef;
+    this->_ef = (Effect *)NULL;
     return;
   }
-
-  if ( this->_ef.id == EFFECT_FADEIN ) {
-    uint8_t bl = this->element[this->_ef.el1].get_blightness();
-    if ( bl < BLIGHTNESS_MAX ) {
-      this->element[this->_ef.el1].inc_blightness();
-    } else {
-      this->effect_end();
-    }
-    return;
-  } // FADEIN
-
-  if ( this->_ef.id == EFFECT_FADEOUT ) {
-    uint8_t bl = this->element[this->_ef.el1].get_blightness();
-    if ( bl > 0 ) {
-      this->element[this->_ef.el1].dec_blightness();
-    } else {
-      this->effect_end();
-    }
-    return;
-  } // FADEOUT
-
-  if ( this->_ef.id == EFFECT_XFADE ) {
-    uint8_t bl1 = this->element[this->_ef.el1].get_blightness();
-    uint8_t bl2 = this->element[this->_ef.el1].get_blightness();
-    int end_count = 0;
-
-    if ( bl1 < BLIGHTNESS_MAX ) {
-      this->element[this->_ef.el1].inc_blightness();
-    } else {
-      end_count++;
-    }
-    if ( bl2 > 0 ) {
-      this->element[this->_ef.el2].dec_blightness();
-    } else {
-      end_count++;
-    }
-    if ( end_count >= 2 ) {
-      this->effect_end();
-    }
-    return;
-  } // XFADE
-
-  if ( this->_ef.id == EFFECT_SHUFFLE ) {
-    for (int e=0; e < this->element_n; e++) {
-      this->element[e].set_blightness(0);
-    } // for(e)
-
-    if ( this->_ef.tick < this->_ef.n1 ) {
-      int e = random(this->element_n);
-      this->element[e].set_blightness(BLIGHTNESS_MAX);
-      return;
-    }
-
-    this->element[this->_ef.el1].set_blightness(BLIGHTNESS_MAX);
-  } // SHUFFLE
+  // Effect is active
+  this->_ef->loop(cur_ms);
 } // NixieTube::loop()
+
+Effect *NixieTube::init_effect(effect_id_t eid) {
+  if ( this->_ef != (Effect *)NULL ) {
+    if ( this->_ef->is_active() ) {
+      this->_ef->end();
+    }
+    delete this->_ef;
+  }
+
+  switch (eid) {
+  case EFFECT_FADEIN:   return new EffectFadeIn(this->element);
+  case EFFECT_FADEOUT:  return new EffectFadeOut(this->element);
+  case EFFECT_XFADE:    return new EffectXFade(this->element);
+  default:
+    Serial.println("ERROR: eid = " + String(eid));
+    return (Effect *)NULL;
+  }
+} // NixieTube::effect_start()
+
+void NixieTube::fadein_start(unsigned long start_ms,
+                             unsigned long tick_ms,
+                             int element) {
+  this->_ef = this->init_effect(EFFECT_FADEIN);
+  this->_ef->start(start_ms, tick_ms, element);
+} // NixieTube::fadein_start()
+
+void NixieTube::fadeout_start(unsigned long start_ms,
+                              unsigned long tick_ms,
+                              int element) {
+  this->_ef = this->init_effect(EFFECT_FADEOUT);
+  this->_ef->start(start_ms, tick_ms, element);
+} // NixieTube::fadeout_start()
+
+void NixieTube::xfade_start(unsigned long start_ms,
+                            unsigned long tick_ms,
+                            int el_in, int el_out) {
+  this->_ef = this->init_effect(EFFECT_XFADE);
+  this->_ef->start(start_ms, tick_ms, el_in, el_out);
+} // NixieTube::xfade_start()
 //============================================================================
 // class NixieArray
 //----------------------------------------------------------------------------
