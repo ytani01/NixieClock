@@ -109,7 +109,6 @@ void EffectFadeIn::start(unsigned long start_ms,
                     unsigned long tick_ms,
                     int element) {
   Effect::start(start_ms, tick_ms);
-  Serial.println("EffectFadeIn::start()");
 
   this->_el = element;
   this->_Element[this->_el].set_blightness(0);
@@ -198,6 +197,48 @@ void EffectXFade::loop(unsigned long cur_ms) {
   }
 } // EffectXFade::loop()
 //============================================================================
+// class EffectShuffle
+//----------------------------------------------------------------------------
+EffectShuffle::EffectShuffle(NixieElement *element)
+: Effect(EFFECT_SHUFFLE, element) {
+}
+
+void EffectShuffle::start(unsigned long start_ms, unsigned long tick_ms,
+                          int n, int element) {
+  Effect::start(start_ms, tick_ms);
+
+  this->_n = n;
+  this->_el = element;
+
+  for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
+    this->_Element[e].set_blightness(0);
+  }
+} // EffectShuffle::start()
+
+void EffectShuffle::loop(unsigned long cur_ms) {
+  static int el_random = 0;
+
+  if ( ! this->tick(cur_ms) ) {
+    return;
+  }
+
+  this->_Element[el_random].set_blightness(0);
+
+  if ( this->_tick >= this->_n ) {
+    this->end();
+    return;
+  }
+  
+  el_random = random(NIXIE_NUM_DIGIT_N);
+  this->_Element[el_random].set_blightness(BLIGHTNESS_MAX);
+} // EffectShuffle::loop()
+
+void EffectShuffle::end() {
+  Effect::end();
+
+  this->_Element[this->_el].set_blightness(BLIGHTNESS_MAX);
+} // EffectShuffle::end()
+//============================================================================
 // class NixieTube
 //----------------------------------------------------------------------------
 void NixieTube::setup(int element_n, uint8_t *pin) {
@@ -234,6 +275,7 @@ Effect *NixieTube::init_effect(effect_id_t eid) {
   case EFFECT_FADEIN:   return new EffectFadeIn(this->element);
   case EFFECT_FADEOUT:  return new EffectFadeOut(this->element);
   case EFFECT_XFADE:    return new EffectXFade(this->element);
+  case EFFECT_SHUFFLE:  return new EffectShuffle(this->element);
   default:
     Serial.println("ERROR: eid = " + String(eid));
     return (Effect *)NULL;
@@ -260,6 +302,12 @@ void NixieTube::xfade_start(unsigned long start_ms,
   this->_ef = this->init_effect(EFFECT_XFADE);
   this->_ef->start(start_ms, tick_ms, el_in, el_out);
 } // NixieTube::xfade_start()
+
+void NixieTube::shuffle_start(unsigned long start_ms, unsigned long tick_ms,
+                              int n, int el) {
+  this->_ef = this->init_effect(EFFECT_SHUFFLE);
+  this->_ef->start(start_ms, tick_ms, n, el);
+} // NixieTube::shuffle_start()
 //============================================================================
 // class NixieArray
 //----------------------------------------------------------------------------

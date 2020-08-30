@@ -64,11 +64,9 @@ void ModeTest1::loop(unsigned long cur_ms) {
   this->_nxa->num[num].xfade_start(cur_ms, this->FADE_TICK_MS,
                                    this->_digit, this->_prev_digit);
 
-  /*
   num = 4;
   this->_nxa->num[num].shuffle_start(cur_ms, this->SHUFFLE_TICK_MS,
                                      this->SHUFFLE_COUNT, this->_digit);
-  */
   // -------------------------------------------------------------------------
   // colon
   if (this->_digit % 2 == 0) {

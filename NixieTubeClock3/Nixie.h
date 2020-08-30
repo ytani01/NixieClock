@@ -86,6 +86,7 @@ class Effect {
     
  protected:
   NixieElement *_Element;
+  int           _element_n;
   boolean       _active    = false;
   effect_id_t   _id        = EFFECT_NONE;
   unsigned long _start_ms  = 0;
@@ -130,6 +131,19 @@ class EffectXFade : public Effect {
 
 }; // class EffectXFade
 //============================================================================
+class EffectShuffle : public Effect {
+ public:
+  EffectShuffle(NixieElement *element);
+  void start(unsigned long start_ms, unsigned long tick_ms, int n,
+             int element);
+  void loop(unsigned long cur_ms);
+  void end();
+
+ private:
+  int   _el;
+  int   _n;
+}; // class EffectShuffle
+//============================================================================
 class NixieTube {
  public:
   int           element_n;
@@ -146,7 +160,7 @@ class NixieTube {
   void fadeout_start(unsigned long start_ms, unsigned long ms, int element_i);
   void xfade_start(unsigned long start_ms, unsigned long ms,
                    int el_in, int el_out);
-  void shuffle_start(unsigned long start_ms, unsigned long tick, int count,
+  void shuffle_start(unsigned long start_ms, unsigned long tick, int n,
                      int element_i);
 
  private:
