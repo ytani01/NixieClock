@@ -72,10 +72,10 @@ void Effect::loop(unsigned long cur_ms) {
   if ( ! tick(cur_ms) ) {
     return;
   }
+  Serial.println("Effect::loop()");
 }
 
 void Effect::end() {
-  Serial.println("Effect::end():_id=" + String(this->_id));
   this->_active = false;
 } // Effect::end()
 
@@ -109,6 +109,7 @@ void EffectFadeIn::start(unsigned long start_ms,
                     unsigned long tick_ms,
                     int element) {
   Effect::start(start_ms, tick_ms);
+  Serial.println("EffectFadeIn::start()");
 
   this->_el = element;
   this->_Element[this->_el].set_blightness(0);
@@ -119,10 +120,10 @@ void EffectFadeIn::loop(unsigned long cur_ms) {
     return;
   }
 
-  NixieElement e = this->_Element[this->_el];
-  uint8_t bl = e.get_blightness();
+  NixieElement *e = &(this->_Element[this->_el]); // 重要！ポインタ渡し
+  uint8_t bl = e->get_blightness();
   if ( bl < BLIGHTNESS_MAX ) {
-    e.inc_blightness();
+    e->inc_blightness();
   } else {
     this->end();
   }
@@ -139,7 +140,7 @@ void EffectFadeOut::start(unsigned long start_ms, unsigned long tick_ms,
   Effect::start(start_ms, tick_ms);
 
   this->_el = element;
-  this->_Element[this->_el].set_blightness(0);
+  this->_Element[this->_el].set_blightness(BLIGHTNESS_MAX);
 }
 
 void EffectFadeOut::loop(unsigned long cur_ms) {
@@ -147,10 +148,10 @@ void EffectFadeOut::loop(unsigned long cur_ms) {
     return;
   }
 
-  NixieElement e = this->_Element[this->_el];
-  uint8_t bl = e.get_blightness();
+  NixieElement *e = &(this->_Element[this->_el]);
+  uint8_t bl = e->get_blightness();
   if ( bl > 0 ) {
-    e.dec_blightness();
+    e->dec_blightness();
   } else {
     this->end();
   }
@@ -163,7 +164,7 @@ EffectXFade::EffectXFade(NixieElement *element)
 }
 
 void EffectXFade::start(unsigned long start_ms, unsigned long tick_ms,
-                   int el_in, int el_out) {
+                        int el_in, int el_out) {
   Effect::start(start_ms, tick_ms);
 
   this->_el_in  = el_in;
@@ -177,18 +178,18 @@ void EffectXFade::loop(unsigned long cur_ms) {
     return;
   }
 
-  NixieElement e_in  = this->_Element[this->_el_in];
-  NixieElement e_out = this->_Element[this->_el_out];
-  uint8_t bl_in  = e_in.get_blightness();
-  uint8_t bl_out = e_out.get_blightness();
+  NixieElement *e_in  = &(this->_Element[this->_el_in]);
+  NixieElement *e_out = &(this->_Element[this->_el_out]);
+  uint8_t bl_in  = e_in->get_blightness();
+  uint8_t bl_out = e_out->get_blightness();
   int end_count = 0;
   if ( bl_in < BLIGHTNESS_MAX ) {
-    e_in.inc_blightness();
+    e_in->inc_blightness();
   } else {
     end_count++;
   }
   if ( bl_out > 0 ) {
-    e_out.dec_blightness();
+    e_out->dec_blightness();
   } else {
     end_count++;
   }

@@ -89,7 +89,7 @@ class Effect {
   boolean       _active    = false;
   effect_id_t   _id        = EFFECT_NONE;
   unsigned long _start_ms  = 0;
-  unsigned long _tick_ms   = 0;
+  unsigned long _tick_ms   = 1000;
   unsigned long _tick      = 0;
   unsigned long _prev_tick = 0;
 

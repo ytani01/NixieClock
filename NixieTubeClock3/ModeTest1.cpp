@@ -43,6 +43,7 @@ void ModeTest1::loop(unsigned long cur_ms) {
   if ( ! this->tick(cur_ms) ) {
     return;
   }
+  Serial.println("digit=" + String(this->_digit));
   // -------------------------------------------------------------------------
   // num
   int num = 0;
