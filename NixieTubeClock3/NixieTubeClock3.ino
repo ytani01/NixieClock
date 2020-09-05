@@ -5,6 +5,7 @@
 #include "Button.h"
 #include "ModeBase.h"
 #include "ModeTest1.h"
+#include "ModeTest2.h"
 
 #define LOOP_DELAY_US       1 // micro seconds
 #define DEBOUNCE          200 // msec
@@ -53,9 +54,11 @@ int curDigit = 0;
 //----------------------------------------------------------------------------
 #define MODE_NONE -1
 #define MODE_TEST1 0
+#define MODE_TEST2 1
 ModeTest1 modeT1;
+ModeTest2 modeT2;
 
-ModeBase *Mode[] = {&modeT1};
+ModeBase *Mode[] = {&modeT1, &modeT2};
 
 static unsigned long MODE_N = sizeof(Mode) / sizeof(ModeBase *);
 
@@ -73,6 +76,11 @@ void btn_handler() {
 
   for (int b=0; b < BTN_N; b++) {
     if ( btnObj[b]->get() ) {
+      if ( b == 0 && btnObj[b]->get_click_count() >= 2 ) {
+        // Change major mode
+        curMode = (curMode + 1) % MODE_N;
+        Serial.println("curMode=" + String(curMode));
+      }
       btnObj[b]->print();
       Mode[curMode]->btn_intr(curMsec, btnObj[b]);
     }

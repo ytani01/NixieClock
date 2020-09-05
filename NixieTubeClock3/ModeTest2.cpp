@@ -1,22 +1,22 @@
 /*
  * (c) 2020 Yoichi Tanibayashi
  */
-#include "ModeTest1.h"
+#include "ModeTest2.h"
 
-void ModeTest1::setup(NixieArray *nxa) {
+void ModeTest2::setup(NixieArray *nxa) {
   ModeBase::setup(nxa);
 
-  this->_name = "ModeTest1";
-  this->_tick_ms = ModeTest1::TICK_MS;
+  this->_name = "ModeTest2";
+  this->_tick_ms = ModeTest2::TICK_MS;
 
-  String msg = "ModeTest1::setup(): ";
+  String msg = "ModeTest2::setup(): ";
   msg += "_name = " + this->_name;
   msg += ", ";
   msg += "_tick_ms = " + this->_tick_ms;
   Serial.println(msg);
 }
 
-void ModeTest1::init(unsigned long start_ms) {
+void ModeTest2::init(unsigned long start_ms) {
   ModeBase::init(start_ms);
 
   this->_digit = 0;
@@ -39,7 +39,7 @@ void ModeTest1::init(unsigned long start_ms) {
   } // for (colon)
 }
 
-void ModeTest1::loop(unsigned long cur_ms) {
+void ModeTest2::loop(unsigned long cur_ms) {
   if ( ! this->tick(cur_ms) ) {
     return;
   }
@@ -91,12 +91,11 @@ void ModeTest1::loop(unsigned long cur_ms) {
   // -------------------------------------------------------------------------
   this->_prev_digit = this->_digit;
   this->_digit = (this->_digit + 1) % 10;
-} // ModeTest1::loop()
+} // ModeTest2::loop()
 
-void ModeTest1::btn_intr(unsigned long cur_ms, Button *btn) {
-  Serial.println("ModeTest1::btn_intr()");
-
-} // ModeTest1::btn_intr()
+void ModeTest2::btn_intr(unsigned long cur_ms, Button *btn) {
+  Serial.println("ModeTest2::btn_intr()");
+} // ModeTest2::btn_intr()
 
 // for emacs
 // Local Variables:
