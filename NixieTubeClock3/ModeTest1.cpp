@@ -3,11 +3,8 @@
  */
 #include "ModeTest1.h"
 
-void ModeTest1::setup(NixieArray *nxa) {
-  ModeBase::setup(nxa);
-
-  this->_name = "ModeTest1";
-  this->_tick_ms = ModeTest1::TICK_MS;
+ModeTest1::ModeTest1(NixieArray *nxa)
+:  ModeBase::ModeBase(nxa, "ModeTest1", ModeTest1::TICK_MS) {
 
   String msg = "ModeTest1::setup(): ";
   msg += "_name = " + this->_name;
@@ -70,23 +67,25 @@ void ModeTest1::loop(unsigned long cur_ms) {
   // -------------------------------------------------------------------------
   // colon
   if (this->_digit % 2 == 0) {
+    Serial.println("COLON:ON");
     this->_nxa->colon[NIXIE_COLON_L].element[NIXIE_COLON_DOT_UP].
       set_blightness(BLIGHTNESS_MAX);
     this->_nxa->colon[NIXIE_COLON_L].element[NIXIE_COLON_DOT_DOWN].
-      set_blightness(BLIGHTNESS_MAX);
+      set_blightness(0);
     this->_nxa->colon[NIXIE_COLON_R].element[NIXIE_COLON_DOT_UP].
       set_blightness(0);
     this->_nxa->colon[NIXIE_COLON_R].element[NIXIE_COLON_DOT_DOWN].
-      set_blightness(0);
+      set_blightness(BLIGHTNESS_MAX);
   } else {
+    Serial.println("COLON:OFF");
     this->_nxa->colon[NIXIE_COLON_L].element[NIXIE_COLON_DOT_UP].
       set_blightness(0);
     this->_nxa->colon[NIXIE_COLON_L].element[NIXIE_COLON_DOT_DOWN].
-      set_blightness(0);
+      set_blightness(BLIGHTNESS_MAX);
     this->_nxa->colon[NIXIE_COLON_R].element[NIXIE_COLON_DOT_UP].
       set_blightness(BLIGHTNESS_MAX);
     this->_nxa->colon[NIXIE_COLON_R].element[NIXIE_COLON_DOT_DOWN].
-      set_blightness(BLIGHTNESS_MAX);
+      set_blightness(0);
   }
   // -------------------------------------------------------------------------
   this->_prev_digit = this->_digit;

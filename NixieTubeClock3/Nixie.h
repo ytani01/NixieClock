@@ -155,6 +155,7 @@ class NixieTube {
   void loop(unsigned long cur_msec);
 
   Effect *init_effect(effect_id_t eid);
+  void end_effect();
 
   void fadein_start(unsigned long start_ms, unsigned long ms, int element_i);
   void fadeout_start(unsigned long start_ms, unsigned long ms, int element_i);

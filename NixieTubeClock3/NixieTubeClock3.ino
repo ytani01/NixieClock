@@ -22,12 +22,12 @@
 
 #define PIN_LED            27
 
-#define PIN_BTN1           33
-#define PIN_BTN2           34
-#define PIN_BTN3           35
+#define PIN_BTN0           33
+#define PIN_BTN1           34
+#define PIN_BTN2           35
 #define BTN_N               3
 //============================================================================
-uint8_t pinsIn[] = {PIN_BTN1, PIN_BTN2, PIN_BTN3};
+uint8_t pinsIn[] = {PIN_BTN0, PIN_BTN1, PIN_BTN2};
 
 uint8_t nixiePins[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N] =
   {{ 9,  0,  1,  2,  3,  4,  5,  6,  7,  8},
@@ -42,8 +42,8 @@ uint8_t colonPins[NIXIE_COLON_N][NIXIE_COLON_DOT_N] =
    {PIN_COLON_L_TOP, PIN_COLON_L_BOTTOM} };
 //----------------------------------------------------------------------------
 NixieArray *nixieArray;
-Button btnObj1, btnObj2, btnObj3;
-Button *btnObj[] = {&btnObj1, &btnObj2, &btnObj3};
+Button btnObj0, btnObj1, btnObj2;
+Button *btnObj[] = {&btnObj0, &btnObj1, &btnObj2};
 //----------------------------------------------------------------------------
 unsigned long loopCount  = 0;
 unsigned long curMsec    = 0; // msec
@@ -55,10 +55,10 @@ int curDigit = 0;
 #define MODE_NONE -1
 #define MODE_TEST1 0
 #define MODE_TEST2 1
-ModeTest1 modeT1;
-ModeTest2 modeT2;
+ModeTest1 *modeT1;
+ModeTest2 *modeT2;
 
-ModeBase *Mode[] = {&modeT1, &modeT2};
+ModeBase *Mode[] = {modeT1, modeT2};
 
 static unsigned long MODE_N = sizeof(Mode) / sizeof(ModeBase *);
 
@@ -77,6 +77,14 @@ void btn_handler() {
   for (int b=0; b < BTN_N; b++) {
     if ( btnObj[b]->get() ) {
       if ( b == 0 && btnObj[b]->get_click_count() >= 2 ) {
+        // XXX stop all effects
+        for (int t=0; t < NIXIE_NUM_N; t++) {
+          nixieArray->num[t].end_effect();
+        } // for(t)
+        for (int t=0; t < NIXIE_COLON_N; t++) {
+          nixieArray->colon[t].end_effect();
+        } // for(t)
+
         // Change major mode
         curMode = (curMode + 1) % MODE_N;
         Serial.println("curMode=" + String(curMode));
@@ -99,26 +107,25 @@ void setup() {
                               nixiePins, colonPins);
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // 各モードの初期化
-  for (int m=0; m < MODE_N; m++) {
-    Mode[m]->setup(nixieArray);
-  }
+  Mode[0] = new ModeTest1(nixieArray);
+  Mode[1] = new ModeTest2(nixieArray);
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // ボタンの初期化
+  btnObj0.setup(PIN_BTN0, "BTN0");
   btnObj1.setup(PIN_BTN1, "BTN1");
   btnObj2.setup(PIN_BTN2, "BTN2");
-  btnObj3.setup(PIN_BTN3, "BTN3");
   //-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+  uint8_t intr_pin0 = digitalPinToInterrupt(PIN_BTN0);
   uint8_t intr_pin1 = digitalPinToInterrupt(PIN_BTN1);
   uint8_t intr_pin2 = digitalPinToInterrupt(PIN_BTN2);
-  uint8_t intr_pin3 = digitalPinToInterrupt(PIN_BTN3);
   Serial.println("digitalPinToInterrupt:");
+  Serial.println(" " + String(PIN_BTN0) + " --> " + String(intr_pin0));
   Serial.println(" " + String(PIN_BTN1) + " --> " + String(intr_pin1));
   Serial.println(" " + String(PIN_BTN2) + " --> " + String(intr_pin2));
-  Serial.println(" " + String(PIN_BTN3) + " --> " + String(intr_pin3));
 
+  attachInterrupt(intr_pin0, btn_handler, CHANGE);
   attachInterrupt(intr_pin1, btn_handler, CHANGE);
   attachInterrupt(intr_pin2, btn_handler, CHANGE);
-  attachInterrupt(intr_pin3, btn_handler, CHANGE);
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // 時間
   prevMsec = millis();
@@ -144,6 +151,10 @@ void loop() {
   for (int b=0; b < BTN_N; b++) {
     if ( btnObj[b]->get() ) {
       btnObj[b]->print();
+      if ( b == 0 && btnObj[b]->get_click_count() >= 2 ) {
+        curMode = (curMode + 1) % MODE_N;
+        Serial.println("curMode=" + String(curMode));
+      }
       Mode[curMode]->btn_intr(curMsec, btnObj[b]);
     }
   }

@@ -3,6 +3,18 @@
  */
 #include "ModeBase.h"
 
+ModeBase::ModeBase(NixieArray *nxa, String name, unsigned long tick_ms) {
+  this->_nxa = nxa;
+  this->_name = name;
+  this->_tick_ms = tick_ms;
+
+  String msg = "ModeBase::setup(): ";
+  msg += "_name = " + this->_name;
+  msg += ", ";
+  msg += "_tick_ms = " + this->_tick_ms;
+  Serial.println(msg);
+}
+
 boolean ModeBase::tick(unsigned long cur_ms) {
   if ( this->_tick_ms == 0 ) {
     Serial.println("!? _tick_ms=" + String(this->_tick_ms));
@@ -15,19 +27,6 @@ boolean ModeBase::tick(unsigned long cur_ms) {
   }
   return true;
 } // ModeBase::tick()
-
-void ModeBase::setup(NixieArray *nxa) {
-  this->_nxa = nxa;
-
-  this->_name = "ModeBase";
-  this->_tick_ms = ModeBase::TICK_MS;
-
-  String msg = "ModeBase::setup(): ";
-  msg += "_name = " + this->_name;
-  msg += ", ";
-  msg += "_tick_ms = " + this->_tick_ms;
-  Serial.println(msg);
-}
 
 void ModeBase::init(unsigned long start_ms) {
   this->_start_ms = start_ms;

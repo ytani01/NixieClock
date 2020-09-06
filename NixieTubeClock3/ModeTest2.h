@@ -12,14 +12,14 @@ class ModeTest2 : public ModeBase {
   static const unsigned long SHUFFLE_TICK_MS = 10; // ms
   static const unsigned long SHUFFLE_COUNT = 60;
   
-  void setup(NixieArray *nxa);
+  ModeTest2(NixieArray *nxa);
   void init(unsigned long start_ms);
   void loop(unsigned long cur_ms);
   void btn_intr(unsigned long cur_ms, Button *btn);
 
  private:
-  int _digit;
-  int _prev_digit;
+  int *_digit;
+  int _digit_n;
 };
 #endif // MODE_TEST2_H
 

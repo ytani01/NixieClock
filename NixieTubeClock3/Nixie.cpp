@@ -269,6 +269,7 @@ Effect *NixieTube::init_effect(effect_id_t eid) {
       this->_ef->end();
     }
     delete this->_ef;
+    this->_ef = (Effect *)NULL;
   }
 
   switch (eid) {
@@ -280,7 +281,18 @@ Effect *NixieTube::init_effect(effect_id_t eid) {
     Serial.println("ERROR: eid = " + String(eid));
     return (Effect *)NULL;
   }
-} // NixieTube::effect_start()
+} // NixieTube::init_effect()
+
+void NixieTube::end_effect() {
+  if ( this->_ef == (Effect *)NULL ) {
+    return;
+  }
+  if ( this->_ef->is_active() ) {
+    this->_ef->end();
+  }
+  delete this->_ef;
+  this->_ef = (Effect *)NULL;
+} // NixieTube::end_effect()
 
 void NixieTube::fadein_start(unsigned long start_ms,
                              unsigned long tick_ms,
@@ -350,6 +362,9 @@ void NixieArray::loop(unsigned long cur_ms) {
 void NixieArray::set_onoff(unsigned long cur_ms) {
   uint8_t timing = cur_ms % BLIGHTNESS_MAX;
 
+  //Serial.println("timing=" + String(timing));
+
+  // 数字部
   for (int t=0; t < NIXIE_NUM_N; t++) {
     for (int e=0; e < this->num[t].element_n; e++) {
       this->num[t].element[e].off();
@@ -359,11 +374,12 @@ void NixieArray::set_onoff(unsigned long cur_ms) {
     } // for(e)
   } // for(t)
 
+  // colorn部
   for (int t=0; t < NIXIE_COLON_N; t++) {
     for (int e=0; e < this->colon[t].element_n; e++) {
-      this->num[t].element[e].off();
-      if (this->num[t].element[e].get_blightness() > timing) {
-        this->num[t].element[e].on();
+      this->colon[t].element[e].off();
+      if (this->colon[t].element[e].get_blightness() > timing) {
+        this->colon[t].element[e].on();
       }
     } // for(e)
   } // for(t)
@@ -413,12 +429,10 @@ void NixieArray::display(unsigned long cur_ms) {
   for (int c=0; c < NIXIE_COLON_N; c++) {
     for (int d=0; d < NIXIE_COLON_DOT_N; d++) {
       uint8_t pin = this->colon[c].element[d].get_pin();
-
-      //Serial.print("pin[" + String(pin) + "]:");
       if ( this->colon[c].element[d].is_on() ) {
-        digitalWrite(pin, HIGH);
+        digitalWrite(pin, LOW);  // LOW  --> ON !
       } else {
-        digitalWrite(pin, LOW);
+        digitalWrite(pin, HIGH); // HIGH --> OFF !
       }
     } // for(d)
   } // for(c)
