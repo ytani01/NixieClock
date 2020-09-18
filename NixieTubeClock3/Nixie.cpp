@@ -72,10 +72,10 @@ void Effect::loop(unsigned long cur_ms) {
   if ( ! tick(cur_ms) ) {
     return;
   }
+  Serial.println("Effect::loop()");
 }
 
 void Effect::end() {
-  Serial.println("Effect::end():_id=" + String(this->_id));
   this->_active = false;
 } // Effect::end()
 
@@ -119,10 +119,10 @@ void EffectFadeIn::loop(unsigned long cur_ms) {
     return;
   }
 
-  NixieElement e = this->_Element[this->_el];
-  uint8_t bl = e.get_blightness();
+  NixieElement *e = &(this->_Element[this->_el]); // 重要！ポインタ渡し
+  uint8_t bl = e->get_blightness();
   if ( bl < BLIGHTNESS_MAX ) {
-    e.inc_blightness();
+    e->inc_blightness();
   } else {
     this->end();
   }
@@ -139,7 +139,7 @@ void EffectFadeOut::start(unsigned long start_ms, unsigned long tick_ms,
   Effect::start(start_ms, tick_ms);
 
   this->_el = element;
-  this->_Element[this->_el].set_blightness(0);
+  this->_Element[this->_el].set_blightness(BLIGHTNESS_MAX);
 }
 
 void EffectFadeOut::loop(unsigned long cur_ms) {
@@ -147,10 +147,10 @@ void EffectFadeOut::loop(unsigned long cur_ms) {
     return;
   }
 
-  NixieElement e = this->_Element[this->_el];
-  uint8_t bl = e.get_blightness();
+  NixieElement *e = &(this->_Element[this->_el]);
+  uint8_t bl = e->get_blightness();
   if ( bl > 0 ) {
-    e.dec_blightness();
+    e->dec_blightness();
   } else {
     this->end();
   }
@@ -163,7 +163,7 @@ EffectXFade::EffectXFade(NixieElement *element)
 }
 
 void EffectXFade::start(unsigned long start_ms, unsigned long tick_ms,
-                   int el_in, int el_out) {
+                        int el_in, int el_out) {
   Effect::start(start_ms, tick_ms);
 
   this->_el_in  = el_in;
@@ -177,18 +177,18 @@ void EffectXFade::loop(unsigned long cur_ms) {
     return;
   }
 
-  NixieElement e_in  = this->_Element[this->_el_in];
-  NixieElement e_out = this->_Element[this->_el_out];
-  uint8_t bl_in  = e_in.get_blightness();
-  uint8_t bl_out = e_out.get_blightness();
+  NixieElement *e_in  = &(this->_Element[this->_el_in]);
+  NixieElement *e_out = &(this->_Element[this->_el_out]);
+  uint8_t bl_in  = e_in->get_blightness();
+  uint8_t bl_out = e_out->get_blightness();
   int end_count = 0;
   if ( bl_in < BLIGHTNESS_MAX ) {
-    e_in.inc_blightness();
+    e_in->inc_blightness();
   } else {
     end_count++;
   }
   if ( bl_out > 0 ) {
-    e_out.dec_blightness();
+    e_out->dec_blightness();
   } else {
     end_count++;
   }
@@ -196,6 +196,48 @@ void EffectXFade::loop(unsigned long cur_ms) {
     this->end();
   }
 } // EffectXFade::loop()
+//============================================================================
+// class EffectShuffle
+//----------------------------------------------------------------------------
+EffectShuffle::EffectShuffle(NixieElement *element)
+: Effect(EFFECT_SHUFFLE, element) {
+}
+
+void EffectShuffle::start(unsigned long start_ms, unsigned long tick_ms,
+                          int n, int element) {
+  Effect::start(start_ms, tick_ms);
+
+  this->_n = n;
+  this->_el = element;
+
+  for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
+    this->_Element[e].set_blightness(0);
+  }
+} // EffectShuffle::start()
+
+void EffectShuffle::loop(unsigned long cur_ms) {
+  static int el_random = 0;
+
+  if ( ! this->tick(cur_ms) ) {
+    return;
+  }
+
+  this->_Element[el_random].set_blightness(0);
+
+  if ( this->_tick >= this->_n ) {
+    this->end();
+    return;
+  }
+  
+  el_random = random(NIXIE_NUM_DIGIT_N);
+  this->_Element[el_random].set_blightness(BLIGHTNESS_MAX);
+} // EffectShuffle::loop()
+
+void EffectShuffle::end() {
+  Effect::end();
+
+  this->_Element[this->_el].set_blightness(BLIGHTNESS_MAX);
+} // EffectShuffle::end()
 //============================================================================
 // class NixieTube
 //----------------------------------------------------------------------------
@@ -227,17 +269,30 @@ Effect *NixieTube::init_effect(effect_id_t eid) {
       this->_ef->end();
     }
     delete this->_ef;
+    this->_ef = (Effect *)NULL;
   }
 
   switch (eid) {
   case EFFECT_FADEIN:   return new EffectFadeIn(this->element);
   case EFFECT_FADEOUT:  return new EffectFadeOut(this->element);
   case EFFECT_XFADE:    return new EffectXFade(this->element);
+  case EFFECT_SHUFFLE:  return new EffectShuffle(this->element);
   default:
     Serial.println("ERROR: eid = " + String(eid));
     return (Effect *)NULL;
   }
-} // NixieTube::effect_start()
+} // NixieTube::init_effect()
+
+void NixieTube::end_effect() {
+  if ( this->_ef == (Effect *)NULL ) {
+    return;
+  }
+  if ( this->_ef->is_active() ) {
+    this->_ef->end();
+  }
+  delete this->_ef;
+  this->_ef = (Effect *)NULL;
+} // NixieTube::end_effect()
 
 void NixieTube::fadein_start(unsigned long start_ms,
                              unsigned long tick_ms,
@@ -259,6 +314,12 @@ void NixieTube::xfade_start(unsigned long start_ms,
   this->_ef = this->init_effect(EFFECT_XFADE);
   this->_ef->start(start_ms, tick_ms, el_in, el_out);
 } // NixieTube::xfade_start()
+
+void NixieTube::shuffle_start(unsigned long start_ms, unsigned long tick_ms,
+                              int n, int el) {
+  this->_ef = this->init_effect(EFFECT_SHUFFLE);
+  this->_ef->start(start_ms, tick_ms, n, el);
+} // NixieTube::shuffle_start()
 //============================================================================
 // class NixieArray
 //----------------------------------------------------------------------------
@@ -301,6 +362,9 @@ void NixieArray::loop(unsigned long cur_ms) {
 void NixieArray::set_onoff(unsigned long cur_ms) {
   uint8_t timing = cur_ms % BLIGHTNESS_MAX;
 
+  //Serial.println("timing=" + String(timing));
+
+  // 数字部
   for (int t=0; t < NIXIE_NUM_N; t++) {
     for (int e=0; e < this->num[t].element_n; e++) {
       this->num[t].element[e].off();
@@ -310,11 +374,12 @@ void NixieArray::set_onoff(unsigned long cur_ms) {
     } // for(e)
   } // for(t)
 
+  // colorn部
   for (int t=0; t < NIXIE_COLON_N; t++) {
     for (int e=0; e < this->colon[t].element_n; e++) {
-      this->num[t].element[e].off();
-      if (this->num[t].element[e].get_blightness() > timing) {
-        this->num[t].element[e].on();
+      this->colon[t].element[e].off();
+      if (this->colon[t].element[e].get_blightness() > timing) {
+        this->colon[t].element[e].on();
       }
     } // for(e)
   } // for(t)
@@ -364,12 +429,10 @@ void NixieArray::display(unsigned long cur_ms) {
   for (int c=0; c < NIXIE_COLON_N; c++) {
     for (int d=0; d < NIXIE_COLON_DOT_N; d++) {
       uint8_t pin = this->colon[c].element[d].get_pin();
-
-      //Serial.print("pin[" + String(pin) + "]:");
       if ( this->colon[c].element[d].is_on() ) {
-        digitalWrite(pin, HIGH);
+        digitalWrite(pin, LOW);  // LOW  --> ON !
       } else {
-        digitalWrite(pin, LOW);
+        digitalWrite(pin, HIGH); // HIGH --> OFF !
       }
     } // for(d)
   } // for(c)
