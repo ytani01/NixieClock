@@ -3,13 +3,11 @@
  */
 #include "ModeTest1.h"
 
-void ModeTest1::setup(NixieArray *nxa) {
-  ModeBase::setup(nxa);
-
+ModeTest1::ModeTest1(NixieArray *nxa) : ModeBase(nxa) {
   this->_name = "ModeTest1";
   this->_tick_ms = ModeTest1::TICK_MS;
 
-  String msg = "ModeTest1::setup(): ";
+  String msg = "ModeTest1(): ";
   msg += "_name = " + this->_name;
   msg += ", ";
   msg += "_tick_ms = " + this->_tick_ms;

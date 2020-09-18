@@ -3,8 +3,7 @@
  */
 #include "Button.h"
 
-// public methods
-void Button::setup(uint8_t pin, String name)
+Button::Button(uint8_t pin, String name)
 {
   this->_pin               = pin;
   this->_name              = name;
@@ -21,7 +20,7 @@ void Button::setup(uint8_t pin, String name)
   this->_is_enabled        = true;
 
   pinMode(this->_pin, INPUT_PULLUP);
-}
+} // Button::Button()
 /*
  * return:
  *	true	changed
@@ -104,7 +103,6 @@ void Button::disable()
 {
   this->_is_enabled = false;
 }
-
 boolean Button::is_enabled()
 {
   return this->_is_enabled;

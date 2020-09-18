@@ -3,26 +3,13 @@
  */
 #include "ModeBase.h"
 
-boolean ModeBase::tick(unsigned long cur_ms) {
-  if ( this->_tick_ms == 0 ) {
-    Serial.println("!? _tick_ms=" + String(this->_tick_ms));
-    return false;
-  }
-  this->_prev_tick = this->_tick;
-  this->_tick = (cur_ms - this->_start_ms) / this->_tick_ms;
-  if ( this->_tick == this->_prev_tick ) {
-    return false;
-  }
-  return true;
-} // ModeBase::tick()
-
-void ModeBase::setup(NixieArray *nxa) {
+ModeBase::ModeBase(NixieArray *nxa) {
   this->_nxa = nxa;
 
   this->_name = "ModeBase";
   this->_tick_ms = ModeBase::TICK_MS;
 
-  String msg = "ModeBase::setup(): ";
+  String msg = "ModeBase(): ";
   msg += "_name = " + this->_name;
   msg += ", ";
   msg += "_tick_ms = " + this->_tick_ms;
@@ -48,6 +35,19 @@ void ModeBase::loop(unsigned long cur_ms) {
 void ModeBase::btn_intr(unsigned long cur_ms, Button *btn) {
   Serial.println("ModeBase::btn_intr()");
 } // ModeBase::btn_intr()
+
+boolean ModeBase::tick(unsigned long cur_ms) {
+  if ( this->_tick_ms == 0 ) {
+    Serial.println("!? _tick_ms=" + String(this->_tick_ms));
+    return false;
+  }
+  this->_prev_tick = this->_tick;
+  this->_tick = (cur_ms - this->_start_ms) / this->_tick_ms;
+  if ( this->_tick == this->_prev_tick ) {
+    return false;
+  }
+  return true;
+} // ModeBase::tick()
 
 // for emacs
 // Local Variables:

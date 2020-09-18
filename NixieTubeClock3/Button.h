@@ -47,7 +47,6 @@ class Button {
   static const unsigned long	REPEAT_MSEC     	=  100;
   static const unsigned long	CLICK_MSEC		=  500;
 
-  // T.B.D.
   static const button_event_t	EVENT_NONE		= 0x00;
   static const button_event_t	EVENT_LONG_PRESSED 	= 0x01;
   static const button_event_t	EVENT_REPEAT		= 0x03;
@@ -56,9 +55,7 @@ class Button {
   static const button_event_t	EVENT_RELEASED		= 0x50;
   static const button_event_t	EVENT_CLICK		= 0x54;
 
-  Button() {};
-  
-  void    	setup(uint8_t pin, String name);
+  Button(uint8_t pin, String name);
 
   boolean	get();
 

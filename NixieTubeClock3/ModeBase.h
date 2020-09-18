@@ -12,12 +12,11 @@ class ModeBase {
   static const unsigned long TICK_MS = 5000; // ms
   static const unsigned long EFFECT_TICK_MS = 200; // ms
   
-  boolean tick(unsigned long cur_ms);
-
-  virtual void setup(NixieArray *nxa);       // setup()内での初期化
+  ModeBase(NixieArray *nxa);
   virtual void init(unsigned long start_ms); // モード変更時の初期化:loop()内
   virtual void loop(unsigned long cur_ms);   // loop()内での処理
   virtual void btn_intr(unsigned long cur_ms, Button *btn); // ボタン処理
+  boolean tick(unsigned long cur_ms);
 
  protected:
   String        _name;
