@@ -3,14 +3,8 @@
  */
 #include "ModeTest1.h"
 
-<<<<<<< HEAD
-ModeTest1::ModeTest1(NixieArray *nxa) : ModeBase(nxa) {
-  this->_name = "ModeTest1";
-  this->_tick_ms = ModeTest1::TICK_MS;
-=======
 ModeTest1::ModeTest1(NixieArray *nxa)
 :  ModeBase::ModeBase(nxa, "ModeTest1", ModeTest1::TICK_MS) {
->>>>>>> 839482fcb75592cc851d3000635618b63c0a7235
 
   String msg = "ModeTest1(): ";
   msg += "_name = " + this->_name;

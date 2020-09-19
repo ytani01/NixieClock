@@ -10,18 +10,12 @@
 #define LOOP_DELAY_US       1 // micro seconds
 #define DEBOUNCE          200 // msec
 
-// #define PIN_LED            27
-
 //============================================================================
-NixieArray *nixieArray;
-//----------------------------------------------------------------------------
 #define PIN_HV5812_CLK     26
 #define PIN_HV5812_STOBE   13
 #define PIN_HV5812_DATA    14
 #define PIN_HV5812_BLANK    4
 
-<<<<<<< HEAD
-=======
 #define PIN_COLON_R_TOP    16
 #define PIN_COLON_R_BOTTOM 16
 #define PIN_COLON_L_TOP    17
@@ -35,8 +29,7 @@ NixieArray *nixieArray;
 #define BTN_N               3
 //============================================================================
 uint8_t pinsIn[] = {PIN_BTN0, PIN_BTN1, PIN_BTN2};
-
->>>>>>> 839482fcb75592cc851d3000635618b63c0a7235
+//----------------------------------------------------------------------------
 uint8_t nixiePins[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N] =
   {{ 9,  0,  1,  2,  3,  4,  5,  6,  7,  8},
    {19, 10, 11, 12, 13, 14, 15, 16, 17, 18},
@@ -45,42 +38,16 @@ uint8_t nixiePins[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N] =
    {49, 40, 41, 42, 43, 44, 45, 46, 47, 48},
    {59, 50, 51, 52, 53, 54, 55, 56, 57, 58} };
 //----------------------------------------------------------------------------
-#define PIN_COLON_R_TOP    16
-#define PIN_COLON_R_BOTTOM 16
-#define PIN_COLON_L_TOP    17
-#define PIN_COLON_L_BOTTOM 17
-
 uint8_t colonPins[NIXIE_COLON_N][NIXIE_COLON_DOT_N] =
   {{PIN_COLON_R_TOP, PIN_COLON_R_BOTTOM},
    {PIN_COLON_L_TOP, PIN_COLON_L_BOTTOM} };
 //----------------------------------------------------------------------------
-<<<<<<< HEAD
-#define PIN_BTN1           33
-#define PIN_BTN2           34
-#define PIN_BTN3           35
-#define BTN_N               3
-
-Button *btnObj[BTN_N];
-//----------------------------------------------------------------------------
-#define MODE_NONE  -1
-#define MODE_TEST1  0
-#define MODE_CLOCK  1
-#define MODE_N     16
-
-ModeBase *Mode[MODE_N];
-int curMode  = MODE_TEST1;
-int prevMode = MODE_NONE;
-=======
 NixieArray *nixieArray;
-Button btnObj0, btnObj1, btnObj2;
-Button *btnObj[] = {&btnObj0, &btnObj1, &btnObj2};
->>>>>>> 839482fcb75592cc851d3000635618b63c0a7235
+Button *btnObj[3];
 //----------------------------------------------------------------------------
 unsigned long loopCount  = 0;
 unsigned long curMsec    = 0; // msec
 unsigned long prevMsec   = 0;
-<<<<<<< HEAD
-=======
 //----------------------------------------------------------------------------
 int curTube = 0;
 int curDigit = 0;
@@ -97,7 +64,6 @@ static unsigned long MODE_N = sizeof(Mode) / sizeof(ModeBase *);
 
 long curMode = MODE_TEST1;
 long prevMode = MODE_NONE;
->>>>>>> 839482fcb75592cc851d3000635618b63c0a7235
 //============================================================================
 void btn_handler() {
   static unsigned long prev_msec = 0;
@@ -110,9 +76,6 @@ void btn_handler() {
 
   for (int b=0; b < BTN_N; b++) {
     if ( btnObj[b]->get() ) {
-<<<<<<< HEAD
-      btnObj[b]->print(true);
-=======
       if ( b == 0 && btnObj[b]->get_click_count() >= 2 ) {
         // XXX stop all effects
         for (int t=0; t < NIXIE_NUM_N; t++) {
@@ -127,7 +90,6 @@ void btn_handler() {
         Serial.println("curMode=" + String(curMode));
       }
       btnObj[b]->print();
->>>>>>> 839482fcb75592cc851d3000635618b63c0a7235
       Mode[curMode]->btn_intr(curMsec, btnObj[b]);
     }
   } // for(b)
@@ -145,23 +107,13 @@ void setup() {
                               nixiePins, colonPins);
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // 各モードの初期化
-<<<<<<< HEAD
-  Mode[MODE_TEST1] = new ModeTest1(nixieArray);
-  // Mode[MODE_CLOCK] = new ModeClock(nixieyArray, rtc) ??
-  //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  // ボタンの初期化
-  btnObj[0] = new Button(PIN_BTN1, "BTN1");
-  btnObj[1] = new Button(PIN_BTN2, "BTN2");
-  btnObj[2] = new Button(PIN_BTN3, "BTN3");
-=======
   Mode[0] = new ModeTest1(nixieArray);
   Mode[1] = new ModeTest2(nixieArray);
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // ボタンの初期化
-  btnObj0.setup(PIN_BTN0, "BTN0");
-  btnObj1.setup(PIN_BTN1, "BTN1");
-  btnObj2.setup(PIN_BTN2, "BTN2");
->>>>>>> 839482fcb75592cc851d3000635618b63c0a7235
+  btnObj[0] = new Button(PIN_BTN0, "BTN0");
+  btnObj[1] = new Button(PIN_BTN1, "BTN1");
+  btnObj[2] = new Button(PIN_BTN2, "BTN2");
   //-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
   uint8_t intr_pin0 = digitalPinToInterrupt(PIN_BTN0);
   uint8_t intr_pin1 = digitalPinToInterrupt(PIN_BTN1);
@@ -170,12 +122,8 @@ void setup() {
   Serial.println(" " + String(PIN_BTN0) + " --> " + String(intr_pin0));
   Serial.println(" " + String(PIN_BTN1) + " --> " + String(intr_pin1));
   Serial.println(" " + String(PIN_BTN2) + " --> " + String(intr_pin2));
-<<<<<<< HEAD
-  Serial.println(" " + String(PIN_BTN3) + " --> " + String(intr_pin3));
-=======
 
   attachInterrupt(intr_pin0, btn_handler, CHANGE);
->>>>>>> 839482fcb75592cc851d3000635618b63c0a7235
   attachInterrupt(intr_pin1, btn_handler, CHANGE);
   attachInterrupt(intr_pin2, btn_handler, CHANGE);
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
