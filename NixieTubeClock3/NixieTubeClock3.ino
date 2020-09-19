@@ -65,6 +65,13 @@ static unsigned long MODE_N = sizeof(Mode) / sizeof(ModeBase *);
 long curMode = MODE_TEST1;
 long prevMode = MODE_NONE;
 //============================================================================
+long change_mode() {
+  nixieArray->end_all_effect();
+  prevMode = curMode;
+  curMode = (curMode + 1) % MODE_N;
+  Serial.println("change_mode(): curMode=" + String(curMode));
+} // change_mode()
+
 void btn_handler() {
   static unsigned long prev_msec = 0;
   unsigned long cur_msec = millis();
@@ -77,17 +84,7 @@ void btn_handler() {
   for (int b=0; b < BTN_N; b++) {
     if ( btnObj[b]->get() ) {
       if ( b == 0 && btnObj[b]->get_click_count() >= 2 ) {
-        // XXX stop all effects
-        for (int t=0; t < NIXIE_NUM_N; t++) {
-          nixieArray->num[t].end_effect();
-        } // for(t)
-        for (int t=0; t < NIXIE_COLON_N; t++) {
-          nixieArray->colon[t].end_effect();
-        } // for(t)
-
-        // Change major mode
-        curMode = (curMode + 1) % MODE_N;
-        Serial.println("curMode=" + String(curMode));
+	change_mode();
       }
       btnObj[b]->print();
       Mode[curMode]->btn_intr(curMsec, btnObj[b]);
@@ -153,8 +150,7 @@ void loop() {
     if ( btnObj[b]->get() ) {
       btnObj[b]->print();
       if ( b == 0 && btnObj[b]->get_click_count() >= 2 ) {
-        curMode = (curMode + 1) % MODE_N;
-        Serial.println("curMode=" + String(curMode));
+	change_mode();
       }
       Mode[curMode]->btn_intr(curMsec, btnObj[b]);
     }

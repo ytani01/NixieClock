@@ -179,6 +179,9 @@ class NixieArray {
              uint8_t num[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N],
              uint8_t colon[NIXIE_COLON_N][NIXIE_COLON_DOT_N]);
   void loop(unsigned long cur_ms);
+
+  void end_all_effect();
+  
   void set_onoff(unsigned long cur_ms);
   void display(unsigned long cur_ms);
 

@@ -359,10 +359,17 @@ void NixieArray::loop(unsigned long cur_ms) {
   } // for(ti)
 } // NixieArray::loop()
 
+void NixieArray::end_all_effect() {
+  for (int t=0; t < NIXIE_NUM_N; t++) {
+    this->num[t].end_effect();
+  } // for(t)
+  for (int c=0; c < NIXIE_COLON_N; c++) {
+    this->colon[c].end_effect();
+  } // for(c)
+} // NixieArray::end_all_effect()
+
 void NixieArray::set_onoff(unsigned long cur_ms) {
   uint8_t timing = cur_ms % BLIGHTNESS_MAX;
-
-  //Serial.println("timing=" + String(timing));
 
   // 数字部
   for (int t=0; t < NIXIE_NUM_N; t++) {
