@@ -239,6 +239,52 @@ void EffectShuffle::end() {
   this->_Element[this->_el].set_blightness(BLIGHTNESS_MAX);
 } // EffectShuffle::end()
 //============================================================================
+// class EffectShuffle
+//----------------------------------------------------------------------------
+EffectBlink::EffectBlink(NixieElement *element)
+: Effect(EFFECT_BLINK, element) {
+} // EffectBlink::EffectBlink()
+
+void EffectBlink::start(unsigned long start_ms, unsigned long tick_ms,
+                        int el_n) {
+  Effect::start(start_ms, tick_ms);
+
+  this->_el_n = el_n;
+  this->_onoff = true;
+
+  for (int e=0; e < this->_el_n; e++) {
+    this->_blightness[e] = this->_Element[e].get_blightness();
+  } // for(e)
+} // EffectBlink::start()
+
+void EffectBlink::loop(unsigned long cur_ms) {
+  if ( ! this->tick(cur_ms) ) {
+    return;
+  }
+
+  if ( this->_onoff ) {
+    this->_onoff = false;
+    for (int e=0; e < this->_el_n; e++) {
+      this->_Element[e].set_blightness(0);
+    } // for(e)
+    return;
+  }
+
+  // this->_onoff == false
+  this->_onoff = true;
+  for (int e=0; e < this->_el_n; e++) {
+    this->_Element[e].set_blightness(this->_blightness[e]);
+  } // for(e)
+} // EffectBlink::loop()
+
+void EffectBlink::end() {
+  Effect::end();
+
+  for (int e=0; e < this->_el_n; e++) {
+    this->_Element[e].set_blightness(this->_blightness[e]);
+  } // for(e)
+} // EffectBlink::end()
+//============================================================================
 // class NixieTube
 //----------------------------------------------------------------------------
 void NixieTube::setup(int element_n, uint8_t *pin) {
@@ -277,6 +323,7 @@ Effect *NixieTube::init_effect(effect_id_t eid) {
   case EFFECT_FADEOUT:  return new EffectFadeOut(this->element);
   case EFFECT_XFADE:    return new EffectXFade(this->element);
   case EFFECT_SHUFFLE:  return new EffectShuffle(this->element);
+  case EFFECT_BLINK:    return new EffectBlink(this->element);
   default:
     Serial.println("ERROR: eid = " + String(eid));
     return (Effect *)NULL;
@@ -320,6 +367,12 @@ void NixieTube::shuffle_start(unsigned long start_ms, unsigned long tick_ms,
   this->_ef = this->init_effect(EFFECT_SHUFFLE);
   this->_ef->start(start_ms, tick_ms, n, el);
 } // NixieTube::shuffle_start()
+
+void NixieTube::blink_start(unsigned long start_ms, unsigned long tick_ms,
+                            int el_n) {
+  this->_ef = this->init_effect(EFFECT_BLINK);
+  this->_ef->start(start_ms, tick_ms, el_n);
+}
 //============================================================================
 // class NixieArray
 //----------------------------------------------------------------------------

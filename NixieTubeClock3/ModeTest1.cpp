@@ -28,11 +28,13 @@ void ModeTest1::init(unsigned long start_ms) {
       }
     } // for(digit)
   } // for(num)
+  this->_nxa->num[5].blink_start(start_ms, 300, NIXIE_NUM_DIGIT_N);
 
   for (int colon=0; colon < NIXIE_COLON_N; colon++) {
     for (int dot=0; dot < NIXIE_COLON_DOT_N; dot++) {
       this->_nxa->colon[colon].element[dot].set_blightness(BLIGHTNESS_MAX);
     } // for (dot)
+    this->_nxa->colon[colon].blink_start(start_ms, 500, NIXIE_COLON_DOT_N);
   } // for (colon)
 }
 
@@ -64,8 +66,16 @@ void ModeTest1::loop(unsigned long cur_ms) {
   num = 4;
   this->_nxa->num[num].shuffle_start(cur_ms, this->SHUFFLE_TICK_MS,
                                      this->SHUFFLE_COUNT, this->_digit);
+
+  num = 5;
+  this->_nxa->num[num].end_effect();
+  this->_nxa->num[num].element[this->_prev_digit].set_blightness(0);
+  this->_nxa->num[num].element[this->_digit].set_blightness(BLIGHTNESS_MAX);
+  this->_nxa->num[num].blink_start(cur_ms, 100, NIXIE_NUM_DIGIT_N);
+  
   // -------------------------------------------------------------------------
   // colon
+  /*
   if (this->_digit % 2 == 0) {
     Serial.println("COLON:ON");
     this->_nxa->colon[NIXIE_COLON_L].element[NIXIE_COLON_DOT_UP].
@@ -87,14 +97,14 @@ void ModeTest1::loop(unsigned long cur_ms) {
     this->_nxa->colon[NIXIE_COLON_R].element[NIXIE_COLON_DOT_DOWN].
       set_blightness(0);
   }
+  */
   // -------------------------------------------------------------------------
   this->_prev_digit = this->_digit;
   this->_digit = (this->_digit + 1) % 10;
 } // ModeTest1::loop()
 
 void ModeTest1::btn_intr(unsigned long cur_ms, Button *btn) {
-  Serial.println("ModeTest1::btn_intr()");
-
+  Serial.println("ModeTest1::btn_intr(" + btn->get_name() + ")");
 } // ModeTest1::btn_intr()
 
 // for emacs

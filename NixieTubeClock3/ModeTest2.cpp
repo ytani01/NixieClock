@@ -8,6 +8,7 @@ ModeTest2::ModeTest2(NixieArray *nxa)
 
   this->_digit_n = NIXIE_NUM_N;
   this->_digit = new int[this->_digit_n];
+  this->_cur = 0;
 
   String msg = "ModeTest2::setup(): ";
   msg += "_name = " + this->_name;
@@ -20,7 +21,7 @@ void ModeTest2::init(unsigned long start_ms) {
   ModeBase::init(start_ms);
 
   for (int i=0; i < this->_digit_n; i++) {
-    this->_digit[i] = 0;
+    this->_digit[i] = i;
     for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
       if ( this->_digit[i] == e ) {
         this->_nxa->num[i].element[e].set_blightness(BLIGHTNESS_MAX);
@@ -29,12 +30,14 @@ void ModeTest2::init(unsigned long start_ms) {
       }
     } // for(e)
   } // for(i)
+  this->_nxa->num[this->_cur].blink_start(start_ms, 200, NIXIE_NUM_DIGIT_N);
 }
 
 void ModeTest2::loop(unsigned long cur_ms) {
   if ( ! this->tick(cur_ms) ) {
     return;
   }
+
   String msg = "_digit=[ ";
   for (int i=0; i < this->_digit_n; i++) {
     msg += String(this->_digit[i]) + " ";
@@ -44,7 +47,15 @@ void ModeTest2::loop(unsigned long cur_ms) {
 } // ModeTest2::loop()
 
 void ModeTest2::btn_intr(unsigned long cur_ms, Button *btn) {
-  Serial.println("ModeTest2::btn_intr()");
+  Serial.println("ModeTest2::btn_intr(" + btn->get_name() + ")");
+
+  if ( btn->get_name() == "BTN1" ) {
+    if ( btn->get_click_count() > 0 || btn->is_repeated() ) {
+      this->_nxa->num[this->_cur].end_effect();
+      this->_cur = (this->_cur + 1) % NIXIE_NUM_N;
+      this->_nxa->num[this->_cur].blink_start(cur_ms, 200, NIXIE_NUM_DIGIT_N);
+    }
+  }
 } // ModeTest2::btn_intr()
 
 // for emacs

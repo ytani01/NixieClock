@@ -20,6 +20,7 @@ class ModeTest2 : public ModeBase {
  private:
   int *_digit;
   int _digit_n;
+  int _cur;
 };
 #endif // MODE_TEST2_H
 

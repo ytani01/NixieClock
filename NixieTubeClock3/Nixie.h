@@ -85,8 +85,7 @@ class Effect {
   boolean     tick(unsigned long cur_ms);
     
  protected:
-  NixieElement *_Element;
-  int           _element_n;
+  NixieElement *_Element;   // array
   boolean       _active    = false;
   effect_id_t   _id        = EFFECT_NONE;
   unsigned long _start_ms  = 0;
@@ -144,6 +143,19 @@ class EffectShuffle : public Effect {
   int   _n;
 }; // class EffectShuffle
 //============================================================================
+class EffectBlink : public Effect {
+ public:
+  EffectBlink(NixieElement *element);
+  void start(unsigned long start_ms, unsigned long tick_ms, int el_n);
+  void loop(unsigned long cur_ms);
+  void end();
+
+ private:
+  int      _el_n;
+  uint8_t  _blightness[NIXIE_ELEMENT_N_MAX];
+  boolean  _onoff;
+}; // class EffectBlink
+//============================================================================
 class NixieTube {
  public:
   int           element_n;
@@ -163,6 +175,7 @@ class NixieTube {
                    int el_in, int el_out);
   void shuffle_start(unsigned long start_ms, unsigned long tick, int n,
                      int element_i);
+  void blink_start(unsigned long start_ms, unsigned long ms, int el_n);
 
  private:
   Effect *_ef;
