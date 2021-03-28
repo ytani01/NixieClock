@@ -72,6 +72,8 @@ class NixieElement {
 class Effect {
  public:
   Effect(effect_id_t eid, NixieElement *element);
+  virtual ~Effect();
+
   virtual void  start(unsigned long start_ms, unsigned long tick_ms);
   virtual void  start(unsigned long start_ms, unsigned long tick_ms,
                       int element);

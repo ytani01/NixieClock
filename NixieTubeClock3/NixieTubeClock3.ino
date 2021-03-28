@@ -1,6 +1,8 @@
 /*
  * (c) 2020 Yoichi Tanibayashi
  */
+#include <RTClib.h>
+#include <WiFi.h>
 #include "Nixie.h"
 #include "Button.h"
 #include "ModeBase.h"
@@ -27,6 +29,24 @@
 #define PIN_BTN1           34
 #define PIN_BTN2           35
 #define BTN_N               3
+
+//============================================================================
+/* WiFi */
+const char* SSID = "fablabkannai";
+const char* SSID_PW = "kannai201";
+
+//============================================================================
+/* for NTP */
+struct tm timeInfo;
+
+//============================================================================
+/* RTC DS3231 */
+RTC_DS3231 Rtc;
+char dayOfTheWeek[7][4] =
+{
+  "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+};
+
 //============================================================================
 uint8_t pinsIn[] = {PIN_BTN0, PIN_BTN1, PIN_BTN2};
 //----------------------------------------------------------------------------
@@ -70,6 +90,7 @@ long change_mode() {
   prevMode = curMode;
   curMode = (curMode + 1) % MODE_N;
   Serial.println("change_mode(): curMode=" + String(curMode));
+  return curMode;
 } // change_mode()
 
 void btn_handler() {
@@ -96,9 +117,17 @@ void setup() {
   Serial.begin(115200);
   randomSeed(analogRead(0));
   Serial.println("begin");
+  
   //--------------------------------------------------------------------------
   // グローバルオブジェクト・変数の初期化
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  WiFi.begin(SSID, SSID_PW);
+
+  Rtc.begin();
+  unsigned long sec = Rtc.now().second();
+  Serial.println("init> sec=" + String(sec));
+  randomSeed(sec);
+
   nixieArray = new NixieArray(PIN_HV5812_CLK,  PIN_HV5812_STOBE,
                               PIN_HV5812_DATA, PIN_HV5812_BLANK,
                               nixiePins, colonPins);
@@ -129,12 +158,67 @@ void setup() {
   curMsec = millis();
   //--------------------------------------------------------------------------
   nixieArray->display(curMsec); // 初期状態表示
+  //--------------------------------------------------------------------------
+
+  //--------------------------------------------------------------------------
+  // WIFI and NTP
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("waiting WiFi: " + String(SSID));
+  }
+  Serial.println("Connected WiFi: " + String(SSID));
+
+  //--------------------------------------------------------------------------
+  configTime(9 * 3600L, 0, "ntp.nict.jp", "time.google.com");
+  getLocalTime(&timeInfo);
+  DateTime now = DateTime(timeInfo.tm_year + 1900,
+                          timeInfo.tm_mon + 1,
+                          timeInfo.tm_mday,
+                          timeInfo.tm_hour,
+                          timeInfo.tm_min,
+                          timeInfo.tm_sec);
+  Rtc.adjust(now);
+
+  char dt_str[128];
+  sprintf(dt_str, "%04d/%02d/%02d(%s) %02d:%02d:%02d",
+          timeInfo.tm_year + 1900, timeInfo.tm_mon + 1, timeInfo.tm_mday,
+          dayOfTheWeek[timeInfo.tm_wday],
+          timeInfo.tm_hour, timeInfo.tm_min, timeInfo.tm_sec);
+  Serial.println("dt_str(NTP)=" + String(dt_str));
 } // setup()
+
 //============================================================================
 void loop() {
+  char dt_str[128];
+
   prevMsec = curMsec;
   curMsec = millis();
   loopCount++;
+
+  //--------------------------------------------------------------------------
+  if (loopCount % 20000 == 0) {
+    getLocalTime(&timeInfo);
+    sprintf(dt_str, "%04d/%02d/%02d(%s) %02d:%02d:%02d",
+            timeInfo.tm_year + 1900,
+            timeInfo.tm_mon + 1,
+            timeInfo.tm_mday,
+            dayOfTheWeek[timeInfo.tm_wday],
+            timeInfo.tm_hour,
+            timeInfo.tm_min,
+            timeInfo.tm_sec);
+    Serial.println();
+    Serial.println("dt_str(NTP)=" + String(dt_str));
+  }
+
+  if (loopCount % 2000 == 0) {
+    DateTime now = Rtc.now();
+    sprintf(dt_str, "%04d/%02d/%02d(%s) %02d:%02d:%02d",
+            now.year(), now.month(), now.day(),
+            dayOfTheWeek[now.dayOfTheWeek()],
+            now.hour(), now.minute(), now.second());
+    Serial.println("dt_str(RTC)=" + String(dt_str));
+  }
+
   //--------------------------------------------------------------------------
   // モード実行
   if (curMode != prevMode) {

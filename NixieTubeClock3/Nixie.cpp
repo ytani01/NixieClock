@@ -53,6 +53,7 @@ Effect::Effect(effect_id_t eid, NixieElement *element) {
   this->_id = eid;
   this->_Element = element;
 }
+Effect::~Effect() {}
 
 void Effect::start(unsigned long start_ms, unsigned long tick_ms) {
   this->_start_ms = start_ms;
