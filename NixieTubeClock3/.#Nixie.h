@@ -1,1 +1,0 @@
-ytani@ytani-X555UA.1461
