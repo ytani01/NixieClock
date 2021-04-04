@@ -43,6 +43,7 @@ void ModeTest1::loop(unsigned long cur_ms) {
     return;
   }
   // Serial.println("ModeTest1::loop> digit=" + String(this->_digit));
+
   // -------------------------------------------------------------------------
   // num
   int num = 0;
@@ -73,31 +74,6 @@ void ModeTest1::loop(unsigned long cur_ms) {
   this->_nxa->num[num].element[this->_digit].set_blightness(BLIGHTNESS_MAX);
   this->_nxa->num[num].blink_start(cur_ms, 100, NIXIE_NUM_DIGIT_N);
   
-  // -------------------------------------------------------------------------
-  // colon
-  /*
-  if (this->_digit % 2 == 0) {
-    Serial.println("COLON:ON");
-    this->_nxa->colon[NIXIE_COLON_L].element[NIXIE_COLON_DOT_UP].
-      set_blightness(BLIGHTNESS_MAX);
-    this->_nxa->colon[NIXIE_COLON_L].element[NIXIE_COLON_DOT_DOWN].
-      set_blightness(0);
-    this->_nxa->colon[NIXIE_COLON_R].element[NIXIE_COLON_DOT_UP].
-      set_blightness(0);
-    this->_nxa->colon[NIXIE_COLON_R].element[NIXIE_COLON_DOT_DOWN].
-      set_blightness(BLIGHTNESS_MAX);
-  } else {
-    Serial.println("COLON:OFF");
-    this->_nxa->colon[NIXIE_COLON_L].element[NIXIE_COLON_DOT_UP].
-      set_blightness(0);
-    this->_nxa->colon[NIXIE_COLON_L].element[NIXIE_COLON_DOT_DOWN].
-      set_blightness(BLIGHTNESS_MAX);
-    this->_nxa->colon[NIXIE_COLON_R].element[NIXIE_COLON_DOT_UP].
-      set_blightness(BLIGHTNESS_MAX);
-    this->_nxa->colon[NIXIE_COLON_R].element[NIXIE_COLON_DOT_DOWN].
-      set_blightness(0);
-  }
-  */
   // -------------------------------------------------------------------------
   this->_prev_digit = this->_digit;
   this->_digit = (this->_digit + 1) % 10;

@@ -37,11 +37,15 @@ void ModeTest2::loop(unsigned long cur_ms) {
     return;
   }
 
+  /*
   if ( cur_ms - this->_start_ms > 1000 ) {
     for (int i=0; i < NIXIE_NUM_N; i++) {
-      this->_nxa->num[i].end_effect();
+      if (this->_nxa->num[i]._ef->_id != EFFECT_BLINK) {
+        this->_nxa->num[i].end_effect();
+      }
     }
   }
+  */
   
   String msg = "_digit=[ ";
   for (int i=0; i < NIXIE_NUM_N; i++) {
@@ -62,14 +66,15 @@ void ModeTest2::btn_intr(unsigned long cur_ms, Button *btn) {
   if ( btn->get_name() == "BTN1" ) {
     count_t click_count = btn->get_click_count();
     Serial.println("click_count=" + String(click_count));
-
     boolean is_repeated = btn->is_repeated();
     Serial.println("is_repeated=" + String(is_repeated));
 
-    if ( btn->get_click_count() > 0 || btn->is_repeated() ) {
-      this->_nxa->num[this->_cur].end_effect();
+    if ( click_count > 0 || is_repeated ) {
+      for (int i=0; i < NIXIE_NUM_N; i++) {
+        this->_nxa->num[i].end_effect();
+      }
       this->_cur = (this->_cur + 1) % NIXIE_NUM_N;
-      this->_nxa->num[this->_cur].blink_start(cur_ms, 200, NIXIE_NUM_DIGIT_N);
+      this->_nxa->num[this->_cur].blink_start(cur_ms, 200, this->_cur);
     }
   }
 } // ModeTest2::btn_intr()
