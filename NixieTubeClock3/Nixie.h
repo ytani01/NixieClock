@@ -9,10 +9,14 @@
  *   +- NixieTube num[NIXIE_NUM_N]
  *   |   |
  *   |   +- NixieElement element[NIXIE_NUM_DIGIT_N]
+ *   |   |
+ *   |   +- Effect
  *   |
  *   +- NixieTube colon[NIXIE_COLON_N]
  *       |
  *       +- NixieElement element[NIXIE_COLON_DOT_N]
+ *       |
+ *       +- Effect
  *----------------------------------------------------------------------------
  */
 #ifndef NIXIE_H
@@ -29,22 +33,23 @@
 #define NIXIE_COLON_N        2
 #define NIXIE_COLON_R        0
 #define NIXIE_COLON_L        1
-#define NIXIE_COLON_DOT_N    2
-#define NIXIE_COLON_DOT_UP   0
-#define NIXIE_COLON_DOT_DOWN 1
+#define NIXIE_COLON_DOT_N    1  // 現在は、上下同じピンなので、ドットは一つ
+#define NIXIE_COLON_DOT_UP   0  // UPとDOWNは、同じ
+#define NIXIE_COLON_DOT_DOWN 0  // UPとDOWNは、同じ
 
 #define NIXIE_ELEMENT_N_MAX  (NIXIE_NUM_DIGIT_N > NIXIE_COLON_DOT_N ? NIXIE_NUM_DIGIT_N : NIXIE_COLON_DOT_N)
 
 typedef unsigned long effect_id_t;
 #define EFFECT_NONE          0
-#define EFFECT_FADEIN        1
-#define EFFECT_FADEOUT       2
-#define EFFECT_XFADE         3
-#define EFFECT_FOGIN         4
-#define EFFECT_FOGOUT        5
-#define EFFECT_SHUFFLE       6
-#define EFFECT_BLINK         7
-#define EFFECT_RANDOM_ONOFF  8
+#define EFFECT_ONLY          1
+#define EFFECT_FADEIN        2
+#define EFFECT_FADEOUT       3
+#define EFFECT_XFADE         4
+#define EFFECT_FOGIN         5
+#define EFFECT_FOGOUT        6
+#define EFFECT_SHUFFLE       7
+#define EFFECT_BLINK         8
+#define EFFECT_RANDOM_ONOFF  9
 
 //============================================================================
 class NixieElement {
@@ -74,7 +79,7 @@ class NixieElement {
 //============================================================================
 class Effect {
  public:
-  Effect(effect_id_t eid, NixieElement *element);
+  Effect(effect_id_t eid, NixieElement *element, unsigned long el_n);
   virtual ~Effect();
 
   virtual void  start(unsigned long start_ms, unsigned long tick_ms);
@@ -90,7 +95,8 @@ class Effect {
   boolean     tick(unsigned long cur_ms);
     
  protected:
-  NixieElement *_Element;   // array
+  NixieElement *_el;   // array
+  unsigned long _el_n      = 0;           // number of elements (10 or 1)
   boolean       _active    = false;
   effect_id_t   _id        = EFFECT_NONE;
   unsigned long _start_ms  = 0;
@@ -100,65 +106,76 @@ class Effect {
 
 }; // class Effect
 //============================================================================
+class EffectOnly : public Effect {
+ public:
+  EffectOnly(NixieElement *el, unsigned long el_n);
+  void start(unsigned long start_ms, unsigned long tick_ms, int el_i, int bl);
+  void loop(unsigned long cur_ms);
+
+ private:
+  int _el_i;
+  int _bl;
+}; // class EffectOnly
+//============================================================================
 class EffectFadeIn : public Effect {
  public:
-  EffectFadeIn(NixieElement *element);
+  EffectFadeIn(NixieElement *el, unsigned long el_n);
   void start(unsigned long start_ms, unsigned long tick_ms, int element);
   void loop(unsigned long cur_ms);
 
  private:
-  int _el;
+  int _el_i;
 
 }; // class EffectFadeIn
 //============================================================================
 class EffectFadeOut : public Effect {
  public:
-  EffectFadeOut(NixieElement *element);
+  EffectFadeOut(NixieElement *el, unsigned long el_n);
   void start(unsigned long start_ms, unsigned long tick_ms, int element);
   void loop(unsigned long cur_ms);
 
  private:
-  int _el;
+  int _el_i;
 
 }; // class EffectFadeOut
 //============================================================================
 class EffectXFade : public Effect {
  public:
-  EffectXFade(NixieElement *element);
+  EffectXFade(NixieElement *el, unsigned long el_n);
   void start(unsigned long start_ms, unsigned long tick_ms,
              int el_in, int el_out);
   void loop(unsigned long cur_ms);
 
  private:
-  int _el_in;
-  int _el_out;
+  int _el_i_in;
+  int _el_i_out;
 
 }; // class EffectXFade
 
 //============================================================================
 class EffectShuffle : public Effect {
  public:
-  EffectShuffle(NixieElement *element);
-  void start(unsigned long start_ms, unsigned long tick_ms, int n,
-             int element);
+  EffectShuffle(NixieElement *el, unsigned long el_n);
+  void start(unsigned long start_ms, unsigned long tick_ms,
+             int n, int el_i);
   void loop(unsigned long cur_ms);
   void end();
 
  private:
-  int   _el;
+  int   _el_i;
   int   _n;
 }; // class EffectShuffle
 
 //============================================================================
 class EffectBlink : public Effect {
  public:
-  EffectBlink(NixieElement *element);
-  void start(unsigned long start_ms, unsigned long tick_ms, int el_n);
+  EffectBlink(NixieElement *el, unsigned long el_n);
+  void start(unsigned long start_ms, unsigned long tick_ms, int el_i);
   void loop(unsigned long cur_ms);
   void end();
 
  private:
-  int      _el_n;
+  int      _el_i;
   uint8_t  _blightness[NIXIE_ELEMENT_N_MAX];
   boolean  _onoff;
 }; // class EffectBlink
@@ -166,13 +183,13 @@ class EffectBlink : public Effect {
 //============================================================================
 class EffectRandomOnOff : public Effect {
  public:
-  EffectRandomOnOff(NixieElement *element);
-  void start(unsigned long start_ms, unsigned long tick_ms, int element);
+  EffectRandomOnOff(NixieElement *el, unsigned long el_n);
+  void start(unsigned long start_ms, unsigned long tick_ms, int el_i);
   void loop(unsigned long cur_ms);
   void end();
 
  private:
-  int _el;
+  int _el_i;
 }; // class EffectRandomOnOff
 
 //============================================================================
@@ -191,14 +208,14 @@ class NixieTube {
 
   boolean effect_is_active();
 
-  void fadein_start(unsigned long start_ms, unsigned long ms, int element_i);
-  void fadeout_start(unsigned long start_ms, unsigned long ms, int element_i);
+  void fadein_start(unsigned long start_ms, unsigned long ms, int el_i);
+  void fadeout_start(unsigned long start_ms, unsigned long ms, int el_i);
   void xfade_start(unsigned long start_ms, unsigned long ms,
                    int el_in, int el_out);
   void shuffle_start(unsigned long start_ms, unsigned long tick, int n,
-                     int element_i);
-  void blink_start(unsigned long start_ms, unsigned long ms, int el_n);
-  void randomOnOff_start(unsigned long start_ms, unsigned long ms, int el);
+                     int el_i);
+  void blink_start(unsigned long start_ms, unsigned long ms, int el_i);
+  void randomOnOff_start(unsigned long start_ms, unsigned long ms, int el_i);
 
  private:
   Effect *_ef;

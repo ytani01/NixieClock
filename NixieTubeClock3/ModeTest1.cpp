@@ -3,39 +3,39 @@
  */
 #include "ModeTest1.h"
 
-ModeTest1::ModeTest1(NixieArray *nxa)
-:  ModeBase::ModeBase(nxa, "ModeTest1", ModeTest1::TICK_MS) {
-
-  String msg = "ModeTest1(): ";
-  msg += "_name = " + this->_name;
-  msg += ", ";
-  msg += "_tick_ms = " + this->_tick_ms;
-  Serial.println(msg);
+ModeTest1::ModeTest1(NixieArray *nxa):  ModeBase::ModeBase(nxa,
+                                                           "ModeTest1",
+                                                           ModeTest1::TICK_MS) {
 }
 
 void ModeTest1::init(unsigned long start_ms) {
   ModeBase::init(start_ms);
 
+  Serial.println("ModeTest1::init>");
+
   this->_digit = 0;
   this->_prev_digit = 9;
 
-  for (int num=0; num < NIXIE_NUM_N; num++) {
-    for (int digit=0; digit < NIXIE_NUM_DIGIT_N; digit++) {
-      if (digit == this->_prev_digit) {
-        this->_nxa->num[num].element[digit].set_blightness(BLIGHTNESS_MAX);
+  for (int i=0; i < NIXIE_NUM_N; i++) {
+    for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
+      if (d == this->_prev_digit) {
+        this->_nxa->num[i].element[d].set_blightness(BLIGHTNESS_MAX);
       } else {
-        this->_nxa->num[num].element[digit].set_blightness(0);
+        this->_nxa->num[i].element[d].set_blightness(0);
       }
-    } // for(digit)
-  } // for(num)
-  this->_nxa->num[5].blink_start(start_ms, 300, NIXIE_NUM_DIGIT_N);
+    } // for(d)
+  } // for(i)
 
-  for (int colon=0; colon < NIXIE_COLON_N; colon++) {
-    for (int dot=0; dot < NIXIE_COLON_DOT_N; dot++) {
-      this->_nxa->colon[colon].element[dot].set_blightness(BLIGHTNESS_MAX);
-    } // for (dot)
-    this->_nxa->colon[colon].blink_start(start_ms, 500, NIXIE_COLON_DOT_N);
-  } // for (colon)
+  for (int i=0; i < NIXIE_COLON_N; i++) {
+    Serial.println("i=" + String(i));
+    for (int d=0; d < NIXIE_COLON_DOT_N; d++) {
+      Serial.println(" d=" + String(d));
+      this->_nxa->colon[i].element[d].set_blightness(BLIGHTNESS_MAX);
+    } // for (d)
+    this->_nxa->colon[i].blink_start(start_ms, 500, NIXIE_COLON_DOT_UP);
+  } // for (i)
+
+  Serial.println("ModeTest1::init> done");
 }
 
 void ModeTest1::loop(unsigned long cur_ms) {

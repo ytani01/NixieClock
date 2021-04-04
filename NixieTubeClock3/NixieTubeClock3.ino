@@ -56,8 +56,8 @@ uint8_t nixiePins[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N] =
    {59, 50, 51, 52, 53, 54, 55, 56, 57, 58} };
 //----------------------------------------------------------------------------
 uint8_t colonPins[NIXIE_COLON_N][NIXIE_COLON_DOT_N] =
-  {{PIN_COLON_R_TOP, PIN_COLON_R_BOTTOM},
-   {PIN_COLON_L_TOP, PIN_COLON_L_BOTTOM} };
+  {{PIN_COLON_R_TOP},
+   {PIN_COLON_L_TOP} };
 //----------------------------------------------------------------------------
 NixieArray *nixieArray;
 Button *btnObj[3];
@@ -184,7 +184,7 @@ void setup() {
           timeInfo.tm_year + 1900, timeInfo.tm_mon + 1, timeInfo.tm_mday,
           dayOfTheWeek[timeInfo.tm_wday],
           timeInfo.tm_hour, timeInfo.tm_min, timeInfo.tm_sec);
-  // Serial.println("dt_str(NTP)=" + String(dt_str));
+  Serial.println("setup> dt_str(NTP)=" + String(dt_str));
 } // setup()
 
 //============================================================================
@@ -234,7 +234,7 @@ void loop() {
     if ( btnObj[b]->get() ) {
       btnObj[b]->print();
       if ( btnObj[b]->get_name() == "BTN0" &&
-           btnObj[b]->get_click_count() >= 2 ) {
+           btnObj[b]->is_long_pressed() && ! btnObj[b]->is_repeated()) {
 	change_mode();
       } else {
         Mode[curMode]->btn_intr(curMsec, btnObj[b]);

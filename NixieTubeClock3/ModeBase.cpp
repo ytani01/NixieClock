@@ -10,12 +10,16 @@ ModeBase::ModeBase(NixieArray *nxa, String name, unsigned long tick_ms) {
   this->_prev_tick = 0;
 
   String msg = "ModeBase::setup(): ";
-  msg += "_name = " + this->_name;
+  msg += "_name=" + this->_name;
   msg += ", ";
-  msg += "_tick_ms = " + this->_tick_ms;
+  msg += "_tick_ms=" + String(this->_tick_ms);
+  msg += ".";
   Serial.println(msg);
 }
 
+/**
+ * tick: loopで処理する間隔
+ */
 boolean ModeBase::tick(unsigned long cur_ms) {
   if ( this->_tick_ms == 0 ) {
     Serial.println("!? _tick_ms=" + String(this->_tick_ms));
@@ -34,7 +38,8 @@ void ModeBase::init(unsigned long start_ms) {
   (void)this->tick(start_ms);
   
   String msg = "ModeBase::init(): ";
-  msg += "_start_ms = " + String(this->_start_ms);
+  msg += "_start_ms=";
+  msg += String(this->_start_ms);
   Serial.println(msg);
 }
 

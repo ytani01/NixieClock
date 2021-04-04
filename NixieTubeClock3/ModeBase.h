@@ -24,7 +24,7 @@ class ModeBase {
   String        _name;         // モード名
   NixieArray   *_nxa;          // ニキシー管アレイ
   unsigned long _start_ms;
-  unsigned long _tick_ms;      // tick間隔(msec)
+  unsigned long _tick_ms;      // tick間隔(msec): loop()で処理する間隔
   unsigned long _tick;         // tickカウント
   unsigned long _prev_tick;
 };

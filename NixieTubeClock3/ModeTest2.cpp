@@ -3,18 +3,11 @@
  */
 #include "ModeTest2.h"
 
-ModeTest2::ModeTest2(NixieArray *nxa)
-: ModeBase::ModeBase(nxa, "ModeTest2", ModeTest2::TICK_MS) {
-
-  this->_digit_n = NIXIE_NUM_N;
-  this->_digit = new int[this->_digit_n];
+ModeTest2::ModeTest2(NixieArray *nxa): ModeBase::ModeBase(nxa,
+                                                          "ModeTest2",
+                                                          ModeTest2::TICK_MS) {
+  this->_digit = new int[NIXIE_NUM_N];
   this->_cur = 0;
-
-  String msg = "ModeTest2::setup(): ";
-  msg += "_name = " + this->_name;
-  msg += ", ";
-  msg += "_tick_ms = " + this->_tick_ms;
-  Serial.println(msg);
 }
 
 void ModeTest2::init(unsigned long start_ms) {
@@ -22,17 +15,20 @@ void ModeTest2::init(unsigned long start_ms) {
 
   Serial.println("ModeTest2::init>");
 
-  for (int i=0; i < this->_digit_n; i++) {
+  this->_cur = 0;
+
+  for (int i=0; i < NIXIE_NUM_N; i++) {
+    Serial.println("i=" + String(i));
     this->_digit[i] = i;
     for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
-      if ( this->_digit[i] == e ) {
-        // this->_nxa->num[i].element[e].set_blightness(BLIGHTNESS_MAX);
-        this->_nxa->num[i].randomOnOff_start(start_ms, 50, e);
+      if ( e == this->_digit[i] ) {
+        this->_nxa->num[i].randomOnOff_start(start_ms, 50, i);
       } else {
         this->_nxa->num[i].element[e].set_blightness(0);
       }
     } // for(e)
   } // for(i)
+  this->_nxa->num[this->_cur].end_effect();
   this->_nxa->num[this->_cur].blink_start(start_ms, 200, NIXIE_NUM_DIGIT_N);
 }
 
@@ -42,13 +38,13 @@ void ModeTest2::loop(unsigned long cur_ms) {
   }
 
   if ( cur_ms - this->_start_ms > 1000 ) {
-    for (int i=0; i < _digit_n; i++) {
+    for (int i=0; i < NIXIE_NUM_N; i++) {
       this->_nxa->num[i].end_effect();
     }
   }
   
   String msg = "_digit=[ ";
-  for (int i=0; i < this->_digit_n; i++) {
+  for (int i=0; i < NIXIE_NUM_N; i++) {
     if (i == this->_cur) {
       msg += "<" + String(this->_digit[i]) + "> ";
     } else {
@@ -62,7 +58,14 @@ void ModeTest2::loop(unsigned long cur_ms) {
 void ModeTest2::btn_intr(unsigned long cur_ms, Button *btn) {
   Serial.println("ModeTest2::btn_intr(" + btn->get_name() + ")");
 
+
   if ( btn->get_name() == "BTN1" ) {
+    count_t click_count = btn->get_click_count();
+    Serial.println("click_count=" + String(click_count));
+
+    boolean is_repeated = btn->is_repeated();
+    Serial.println("is_repeated=" + String(is_repeated));
+
     if ( btn->get_click_count() > 0 || btn->is_repeated() ) {
       this->_nxa->num[this->_cur].end_effect();
       this->_cur = (this->_cur + 1) % NIXIE_NUM_N;

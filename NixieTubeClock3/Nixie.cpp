@@ -1,5 +1,5 @@
 /*
- * (c) Yoichi Tanibayashi
+ * (c) 2021 Yoichi Tanibayashi
  */
 #include "Nixie.h"
 
@@ -49,9 +49,11 @@ boolean NixieElement::is_on() {
 //============================================================================
 // class Effect
 //----------------------------------------------------------------------------
-Effect::Effect(effect_id_t eid, NixieElement *element) {
+Effect::Effect(effect_id_t eid, NixieElement *element, unsigned long el_n) {
   this->_id = eid;
-  this->_Element = element;
+  this->_el = element;
+  this->_el_n = el_n;
+  Serial.println("Effect::Effect> el_n=" + String(this->_el_n));
 }
 Effect::~Effect() {}
 
@@ -60,6 +62,9 @@ void Effect::start(unsigned long start_ms, unsigned long tick_ms) {
   this->_tick_ms = tick_ms;
   (void)this->tick(this->_start_ms);
   this->_active = true;
+  Serial.println("Effect::start> start_ms=" + String(this->_start_ms));
+  Serial.println("Effect::start> tick_ms=" + String(this->_tick_ms));
+  Serial.println("Effect::start> el_n=" + String(this->_el_n));
 }
 void Effect::start(unsigned long start_ms, unsigned long tick_ms, int el) {
   this->start(start_ms, tick_ms);
@@ -101,19 +106,53 @@ boolean Effect::tick(unsigned long cur_ms) {
 } // Effect::tick()
 
 //============================================================================
+// class EffectOnly
+//----------------------------------------------------------------------------
+EffectOnly::EffectOnly(NixieElement *el,
+                       unsigned long el_n): Effect::Effect(EFFECT_ONLY,
+                                                           el, el_n) {
+}
+
+void EffectOnly::start(unsigned long start_ms,
+                       unsigned long tick_ms,
+                       int el_i, int bl) {
+  Effect::start(start_ms, tick_ms);
+
+  this->_el_i = el_i;
+  this->_bl = bl;
+
+  for (int i=0; i < this->_el_n; i++) {
+    if (i == this->_el_i) {
+      this->_el[this->_el_i].set_blightness(this->_bl);
+    } else {
+      this->_el[this->_el_i].set_blightness(0);
+    }
+  } // EffectOnly::start()
+}
+
+void EffectOnly::loop(unsigned long cur_ms) {
+  if ( ! this->tick(cur_ms) ) {
+    return;
+  }
+
+  // do nothing
+  return;
+} // EffectOnly::loop()
+//============================================================================
 // class EffectFadeIn
 //----------------------------------------------------------------------------
-EffectFadeIn::EffectFadeIn(NixieElement *element)
-: Effect::Effect(EFFECT_FADEIN, element) {
+EffectFadeIn::EffectFadeIn(NixieElement *el,
+                           unsigned long el_n): Effect::Effect(EFFECT_FADEIN,
+                                                               el, el_n) {
 }
 
 void EffectFadeIn::start(unsigned long start_ms,
-                    unsigned long tick_ms,
-                    int element) {
+                         unsigned long tick_ms,
+                         int el_i) {
   Effect::start(start_ms, tick_ms);
 
-  this->_el = element;
-  this->_Element[this->_el].set_blightness(0);
+  this->_el_i = el_i;
+  this->_el[this->_el_i].set_blightness(0);
 } // EffectFadeIn::start()
 
 void EffectFadeIn::loop(unsigned long cur_ms) {
@@ -121,7 +160,7 @@ void EffectFadeIn::loop(unsigned long cur_ms) {
     return;
   }
 
-  NixieElement *e = &(this->_Element[this->_el]); // 重要！ポインタ渡し
+  NixieElement *e = &(this->_el[this->_el_i]); // 重要！ポインタ渡し
   uint8_t bl = e->get_blightness();
   if ( bl < BLIGHTNESS_MAX ) {
     e->inc_blightness();
@@ -132,16 +171,18 @@ void EffectFadeIn::loop(unsigned long cur_ms) {
 //============================================================================
 // class EffectFadeOut
 //----------------------------------------------------------------------------
-EffectFadeOut::EffectFadeOut(NixieElement *element)
-: Effect::Effect(EFFECT_FADEOUT, element) {
+EffectFadeOut::EffectFadeOut(NixieElement *el,
+                             unsigned long el_n): Effect::Effect(EFFECT_FADEOUT,
+                                                                 el, el_n) {
 }
 
-void EffectFadeOut::start(unsigned long start_ms, unsigned long tick_ms,
-                    int element) {
+void EffectFadeOut::start(unsigned long start_ms,
+                          unsigned long tick_ms,
+                          int el_i) {
   Effect::start(start_ms, tick_ms);
 
-  this->_el = element;
-  this->_Element[this->_el].set_blightness(BLIGHTNESS_MAX);
+  this->_el_i = el_i;
+  this->_el[this->_el_i].set_blightness(BLIGHTNESS_MAX);
 }
 
 void EffectFadeOut::loop(unsigned long cur_ms) {
@@ -149,7 +190,7 @@ void EffectFadeOut::loop(unsigned long cur_ms) {
     return;
   }
 
-  NixieElement *e = &(this->_Element[this->_el]);
+  NixieElement *e = &(this->_el[this->_el_i]);
   uint8_t bl = e->get_blightness();
   if ( bl > 0 ) {
     e->dec_blightness();
@@ -160,18 +201,20 @@ void EffectFadeOut::loop(unsigned long cur_ms) {
 //============================================================================
 // class EffectXFade
 //----------------------------------------------------------------------------
-EffectXFade::EffectXFade(NixieElement *element)
-: Effect::Effect(EFFECT_XFADE, element) {
+EffectXFade::EffectXFade(NixieElement *el,
+                         unsigned long el_n): Effect::Effect(EFFECT_XFADE,
+                                                             el, el_n) {
 }
 
-void EffectXFade::start(unsigned long start_ms, unsigned long tick_ms,
-                        int el_in, int el_out) {
+void EffectXFade::start(unsigned long start_ms,
+                        unsigned long tick_ms,
+                        int el_i_in, int el_i_out) {
   Effect::start(start_ms, tick_ms);
 
-  this->_el_in  = el_in;
-  this->_el_out = el_out;
-  this->_Element[this->_el_in].set_blightness(0);
-  this->_Element[this->_el_out].set_blightness(BLIGHTNESS_MAX);
+  this->_el_i_in  = el_i_in;
+  this->_el_i_out = el_i_out;
+  this->_el[this->_el_i_in].set_blightness(0);
+  this->_el[this->_el_i_out].set_blightness(BLIGHTNESS_MAX);
 } // EffectXFade::start()
 
 void EffectXFade::loop(unsigned long cur_ms) {
@@ -179,8 +222,8 @@ void EffectXFade::loop(unsigned long cur_ms) {
     return;
   }
 
-  NixieElement *e_in  = &(this->_Element[this->_el_in]);
-  NixieElement *e_out = &(this->_Element[this->_el_out]);
+  NixieElement *e_in  = &(this->_el[this->_el_i_in]);
+  NixieElement *e_out = &(this->_el[this->_el_i_out]);
   uint8_t bl_in  = e_in->get_blightness();
   uint8_t bl_out = e_out->get_blightness();
   int end_count = 0;
@@ -201,19 +244,21 @@ void EffectXFade::loop(unsigned long cur_ms) {
 //============================================================================
 // class EffectShuffle
 //----------------------------------------------------------------------------
-EffectShuffle::EffectShuffle(NixieElement *element)
-: Effect(EFFECT_SHUFFLE, element) {
+EffectShuffle::EffectShuffle(NixieElement *el,
+                             unsigned long el_n): Effect(EFFECT_SHUFFLE,
+                                                         el, el_n) {
 }
 
-void EffectShuffle::start(unsigned long start_ms, unsigned long tick_ms,
-                          int n, int element) {
+void EffectShuffle::start(unsigned long start_ms,
+                          unsigned long tick_ms,
+                          int n, int el_i) {
   Effect::start(start_ms, tick_ms);
 
   this->_n = n;
-  this->_el = element;
+  this->_el_i = el_i;
 
-  for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
-    this->_Element[e].set_blightness(0);
+  for (int e=0; e < this->_el_n; e++) {
+    this->_el[e].set_blightness(0);
   }
 } // EffectShuffle::start()
 
@@ -224,40 +269,44 @@ void EffectShuffle::loop(unsigned long cur_ms) {
     return;
   }
 
-  this->_Element[el_random].set_blightness(0);
+  this->_el[el_random].set_blightness(0);
 
   if ( this->_tick >= this->_n ) {
     this->end();
     return;
   }
   
-  el_random = random(NIXIE_NUM_DIGIT_N);
-  this->_Element[el_random].set_blightness(BLIGHTNESS_MAX);
+  el_random = random(this->_el_n);
+  this->_el[el_random].set_blightness(BLIGHTNESS_MAX);
 } // EffectShuffle::loop()
 
 void EffectShuffle::end() {
   Effect::end();
 
-  this->_Element[this->_el].set_blightness(BLIGHTNESS_MAX);
+  this->_el[this->_el_i].set_blightness(BLIGHTNESS_MAX);
 } // EffectShuffle::end()
 
 //============================================================================
 // class EffectBlink
 //----------------------------------------------------------------------------
-EffectBlink::EffectBlink(NixieElement *element)
-: Effect(EFFECT_BLINK, element) {
+EffectBlink::EffectBlink(NixieElement *el,
+                         unsigned long el_n): Effect(EFFECT_BLINK,
+                                                     el, el_n) {
 } // EffectBlink::EffectBlink()
 
-void EffectBlink::start(unsigned long start_ms, unsigned long tick_ms,
-                        int el_n) {
+void EffectBlink::start(unsigned long start_ms,
+                        unsigned long tick_ms,
+                        int el_i) {
+  Serial.println("EffectBlink::start> el_i=" + String(el_i));
   Effect::start(start_ms, tick_ms);
 
-  this->_el_n = el_n;
   this->_onoff = true;
 
-  for (int e=0; e < this->_el_n; e++) {
-    this->_blightness[e] = this->_Element[e].get_blightness();
-  } // for(e)
+  Serial.println("EffectBlink::start> el_n=" + String(this->_el_n));
+  for (int i=0; i < this->_el_n; i++) {
+    this->_blightness[i] = this->_el[i].get_blightness();
+  } // for(i)
+  Serial.println("EffectBlink::start> done");
 } // EffectBlink::start()
 
 void EffectBlink::loop(unsigned long cur_ms) {
@@ -267,41 +316,42 @@ void EffectBlink::loop(unsigned long cur_ms) {
 
   if ( this->_onoff ) {
     this->_onoff = false;
-    for (int e=0; e < this->_el_n; e++) {
-      this->_Element[e].set_blightness(0);
-    } // for(e)
+    for (int i=0; i < this->_el_n; i++) {
+      this->_el[i].set_blightness(0);
+    } // for(i)
     return;
   }
 
   // this->_onoff == false
   this->_onoff = true;
-  for (int e=0; e < this->_el_n; e++) {
-    this->_Element[e].set_blightness(this->_blightness[e]);
-  } // for(e)
+  for (int i=0; i < this->_el_n; i++) {
+    this->_el[i].set_blightness(this->_blightness[i]);
+  } // for(i)
 } // EffectBlink::loop()
 
 void EffectBlink::end() {
   Effect::end();
 
   for (int e=0; e < this->_el_n; e++) {
-    this->_Element[e].set_blightness(this->_blightness[e]);
+    this->_el[e].set_blightness(this->_blightness[e]);
   } // for(e)
 } // EffectBlink::end()
 
 //============================================================================
 // class EffectRandomOnOff
 //----------------------------------------------------------------------------
-EffectRandomOnOff::EffectRandomOnOff(NixieElement *element)
-: Effect(EFFECT_RANDOM_ONOFF, element) {
+EffectRandomOnOff::EffectRandomOnOff(NixieElement *el,
+                                     unsigned long el_n): Effect(EFFECT_RANDOM_ONOFF,
+                                                                 el, el_n) {
 
 } // EffectRandomOnOff::EffectRandomOnOff()
 
 void EffectRandomOnOff::start(unsigned long start_ms, unsigned long tick_ms,
-                              int element) {
+                              int el_i) {
   Effect::start(start_ms, tick_ms);
 
-  this->_el = element;
-  this->_Element[this->_el].set_blightness(BLIGHTNESS_MAX);
+  this->_el_i = el_i;
+  this->_el[this->_el_i].set_blightness(BLIGHTNESS_MAX);
 } // EffectRandomOnOff::start()
 
 void EffectRandomOnOff::loop(unsigned long cur_ms) {
@@ -309,7 +359,7 @@ void EffectRandomOnOff::loop(unsigned long cur_ms) {
     return;
   }
 
-  NixieElement *e = &(this->_Element[this->_el]); // 重要！ポインタ渡し
+  NixieElement *e = &(this->_el[this->_el_i]); // 重要！ポインタ渡し
   if (random(10) > 5) {
     e->set_blightness(BLIGHTNESS_MAX);
   } else {
@@ -320,7 +370,7 @@ void EffectRandomOnOff::loop(unsigned long cur_ms) {
 void EffectRandomOnOff::end() {
   Effect::end();
 
-  this->_Element[this->_el].set_blightness(BLIGHTNESS_MAX);
+  this->_el[this->_el_i].set_blightness(BLIGHTNESS_MAX);
 } // EffectRandomOnOff::end()
 
 //============================================================================
@@ -358,12 +408,13 @@ Effect *NixieTube::init_effect(effect_id_t eid) {
   }
 
   switch (eid) {
-  case EFFECT_FADEIN:   return new EffectFadeIn(this->element);
-  case EFFECT_FADEOUT:  return new EffectFadeOut(this->element);
-  case EFFECT_XFADE:    return new EffectXFade(this->element);
-  case EFFECT_SHUFFLE:  return new EffectShuffle(this->element);
-  case EFFECT_BLINK:    return new EffectBlink(this->element);
-  case EFFECT_RANDOM_ONOFF:    return new EffectRandomOnOff(this->element);
+  case EFFECT_ONLY:     return new EffectOnly(this->element, this->element_n);
+  case EFFECT_FADEIN:   return new EffectFadeIn(this->element, this->element_n);
+  case EFFECT_FADEOUT:  return new EffectFadeOut(this->element, this->element_n);
+  case EFFECT_XFADE:    return new EffectXFade(this->element, this->element_n);
+  case EFFECT_SHUFFLE:  return new EffectShuffle(this->element, this->element_n);
+  case EFFECT_BLINK:    return new EffectBlink(this->element, this->element_n);
+  case EFFECT_RANDOM_ONOFF:    return new EffectRandomOnOff(this->element, this->element_n);
   default:
     Serial.println("ERROR: eid = " + String(eid));
     return (Effect *)NULL;
@@ -406,17 +457,21 @@ void NixieTube::xfade_start(unsigned long start_ms,
   this->_ef->start(start_ms, tick_ms, el_in, el_out);
 } // NixieTube::xfade_start()
 
-void NixieTube::shuffle_start(unsigned long start_ms, unsigned long tick_ms,
+void NixieTube::shuffle_start(unsigned long start_ms,
+                              unsigned long tick_ms,
                               int n, int el) {
   this->_ef = this->init_effect(EFFECT_SHUFFLE);
   this->_ef->start(start_ms, tick_ms, n, el);
 } // NixieTube::shuffle_start()
 
-void NixieTube::blink_start(unsigned long start_ms, unsigned long tick_ms,
-                            int el_n) {
+void NixieTube::blink_start(unsigned long start_ms,
+                            unsigned long tick_ms,
+                            int el_i) {
+  Serial.println("blink_start> el_i=" + String(el_i));
   this->_ef = this->init_effect(EFFECT_BLINK);
-  this->_ef->start(start_ms, tick_ms, el_n);
-}
+  this->_ef->start(start_ms, tick_ms, el_i);
+  Serial.println("blink_start> done");
+} // NixieTube::blink_start()
 
 void NixieTube::randomOnOff_start(unsigned long start_ms,
                                   unsigned long tick_ms,
