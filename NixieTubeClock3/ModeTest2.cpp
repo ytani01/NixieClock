@@ -20,11 +20,14 @@ ModeTest2::ModeTest2(NixieArray *nxa)
 void ModeTest2::init(unsigned long start_ms) {
   ModeBase::init(start_ms);
 
+  Serial.println("ModeTest2::init>");
+
   for (int i=0; i < this->_digit_n; i++) {
     this->_digit[i] = i;
     for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
       if ( this->_digit[i] == e ) {
-        this->_nxa->num[i].element[e].set_blightness(BLIGHTNESS_MAX);
+        // this->_nxa->num[i].element[e].set_blightness(BLIGHTNESS_MAX);
+        this->_nxa->num[i].randomOnOff_start(start_ms, 50, e);
       } else {
         this->_nxa->num[i].element[e].set_blightness(0);
       }
@@ -38,9 +41,19 @@ void ModeTest2::loop(unsigned long cur_ms) {
     return;
   }
 
+  if ( cur_ms - this->_start_ms > 1000 ) {
+    for (int i=0; i < _digit_n; i++) {
+      this->_nxa->num[i].end_effect();
+    }
+  }
+  
   String msg = "_digit=[ ";
   for (int i=0; i < this->_digit_n; i++) {
-    msg += String(this->_digit[i]) + " ";
+    if (i == this->_cur) {
+      msg += "<" + String(this->_digit[i]) + "> ";
+    } else {
+      msg += String(this->_digit[i]) + " ";
+    }
   } // for(i)
   msg += "]";
   Serial.println(msg);

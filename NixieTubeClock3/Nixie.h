@@ -18,11 +18,13 @@
 #ifndef NIXIE_H
 #define NIXIE_H
 #include <Arduino.h>
+#include <RTClib.h>
+#include <WiFi.h>
 
 #define BLIGHTNESS_MAX       8
 
-#define NIXIE_NUM_N          6
-#define NIXIE_NUM_DIGIT_N   10
+#define NIXIE_NUM_N          6  // 数字の桁数
+#define NIXIE_NUM_DIGIT_N   10  // 一桁の数字のパターン数
 
 #define NIXIE_COLON_N        2
 #define NIXIE_COLON_R        0
@@ -33,7 +35,7 @@
 
 #define NIXIE_ELEMENT_N_MAX  (NIXIE_NUM_DIGIT_N > NIXIE_COLON_DOT_N ? NIXIE_NUM_DIGIT_N : NIXIE_COLON_DOT_N)
 
-typedef unsigned char effect_id_t;
+typedef unsigned long effect_id_t;
 #define EFFECT_NONE          0
 #define EFFECT_FADEIN        1
 #define EFFECT_FADEOUT       2
@@ -42,6 +44,7 @@ typedef unsigned char effect_id_t;
 #define EFFECT_FOGOUT        5
 #define EFFECT_SHUFFLE       6
 #define EFFECT_BLINK         7
+#define EFFECT_RANDOM_ONOFF  8
 
 //============================================================================
 class NixieElement {
@@ -131,6 +134,7 @@ class EffectXFade : public Effect {
   int _el_out;
 
 }; // class EffectXFade
+
 //============================================================================
 class EffectShuffle : public Effect {
  public:
@@ -144,6 +148,7 @@ class EffectShuffle : public Effect {
   int   _el;
   int   _n;
 }; // class EffectShuffle
+
 //============================================================================
 class EffectBlink : public Effect {
  public:
@@ -157,6 +162,19 @@ class EffectBlink : public Effect {
   uint8_t  _blightness[NIXIE_ELEMENT_N_MAX];
   boolean  _onoff;
 }; // class EffectBlink
+
+//============================================================================
+class EffectRandomOnOff : public Effect {
+ public:
+  EffectRandomOnOff(NixieElement *element);
+  void start(unsigned long start_ms, unsigned long tick_ms, int element);
+  void loop(unsigned long cur_ms);
+  void end();
+
+ private:
+  int _el;
+}; // class EffectRandomOnOff
+
 //============================================================================
 class NixieTube {
  public:
@@ -171,6 +189,8 @@ class NixieTube {
   Effect *init_effect(effect_id_t eid);
   void end_effect();
 
+  boolean effect_is_active();
+
   void fadein_start(unsigned long start_ms, unsigned long ms, int element_i);
   void fadeout_start(unsigned long start_ms, unsigned long ms, int element_i);
   void xfade_start(unsigned long start_ms, unsigned long ms,
@@ -178,6 +198,7 @@ class NixieTube {
   void shuffle_start(unsigned long start_ms, unsigned long tick, int n,
                      int element_i);
   void blink_start(unsigned long start_ms, unsigned long ms, int el_n);
+  void randomOnOff_start(unsigned long start_ms, unsigned long ms, int el);
 
  private:
   Effect *_ef;

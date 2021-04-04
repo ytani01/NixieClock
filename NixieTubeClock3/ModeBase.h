@@ -21,11 +21,11 @@ class ModeBase {
   virtual void btn_intr(unsigned long cur_ms, Button *btn); // ボタン処理
 
  protected:
-  String        _name;
-  NixieArray   *_nxa;
+  String        _name;         // モード名
+  NixieArray   *_nxa;          // ニキシー管アレイ
   unsigned long _start_ms;
-  unsigned long _tick_ms;
-  unsigned long _tick;
+  unsigned long _tick_ms;      // tick間隔(msec)
+  unsigned long _tick;         // tickカウント
   unsigned long _prev_tick;
 };
 #endif // MODE_BASE_H

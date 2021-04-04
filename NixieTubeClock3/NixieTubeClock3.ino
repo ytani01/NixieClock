@@ -1,13 +1,12 @@
 /*
  * (c) 2020 Yoichi Tanibayashi
  */
-#include <RTClib.h>
-#include <WiFi.h>
 #include "Nixie.h"
 #include "Button.h"
 #include "ModeBase.h"
 #include "ModeTest1.h"
 #include "ModeTest2.h"
+#include "ModeClock1.h"
 
 #define LOOP_DELAY_US       1 // micro seconds
 #define DEBOUNCE          200 // msec
@@ -43,9 +42,7 @@ struct tm timeInfo;
 /* RTC DS3231 */
 RTC_DS3231 Rtc;
 char dayOfTheWeek[7][4] =
-{
-  "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
-};
+  {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 
 //============================================================================
 uint8_t pinsIn[] = {PIN_BTN0, PIN_BTN1, PIN_BTN2};
@@ -75,10 +72,12 @@ int curDigit = 0;
 #define MODE_NONE -1
 #define MODE_TEST1 0
 #define MODE_TEST2 1
+#define MODE_CLOCK1 2
 ModeTest1 *modeT1;
 ModeTest2 *modeT2;
+ModeClock1 *modeC1;
 
-ModeBase *Mode[] = {modeT1, modeT2};
+ModeBase *Mode[] = {modeT1, modeT2, modeC1};
 
 static unsigned long MODE_N = sizeof(Mode) / sizeof(ModeBase *);
 
@@ -135,6 +134,7 @@ void setup() {
   // 各モードの初期化
   Mode[0] = new ModeTest1(nixieArray);
   Mode[1] = new ModeTest2(nixieArray);
+  Mode[2] = new ModeClock1(nixieArray);
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // ボタンの初期化
   btnObj[0] = new Button(PIN_BTN0, "BTN0");
@@ -184,7 +184,7 @@ void setup() {
           timeInfo.tm_year + 1900, timeInfo.tm_mon + 1, timeInfo.tm_mday,
           dayOfTheWeek[timeInfo.tm_wday],
           timeInfo.tm_hour, timeInfo.tm_min, timeInfo.tm_sec);
-  Serial.println("dt_str(NTP)=" + String(dt_str));
+  // Serial.println("dt_str(NTP)=" + String(dt_str));
 } // setup()
 
 //============================================================================
@@ -216,7 +216,7 @@ void loop() {
             now.year(), now.month(), now.day(),
             dayOfTheWeek[now.dayOfTheWeek()],
             now.hour(), now.minute(), now.second());
-    Serial.println("dt_str(RTC)=" + String(dt_str));
+    // Serial.println("dt_str(RTC)=" + String(dt_str));
   }
 
   //--------------------------------------------------------------------------
@@ -233,10 +233,12 @@ void loop() {
   for (int b=0; b < BTN_N; b++) {
     if ( btnObj[b]->get() ) {
       btnObj[b]->print();
-      if ( b == 0 && btnObj[b]->get_click_count() >= 2 ) {
+      if ( btnObj[b]->get_name() == "BTN0" &&
+           btnObj[b]->get_click_count() >= 2 ) {
 	change_mode();
+      } else {
+        Mode[curMode]->btn_intr(curMsec, btnObj[b]);
       }
-      Mode[curMode]->btn_intr(curMsec, btnObj[b]);
     }
   }
   //--------------------------------------------------------------------------

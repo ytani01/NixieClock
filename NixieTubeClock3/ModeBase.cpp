@@ -7,6 +7,7 @@ ModeBase::ModeBase(NixieArray *nxa, String name, unsigned long tick_ms) {
   this->_nxa = nxa;
   this->_name = name;
   this->_tick_ms = tick_ms;
+  this->_prev_tick = 0;
 
   String msg = "ModeBase::setup(): ";
   msg += "_name = " + this->_name;

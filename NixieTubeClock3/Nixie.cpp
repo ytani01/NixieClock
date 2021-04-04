@@ -99,6 +99,7 @@ boolean Effect::tick(unsigned long cur_ms) {
   }
   return true;
 } // Effect::tick()
+
 //============================================================================
 // class EffectFadeIn
 //----------------------------------------------------------------------------
@@ -239,8 +240,9 @@ void EffectShuffle::end() {
 
   this->_Element[this->_el].set_blightness(BLIGHTNESS_MAX);
 } // EffectShuffle::end()
+
 //============================================================================
-// class EffectShuffle
+// class EffectBlink
 //----------------------------------------------------------------------------
 EffectBlink::EffectBlink(NixieElement *element)
 : Effect(EFFECT_BLINK, element) {
@@ -285,6 +287,42 @@ void EffectBlink::end() {
     this->_Element[e].set_blightness(this->_blightness[e]);
   } // for(e)
 } // EffectBlink::end()
+
+//============================================================================
+// class EffectRandomOnOff
+//----------------------------------------------------------------------------
+EffectRandomOnOff::EffectRandomOnOff(NixieElement *element)
+: Effect(EFFECT_RANDOM_ONOFF, element) {
+
+} // EffectRandomOnOff::EffectRandomOnOff()
+
+void EffectRandomOnOff::start(unsigned long start_ms, unsigned long tick_ms,
+                              int element) {
+  Effect::start(start_ms, tick_ms);
+
+  this->_el = element;
+  this->_Element[this->_el].set_blightness(BLIGHTNESS_MAX);
+} // EffectRandomOnOff::start()
+
+void EffectRandomOnOff::loop(unsigned long cur_ms) {
+  if ( ! this->tick(cur_ms) ) {
+    return;
+  }
+
+  NixieElement *e = &(this->_Element[this->_el]); // 重要！ポインタ渡し
+  if (random(10) > 5) {
+    e->set_blightness(BLIGHTNESS_MAX);
+  } else {
+    e->set_blightness(0);    
+  }
+} // EffectRandomOnOff::loop()
+
+void EffectRandomOnOff::end() {
+  Effect::end();
+
+  this->_Element[this->_el].set_blightness(BLIGHTNESS_MAX);
+} // EffectRandomOnOff::end()
+
 //============================================================================
 // class NixieTube
 //----------------------------------------------------------------------------
@@ -325,6 +363,7 @@ Effect *NixieTube::init_effect(effect_id_t eid) {
   case EFFECT_XFADE:    return new EffectXFade(this->element);
   case EFFECT_SHUFFLE:  return new EffectShuffle(this->element);
   case EFFECT_BLINK:    return new EffectBlink(this->element);
+  case EFFECT_RANDOM_ONOFF:    return new EffectRandomOnOff(this->element);
   default:
     Serial.println("ERROR: eid = " + String(eid));
     return (Effect *)NULL;
@@ -341,6 +380,10 @@ void NixieTube::end_effect() {
   delete this->_ef;
   this->_ef = (Effect *)NULL;
 } // NixieTube::end_effect()
+
+boolean NixieTube::effect_is_active() {
+  return this->_ef;
+} // NixieTube::effect_is_active()
 
 void NixieTube::fadein_start(unsigned long start_ms,
                              unsigned long tick_ms,
@@ -374,6 +417,14 @@ void NixieTube::blink_start(unsigned long start_ms, unsigned long tick_ms,
   this->_ef = this->init_effect(EFFECT_BLINK);
   this->_ef->start(start_ms, tick_ms, el_n);
 }
+
+void NixieTube::randomOnOff_start(unsigned long start_ms,
+                                  unsigned long tick_ms,
+                                  int el) {
+  this->_ef = this->init_effect(EFFECT_RANDOM_ONOFF);
+  this->_ef->start(start_ms, tick_ms, el);
+}
+  
 //============================================================================
 // class NixieArray
 //----------------------------------------------------------------------------
