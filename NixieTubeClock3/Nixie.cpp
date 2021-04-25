@@ -53,8 +53,9 @@ Effect::Effect(effect_id_t eid, NixieElement *element, unsigned long el_n) {
   this->_id = eid;
   this->_el = element;
   this->_el_n = el_n;
-  Serial.println("Effect::Effect> el_n=" + String(this->_el_n));
+  // Serial.println("Effect::Effect> el_n=" + String(this->_el_n));
 }
+
 Effect::~Effect() {}
 
 void Effect::start(unsigned long start_ms, unsigned long tick_ms) {
@@ -63,8 +64,8 @@ void Effect::start(unsigned long start_ms, unsigned long tick_ms) {
   (void)this->tick(this->_start_ms);
   this->_active = true;
   Serial.println("Effect::start> start_ms=" + String(this->_start_ms));
-  Serial.println("Effect::start> tick_ms=" + String(this->_tick_ms));
-  Serial.println("Effect::start> el_n=" + String(this->_el_n));
+  // Serial.println("Effect::start> tick_ms=" + String(this->_tick_ms));
+  // Serial.println("Effect::start> el_n=" + String(this->_el_n));
 }
 void Effect::start(unsigned long start_ms, unsigned long tick_ms, int el) {
   this->start(start_ms, tick_ms);
@@ -78,7 +79,7 @@ void Effect::loop(unsigned long cur_ms) {
   if ( ! tick(cur_ms) ) {
     return;
   }
-  Serial.println("Effect::loop()");
+  // Serial.println("Effect::loop()");
 }
 
 void Effect::end() {
@@ -179,6 +180,7 @@ EffectFadeOut::EffectFadeOut(NixieElement *el,
 void EffectFadeOut::start(unsigned long start_ms,
                           unsigned long tick_ms,
                           int el_i) {
+  Serial.println("EffectFadeOut::start>");
   Effect::start(start_ms, tick_ms);
 
   this->_el_i = el_i;
@@ -192,6 +194,7 @@ void EffectFadeOut::loop(unsigned long cur_ms) {
 
   NixieElement *e = &(this->_el[this->_el_i]);
   uint8_t bl = e->get_blightness();
+  Serial.println("EffectFadeOut::loop> bl=" + String(bl));
   if ( bl > 0 ) {
     e->dec_blightness();
   } else {
@@ -541,7 +544,7 @@ void NixieArray::set_onoff(unsigned long cur_ms) {
     } // for(e)
   } // for(t)
 
-  // colorn部
+  // colon部
   for (int t=0; t < NIXIE_COLON_N; t++) {
     for (int e=0; e < this->colon[t].element_n; e++) {
       this->colon[t].element[e].off();
@@ -597,9 +600,9 @@ void NixieArray::display(unsigned long cur_ms) {
     for (int d=0; d < NIXIE_COLON_DOT_N; d++) {
       uint8_t pin = this->colon[c].element[d].get_pin();
       if ( this->colon[c].element[d].is_on() ) {
-        digitalWrite(pin, LOW);  // LOW  --> ON !
+        digitalWrite(pin, HIGH);  // LOW  --> ON !
       } else {
-        digitalWrite(pin, HIGH); // HIGH --> OFF !
+        digitalWrite(pin, LOW); // HIGH --> OFF !
       }
     } // for(d)
   } // for(c)

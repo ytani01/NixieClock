@@ -7,6 +7,7 @@
 #include "ModeTest1.h"
 #include "ModeTest2.h"
 #include "ModeClock1.h"
+#include "ModeClock2.h"
 
 #define LOOP_DELAY_US       1 // micro seconds
 #define DEBOUNCE          200 // msec
@@ -69,19 +70,21 @@ unsigned long prevMsec   = 0;
 int curTube = 0;
 int curDigit = 0;
 //----------------------------------------------------------------------------
-#define MODE_NONE -1
-#define MODE_TEST1 0
-#define MODE_TEST2 1
-#define MODE_CLOCK1 2
+ModeClock1 *modeC1;
+ModeClock2 *modeC2;
 ModeTest1 *modeT1;
 ModeTest2 *modeT2;
-ModeClock1 *modeC1;
 
-ModeBase *Mode[] = {modeT1, modeT2, modeC1};
+ModeBase *Mode[] = {modeC1, modeC2, modeT1, modeT2};
+#define MODE_NONE -1
+#define MODE_CLOCK1 0
+#define MODE_CLOCK2 1
+#define MODE_TEST1 2
+#define MODE_TEST2 3
 
 static unsigned long MODE_N = sizeof(Mode) / sizeof(ModeBase *);
 
-long curMode = MODE_TEST1;
+long curMode = MODE_CLOCK1;
 long prevMode = MODE_NONE;
 //============================================================================
 long change_mode() {
@@ -131,10 +134,12 @@ void setup() {
                               PIN_HV5812_DATA, PIN_HV5812_BLANK,
                               nixiePins, colonPins);
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  // 各モードの初期化
-  Mode[0] = new ModeTest1(nixieArray);
-  Mode[1] = new ModeTest2(nixieArray);
-  Mode[2] = new ModeClock1(nixieArray);
+  // 各モードオブジェクト生成
+  Mode[0] = new ModeClock1(nixieArray);
+  Mode[1] = new ModeClock2(nixieArray);
+  Mode[2] = new ModeTest1(nixieArray);
+  Mode[3] = new ModeTest2(nixieArray);
+
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // ボタンの初期化
   btnObj[0] = new Button(PIN_BTN0, "BTN0");
@@ -222,12 +227,16 @@ void loop() {
   //--------------------------------------------------------------------------
   // モード実行
   if (curMode != prevMode) {
+    Serial.println("AAA " + String(curMode) + " " + String(prevMode));
+
     // モード変更時の初期化
     Mode[curMode]->init(curMsec);
+    Serial.println("BBB " + String(curMode) + " " + String(prevMode));
     prevMode = curMode;
   } else {
     Mode[curMode]->loop(curMsec);
   }
+
   //--------------------------------------------------------------------------
   // ボタン
   for (int b=0; b < BTN_N; b++) {

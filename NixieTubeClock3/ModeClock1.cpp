@@ -12,6 +12,8 @@ ModeClock1::ModeClock1(NixieArray *nxa): ModeBase::ModeBase(nxa,
 }
 
 void ModeClock1::init(unsigned long start_ms) {
+  Serial.println("ModeClock1::init>");
+  
   ModeBase::init(start_ms);
 
   for (int i=0; i < NIXIE_NUM_N; i++) {
@@ -68,18 +70,17 @@ void ModeClock1::loop(unsigned long cur_ms) {
   sprintf(dt_str, "%04d/%02d/%02d(%s) %02d:%02d:%02d",
           now.year(), now.month(), now.day(), WDAY[now.dayOfTheWeek()],
           now.hour(), now.minute(), now.second());
-  Serial.println("ModeClock1::loop> ["
-                 + String(this->_tick)
-                 + "] dt_str(RTC)="
-                 + String(dt_str)
-                 + ", "
-                 + String(time_str));
+
+  char msg[1024];
+  sprintf(msg, "ModeClock1::loop>[%d] dt_str(RTC)=%s, %s",
+          int(this->_tick), dt_str, time_str);
+
+  // Serial.println(msg);
 
 } // ModeClock1::loop()
 
 void ModeClock1::btn_intr(unsigned long cur_ms, Button *btn) {
   Serial.println("ModeClock1::btn_intr(" + btn->get_name() + ")");
-
 } // ModeClock1::btn_intr()
 
 // for emacs
