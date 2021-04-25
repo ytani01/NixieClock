@@ -32,8 +32,10 @@
 
 //============================================================================
 /* WiFi */
-const char* SSID = "fablabkannai";
-const char* SSID_PW = "kannai201";
+// const char* SSID = "fablabkannai";
+// const char* SSID_PW = "kannai201";
+const char* SSID = "ytnet_a1";
+const char* SSID_PW = "a1@ytnet";
 
 //============================================================================
 /* for NTP */
