@@ -10,7 +10,16 @@
 #include "ModeClock2.h"
 
 #define LOOP_DELAY_US       1 // micro seconds
+#define WIFI_TRY_MAX       10 // count
 #define DEBOUNCE          200 // msec
+
+/*
+const char* SSID = "fablabkannai";
+const char* SSID_PW = "kannai201";
+*/
+const char* SSID = "ytnet_a1";
+const char* SSID_PW = "a1@ytnet";
+const char* ntpSvr[] = {"ntp.nict.jp", "time.google.com", ""};
 
 //============================================================================
 #define PIN_HV5812_CLK     26
@@ -31,21 +40,15 @@
 #define BTN_N               3
 
 //============================================================================
-/* WiFi */
-// const char* SSID = "fablabkannai";
-// const char* SSID_PW = "kannai201";
-const char* SSID = "ytnet_a1";
-const char* SSID_PW = "a1@ytnet";
-
-//============================================================================
 /* for NTP */
-struct tm timeInfo;
+const unsigned long ntpInterval = 1000 * 20; // msec
+unsigned long       ntpLast = 0;
+boolean             ntpActive = false;
 
 //============================================================================
 /* RTC DS3231 */
 RTC_DS3231 Rtc;
-char dayOfTheWeek[7][4] =
-  {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+char* dayOfTheWeek[7] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 
 //============================================================================
 uint8_t pinsIn[] = {PIN_BTN0, PIN_BTN1, PIN_BTN2};
@@ -78,21 +81,35 @@ ModeTest1 *modeT1;
 ModeTest2 *modeT2;
 
 ModeBase *Mode[] = {modeC1, modeC2, modeT1, modeT2};
-#define MODE_NONE -1
-#define MODE_CLOCK1 0
-#define MODE_CLOCK2 1
-#define MODE_TEST1 2
-#define MODE_TEST2 3
+long curMode = 0;
+long prevMode = -1;
+static unsigned long modeN = sizeof(Mode) / sizeof(ModeBase *);
 
-static unsigned long MODE_N = sizeof(Mode) / sizeof(ModeBase *);
-
-long curMode = MODE_CLOCK1;
-long prevMode = MODE_NONE;
 //============================================================================
+void ntp_adjust() {
+  struct tm time_info;
+
+  getLocalTime(&time_info);
+  DateTime now = DateTime(time_info.tm_year + 1900,
+                          time_info.tm_mon + 1,
+                          time_info.tm_mday,
+                          time_info.tm_hour,
+                          time_info.tm_min,
+                          time_info.tm_sec);
+  Rtc.adjust(now);
+
+  char dt_str[128];
+  sprintf(dt_str, "%04d/%02d/%02d(%s) %02d:%02d:%02d",
+          time_info.tm_year + 1900, time_info.tm_mon + 1, time_info.tm_mday,
+          dayOfTheWeek[time_info.tm_wday],
+          time_info.tm_hour, time_info.tm_min, time_info.tm_sec);
+  Serial.println("ntp_adjust> " + String(dt_str));
+} // ntp_adjust()
+
 long change_mode() {
   nixieArray->end_all_effect();
   prevMode = curMode;
-  curMode = (curMode + 1) % MODE_N;
+  curMode = (curMode + 1) % modeN;
   Serial.println("change_mode(): curMode=" + String(curMode));
   return curMode;
 } // change_mode()
@@ -116,6 +133,7 @@ void btn_handler() {
     }
   } // for(b)
 } // btn_handler
+
 //============================================================================
 void setup() {
   Serial.begin(115200);
@@ -129,7 +147,7 @@ void setup() {
 
   Rtc.begin();
   unsigned long sec = Rtc.now().second();
-  Serial.println("init> sec=" + String(sec));
+  Serial.println("setup> sec=" + String(sec));
   randomSeed(sec);
 
   nixieArray = new NixieArray(PIN_HV5812_CLK,  PIN_HV5812_STOBE,
@@ -169,29 +187,24 @@ void setup() {
 
   //--------------------------------------------------------------------------
   // WIFI and NTP
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
+  for (int i=0; i < WIFI_TRY_MAX; i++) {
     Serial.println("waiting WiFi: " + String(SSID));
+    delay(500);
+    if (WiFi.status() == WL_CONNECTED) {
+      Serial.println("Connected WiFi: " + String(SSID));
+      Serial.println("IP addr: " + WiFi.localIP().toString());
+
+      configTime(9 * 3600L, 0, ntpSvr[0], ntpSvr[1], ntpSvr[2]);
+      ntpActive = true;
+      ntp_adjust();
+      break;
+    }
   }
-  Serial.println("Connected WiFi: " + String(SSID));
+  if ( ! ntpActive ) {
+    WiFi.mode(WIFI_OFF);
+    Serial.println("setup> WiFi OFF");
+  }
 
-  //--------------------------------------------------------------------------
-  configTime(9 * 3600L, 0, "ntp.nict.jp", "time.google.com");
-  getLocalTime(&timeInfo);
-  DateTime now = DateTime(timeInfo.tm_year + 1900,
-                          timeInfo.tm_mon + 1,
-                          timeInfo.tm_mday,
-                          timeInfo.tm_hour,
-                          timeInfo.tm_min,
-                          timeInfo.tm_sec);
-  Rtc.adjust(now);
-
-  char dt_str[128];
-  sprintf(dt_str, "%04d/%02d/%02d(%s) %02d:%02d:%02d",
-          timeInfo.tm_year + 1900, timeInfo.tm_mon + 1, timeInfo.tm_mday,
-          dayOfTheWeek[timeInfo.tm_wday],
-          timeInfo.tm_hour, timeInfo.tm_min, timeInfo.tm_sec);
-  Serial.println("setup> dt_str(NTP)=" + String(dt_str));
 } // setup()
 
 //============================================================================
@@ -203,18 +216,9 @@ void loop() {
   loopCount++;
 
   //--------------------------------------------------------------------------
-  if (loopCount % 20000 == 0) {
-    getLocalTime(&timeInfo);
-    sprintf(dt_str, "%04d/%02d/%02d(%s) %02d:%02d:%02d",
-            timeInfo.tm_year + 1900,
-            timeInfo.tm_mon + 1,
-            timeInfo.tm_mday,
-            dayOfTheWeek[timeInfo.tm_wday],
-            timeInfo.tm_hour,
-            timeInfo.tm_min,
-            timeInfo.tm_sec);
-    Serial.println();
-    Serial.println("dt_str(NTP)=" + String(dt_str));
+  if (ntpActive && (curMsec - ntpLast) >= ntpInterval) {
+    ntp_adjust();
+    ntpLast = curMsec;
   }
 
   if (loopCount % 2000 == 0) {
@@ -229,11 +233,8 @@ void loop() {
   //--------------------------------------------------------------------------
   // モード実行
   if (curMode != prevMode) {
-    Serial.println("AAA " + String(curMode) + " " + String(prevMode));
-
     // モード変更時の初期化
     Mode[curMode]->init(curMsec);
-    Serial.println("BBB " + String(curMode) + " " + String(prevMode));
     prevMode = curMode;
   } else {
     Mode[curMode]->loop(curMsec);
