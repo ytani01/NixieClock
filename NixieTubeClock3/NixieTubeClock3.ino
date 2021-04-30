@@ -153,6 +153,7 @@ void setup() {
   nixieArray = new NixieArray(PIN_HV5812_CLK,  PIN_HV5812_STOBE,
                               PIN_HV5812_DATA, PIN_HV5812_BLANK,
                               nixiePins, colonPins);
+  nixieArray->bl_max = 5; // XXX
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // 各モードオブジェクト生成
   Mode[0] = new ModeClock1(nixieArray);

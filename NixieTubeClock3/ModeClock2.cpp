@@ -18,7 +18,7 @@ void ModeClock2::init(unsigned long start_ms) {
     this->_num[i] = i;
     for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
       if ( this->_num[i] == e ) {
-        // this->_nxa->num[i].element[e].set_blightness(BLIGHTNESS_MAX);
+        this->_nxa->num[i].element[e].set_blightness(BLIGHTNESS_RESOLUTION);
       } else {
         this->_nxa->num[i].element[e].set_blightness(0);
       }
@@ -52,13 +52,11 @@ void ModeClock2::loop(unsigned long cur_ms) {
     if ( this->_num[5] != prev_num[5] ) {
       this->_nxa->colon[i].fadeout_start(cur_ms, 40,
                                          NIXIE_COLON_DOT_DOWN);
-      Serial.println("FADE_OUT start " + String(this->_num[5]) + " " + String(prev_num[5]));
     } else {
       if ( this->_nxa->colon[i].effect_is_active() ) {
         // Serial.println("FADE active!");
       } else {
-        this->_nxa->colon[i].element[0].set_blightness(BLIGHTNESS_MAX);
-        Serial.println("FADE_IN start " + String(this->_num[5]) + " " + String(prev_num[5]));
+        this->_nxa->colon[i].element[0].set_blightness(BLIGHTNESS_RESOLUTION);
       }
     }
   } // for(COLON)

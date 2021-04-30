@@ -20,7 +20,7 @@ void ModeClock1::init(unsigned long start_ms) {
     this->_num[i] = i;
     for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
       if ( this->_num[i] == e ) {
-        // this->_nxa->num[i].element[e].set_blightness(BLIGHTNESS_MAX);
+        // this->_nxa->num[i].element[e].set_blightness(BLIGHTNESS_RESOLUTION);
       } else {
         this->_nxa->num[i].element[e].set_blightness(0);
       }

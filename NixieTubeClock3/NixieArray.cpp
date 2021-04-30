@@ -1,52 +1,8 @@
 /*
  * (c) 2021 Yoichi Tanibayashi
  */
-#include "Nixie.h"
+#include "NixieArray.h"
 
-//============================================================================
-// class NixieElement
-//----------------------------------------------------------------------------
-void NixieElement::setup(uint8_t pin) {
-  this->set_pin(pin);
-
-  this->set_blightness(0);
-  this->_on = false;
-}
-
-void NixieElement::set_blightness(uint8_t blightness) {
-  this->_blightness = blightness;
-}
-void NixieElement::inc_blightness() {
-  if (this->_blightness < BLIGHTNESS_MAX) {
-    this->_blightness++;
-  }
-}
-void NixieElement::dec_blightness() {
-  if (this->_blightness > 0) {
-    this->_blightness--;
-  }
-}
-uint8_t NixieElement::get_blightness() {
-  return this->_blightness;
-}
-
-void NixieElement::set_pin(uint8_t pin) {
-  this->_pin = pin;
-}
-uint8_t NixieElement::get_pin() {
-  return this->_pin;
-}
-
-void NixieElement::on() {
-  this->_on = true;
-}
-void NixieElement::off() {
-  this->_on = false;
-}
-boolean NixieElement::is_on() {
-  return this->_on;
-}
-  
 //============================================================================
 // class NixieArray
 //----------------------------------------------------------------------------
@@ -96,14 +52,15 @@ void NixieArray::end_all_effect() {
 } // NixieArray::end_all_effect()
 
 void NixieArray::set_onoff(unsigned long cur_ms) {
-  uint8_t timing = cur_ms % BLIGHTNESS_MAX;
+  uint8_t timing = cur_ms % BLIGHTNESS_RESOLUTION;
 
   // 数字部
   for (int t=0; t < NIXIE_NUM_N; t++) {
     for (int e=0; e < this->num[t].element_n; e++) {
-      this->num[t].element[e].off();
       if (this->num[t].element[e].get_blightness() > timing) {
         this->num[t].element[e].on();
+      } else {
+        this->num[t].element[e].off();
       }
     } // for(e)
   } // for(t)

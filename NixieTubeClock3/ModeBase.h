@@ -4,7 +4,7 @@
 #ifndef MODE_BASE_H
 #define MODE_BASE_H
 #include <Arduino.h>
-#include "Nixie.h"
+#include "NixieArray.h"
 #include "Button.h"
 
 class ModeBase {

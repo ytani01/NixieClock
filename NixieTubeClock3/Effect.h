@@ -25,6 +25,7 @@
 #include <RTClib.h>
 #include <WiFi.h>
 #include "Nixie.h"
+#include "NixieElement.h"
 
 typedef unsigned long effect_id_t;
 #define EFFECT_NONE          0
