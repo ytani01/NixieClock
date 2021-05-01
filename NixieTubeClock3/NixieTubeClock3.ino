@@ -9,16 +9,19 @@
 #include "ModeClock1.h"
 #include "ModeClock2.h"
 
+#include "FS.h"
+#include "SPIFFS.h"
+
+#define FORMAT_SPIFFS_IF_FAILED true
+
 #define LOOP_DELAY_US       1 // micro seconds
 #define WIFI_TRY_MAX       10 // count
 #define DEBOUNCE          200 // msec
 
-/*
-const char* SSID = "fablabkannai";
-const char* SSID_PW = "kannai201";
-*/
-const char* SSID = "ytnet_a1";
-const char* SSID_PW = "a1@ytnet";
+const char* FILE_WIFI = "/wifi.txt";
+char ssid[64];
+char ssid_pw[64];
+
 const char* ntpSvr[] = {"ntp.nict.jp", "time.google.com", ""};
 
 //============================================================================
@@ -133,13 +136,32 @@ void btn_handler() {
 void setup() {
   Serial.begin(115200);
   randomSeed(analogRead(0));
-  Serial.println("begin");
+  Serial.println("setup> begin");
   
   //--------------------------------------------------------------------------
   // グローバルオブジェクト・変数の初期化
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  WiFi.begin(SSID, SSID_PW);
+  SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED);
+  fs::FS fs = SPIFFS;
+  File file = fs.open("/wifi.txt");
 
+  int line_no = 0;
+  while (file.available()) {
+    String line = file.readStringUntil('\n');
+    line_no++;
+    Serial.println("setup> line=" + line);
+    if (line_no == 1) {
+      strcpy(ssid, line.c_str());
+    } else if (line_no == 2) {
+      strcpy(ssid_pw, line.c_str());
+    } else {
+      file.close();
+      break;
+    }
+  }
+  WiFi.begin(ssid, ssid_pw);
+
+  Serial.println("setup> RTC begin");
   Rtc.begin();
   unsigned long sec = Rtc.now().second();
   Serial.println("setup> sec=" + String(sec));
@@ -184,10 +206,10 @@ void setup() {
   //--------------------------------------------------------------------------
   // WIFI and NTP
   for (int i=0; i < WIFI_TRY_MAX; i++) {
-    Serial.println("waiting WiFi: " + String(SSID));
+    Serial.println("waiting WiFi: " + String(ssid));
     delay(500);
     if (WiFi.status() == WL_CONNECTED) {
-      Serial.println("Connected WiFi: " + String(SSID));
+      Serial.println("Connected WiFi: " + String(ssid));
       Serial.println("IP addr: " + WiFi.localIP().toString());
 
       configTime(9 * 3600L, 0, ntpSvr[0], ntpSvr[1], ntpSvr[2]);
