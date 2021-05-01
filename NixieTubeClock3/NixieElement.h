@@ -21,6 +21,8 @@
  */
 #ifndef NIXIE_ELEMENT_H
 #define NIXIE_ELEMENT_H
+
+#include "Arduino.h"
 #include "Nixie.h"
 
 class NixieElement {
@@ -32,7 +34,8 @@ class NixieElement {
   void set_blightness(uint8_t blightness);
   void inc_blightness();
   void dec_blightness();
-  uint8_t get_blightness();
+  unsigned int get_blightness();
+
   
   void set_pin(uint8_t pin);
   uint8_t get_pin();
@@ -43,7 +46,7 @@ class NixieElement {
   
  protected:
   uint8_t _pin = 0;
-  uint8_t _blightness = BLIGHTNESS_RESOLUTION;
+  unsigned int _blightness = 8;
   boolean _on = false;
 
 }; // class NixieElement

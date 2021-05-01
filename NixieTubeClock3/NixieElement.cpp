@@ -26,7 +26,7 @@ void NixieElement::dec_blightness() {
     this->_blightness--;
   }
 }
-uint8_t NixieElement::get_blightness() {
+unsigned int NixieElement::get_blightness() {
   return this->_blightness;
 }
 

@@ -31,6 +31,7 @@ NixieArray::NixieArray(uint8_t clk, uint8_t stobe, uint8_t data, uint8_t blank,
       digitalWrite(colon_pin[c][d], LOW);
     }
   } // for(c)
+
 } // NixieArray::setup()
 
 void NixieArray::loop(unsigned long cur_ms) {

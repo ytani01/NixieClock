@@ -75,15 +75,10 @@ unsigned long prevMsec   = 0;
 int curTube = 0;
 int curDigit = 0;
 //----------------------------------------------------------------------------
-ModeClock1 *modeC1;
-ModeClock2 *modeC2;
-ModeTest1 *modeT1;
-ModeTest2 *modeT2;
-
-ModeBase *Mode[] = {modeC1, modeC2, modeT1, modeT2};
+#define MODE_N 3
+ModeBase *Mode[MODE_N];
 long curMode = 0;
 long prevMode = -1;
-static unsigned long modeN = sizeof(Mode) / sizeof(ModeBase *);
 
 //============================================================================
 void ntp_adjust() {
@@ -109,7 +104,7 @@ void ntp_adjust() {
 long change_mode() {
   nixieArray->end_all_effect();
   prevMode = curMode;
-  curMode = (curMode + 1) % modeN;
+  curMode = (curMode + 1) % MODE_N;
   Serial.println("change_mode(): curMode=" + String(curMode));
   return curMode;
 } // change_mode()
@@ -153,12 +148,12 @@ void setup() {
   nixieArray = new NixieArray(PIN_HV5812_CLK,  PIN_HV5812_STOBE,
                               PIN_HV5812_DATA, PIN_HV5812_BLANK,
                               nixiePins, colonPins);
-  nixieArray->bl_max = 5; // XXX
+  nixieArray->blightness = 10;
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // 各モードオブジェクト生成
-  Mode[0] = new ModeClock1(nixieArray);
-  Mode[1] = new ModeClock2(nixieArray);
-  Mode[2] = new ModeTest1(nixieArray);
+  //Mode[0] = new ModeClock1(nixieArray);
+  Mode[0] = new ModeClock2(nixieArray);
+  Mode[1] = new ModeTest1(nixieArray);
   Mode[3] = new ModeTest2(nixieArray);
 
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

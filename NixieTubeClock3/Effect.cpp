@@ -2,6 +2,9 @@
  * (c) 2021 Yoichi Tanibayashi
  */
 #include "Effect.h"
+#include "NixieArray.h"
+
+extern NixieArray *nixieArray;
 
 //============================================================================
 // class Effect
@@ -115,7 +118,7 @@ void EffectFadeIn::loop(unsigned long cur_ms) {
 
   NixieElement *e = &(this->_el[this->_el_i]); // 重要！ポインタ渡し
   uint8_t bl = e->get_blightness();
-  if ( bl < BLIGHTNESS_RESOLUTION ) {
+  if ( bl < nixieArray->blightness ) {
     e->inc_blightness();
   } else {
     this->end();
@@ -169,7 +172,7 @@ void EffectXFade::start(unsigned long start_ms,
   for (int e = 0; e < this->_el_n; e++) {
     NixieElement *el = &(this->_el[e]);
     if ( e == this->_el_i_out ) {
-      el->set_blightness(BLIGHTNESS_RESOLUTION);
+      el->set_blightness(nixieArray->blightness);
     } else {
       el->set_blightness(0);
     }
@@ -186,7 +189,7 @@ void EffectXFade::loop(unsigned long cur_ms) {
   uint8_t bl_in  = e_in->get_blightness();
   uint8_t bl_out = e_out->get_blightness();
   int end_count = 0;
-  if ( bl_in < BLIGHTNESS_RESOLUTION ) {
+  if ( bl_in < nixieArray->blightness ) {
     e_in->inc_blightness();
   } else {
     end_count++;
@@ -333,6 +336,6 @@ void EffectRandomOnOff::end() {
 } // EffectRandomOnOff::end()
   
 // Local Variables:
-// Mode: arduino
+// Mode: c++
 // Coding: utf-8-unix
 // End:

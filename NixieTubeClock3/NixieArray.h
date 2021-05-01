@@ -22,15 +22,15 @@
 #ifndef NIXIE_ARRAY_H
 #define NIXIE_ARRAY_H
 #include "NixieTube.h"
-#include "Effect.h"
 
 class NixieArray {
  public:
   static const unsigned int DISP_DELAY_US = 1; // microsec
+          
+  unsigned int blightness = 3;
 
   NixieTube  num[NIXIE_NUM_N];
   NixieTube  colon[NIXIE_COLON_N];
-  unsigned int bl_max = BLIGHTNESS_RESOLUTION;
 
   NixieArray(uint8_t clk, uint8_t stobe, uint8_t data, uint8_t blank,
              uint8_t num[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N],
@@ -52,6 +52,6 @@ class NixieArray {
 
 // for emacs ..
 // Local Variables:
-// Mode: arduino
+// Mode: c++
 // Coding: utf-8-unix
 // End:
