@@ -20,8 +20,8 @@ const char* WIFIMGR_pass = "xxxxxxxx";
 DNSServer dnsServer;
 
 // parameters setting
-const String defaultSSID = "";
-const String defaultPASSWD = "";
+const String defaultSSID = "please select SSID";
+const String defaultPASSWD = "default pw";
 String ssid = defaultSSID;
 String passwd = defaultPASSWD;
 
@@ -126,7 +126,9 @@ String maskpasswd(String passwd){
 }
 
 void wifimgr_top() {
-  Serial.println("wifimgr_top> ");
+  const char* myname = "wifimgr_top";
+  Serial.printf("%s> ssid=%s, passwd=%s\n",
+                myname, ssid.c_str(), passwd.c_str());
 
   String html = Headder_str();
   html += "<a href='/wifiinput'>WIFI setup</a>";
@@ -143,7 +145,7 @@ String Headder_str() {
   
   String html = "";
   html += "<!DOCTYPE html><html><head>";
-  html += "<meta name='viewport' content='width=device-width, initial-scale=1.3'>";
+  html += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
   html += "<meta http-equiv='Pragma' content='no-cache'>";
   html += "<meta http-equiv='Cache-Control' content='no-cache'></head>";
   html += "<meta http-equiv='Expires' content='0'>";
@@ -218,7 +220,7 @@ String WIFI_Form_str(){
   }
   str += "</select><br>\r\n";
   str += "Password<br><input type='password' name='passwd' value='" + passwd + "'>";
-  str += "<br><input type='submit' value='set'>";
+  str += "<br><input type='submit' value='保存'>";
   str += "</form><br>";
   str += "<script>document.getElementById('ssid').value = '"+ ssid +"';</script>";
   return str;
@@ -235,6 +237,9 @@ void wifiset(){
   confData.print();
  
   confData.writeConfigFile(CONFIG_FILE);
+
+  ssid = confData.ssid;
+  passwd = confData.ssid_pw;
   
   // 「/」に転送
   webServer.sendHeader("Location", String("/"), true);

@@ -22,7 +22,7 @@ String read_line(File file) {
  *
  */
 int ConfigData::readConfigFile(const char* config_file) {
-  const char* func_name = "ConfigData::readConfigFile";
+  const char* myname = "ConfigData::readConfigFile";
 
   if(!SPIFFS.begin(true)) {
     Serial.println("SPIFFS mout failed");
@@ -31,17 +31,17 @@ int ConfigData::readConfigFile(const char* config_file) {
 
   File file = SPIFFS.open(config_file, "r");
   if (!file) {
-    Serial.printf("%s> %s: open faild\n", func_name, config_file);
+    Serial.printf("%s> %s: open faild\n", myname, config_file);
     this->ssid = "";
     this->ssid_pw = "";
     return -1;
   }
 
   this->ssid = read_line(file);
-  Serial.printf("%s> SSID: %s\n", func_name, ssid);
+  Serial.printf("%s> SSID: %s\n", myname, ssid.c_str());
   
   this->ssid_pw = read_line(file);
-  Serial.printf("%s> SSID PW: %s\n", func_name, ssid_pw);
+  Serial.printf("%s> SSID PW: %s\n", myname, ssid_pw.c_str());
 
   file.close();
   return 0;
@@ -51,16 +51,17 @@ int ConfigData::readConfigFile(const char* config_file) {
  *
  */
 int ConfigData::writeConfigFile(const char* config_file) {
-  const char* func_name = "ConfigData::writeConfigFile";
+  const char* myname = "ConfigData::writeConfigFile";
 
   this->ssid.trim();
   this->ssid_pw.trim();
 
-  Serial.printf("%s> \n", func_name);
+  Serial.printf("%s> \n", myname);
   this->print();
 
   File file = SPIFFS.open(config_file, "w");
   if (!file) {
+    Serial.printf("%s> ERROR open failed: %s\n", myname, config_file);
     return -1;
   }
   
@@ -68,6 +69,7 @@ int ConfigData::writeConfigFile(const char* config_file) {
   file.println(this->ssid_pw);
   file.close();
 
+  Serial.printf("%s> wrote: %s\n", myname, config_file);
   delay(100);
   return 0;
 } // ConfigData::writeConfigFile()
@@ -76,6 +78,6 @@ int ConfigData::writeConfigFile(const char* config_file) {
  *
  */
 void ConfigData::print() {
-  Serial.printf("SSID: %s\n", this->ssid);
-  Serial.printf("SSID PW: %s\n", this->ssid_pw);
+  Serial.printf("SSID: %s\n", this->ssid.c_str());
+  Serial.printf("SSID PW: %s\n", this->ssid_pw.c_str());
 } // ConfigData::print()
