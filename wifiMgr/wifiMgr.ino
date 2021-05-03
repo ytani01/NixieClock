@@ -96,7 +96,7 @@ void configserver() {
 
   WiFi.mode(WIFI_AP);
   WiFi.softAP(WIFIMGR_ssid); // no password
-//   WiFi.softAP(WIFIMGR_ssid,WIFIMGR_pass); // with password  
+  //   WiFi.softAP(WIFIMGR_ssid,WIFIMGR_pass); // with password  
   Serial.println("configserver> " + String(WIFIMGR_ssid));
 
   delay(300); // Important! This delay is necessary 
@@ -104,6 +104,7 @@ void configserver() {
 
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start(53, "*", apIP);
+  Serial.println("DNS server: start");
   
   webServer.on("/", wifimgr_top);
   webServer.on("/wifiinput", HTTP_GET, wifiinput);
