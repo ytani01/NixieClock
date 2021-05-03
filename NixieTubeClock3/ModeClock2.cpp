@@ -87,14 +87,14 @@ void ModeClock2::btn_intr(unsigned long cur_ms, Button *btn) {
   boolean flag = false;
 
   if ( btn->get_name() == "BTN1" && btn->get_click_count() > 0 ) {
-    nixieArray->blightness *= 2 * btn->get_click_count() * btn->get_click_count();
+    nixieArray->blightness += btn->get_click_count();
     if (nixieArray->blightness > BLIGHTNESS_RESOLUTION) {
       nixieArray->blightness = BLIGHTNESS_RESOLUTION;
     }
     flag = true;
   }
   if ( btn->get_name() == "BTN2" && btn->get_click_count() > 0 ) {
-    nixieArray->blightness /= 2 * btn->get_click_count() * btn->get_click_count();
+    nixieArray->blightness -= btn->get_click_count();
     if (nixieArray->blightness < 1) {
       nixieArray->blightness = 1;
     }
