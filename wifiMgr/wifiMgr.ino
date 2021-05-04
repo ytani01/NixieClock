@@ -11,27 +11,24 @@
 #include "ConfigData.h"
 #include "NetSetup.h"
 
-#define LED_BUILTIN 2
+#define PIN_LED 2
 
 IPAddress apIP(192,168,1,100);
 WebServer webServer(80);
-const char* WIFIMGR_ssid = "WIFIMGR_ESP32";
+const char* WIFIMGR_ssid = "NIXIE_CLOCK1";
 const char* WIFIMGR_pass = "xxxxxxxx";
 DNSServer dnsServer;
 
 // parameters setting
-const String defaultSSID = "please select SSID";
-const String defaultPASSWD = "default pw";
+const String defaultSSID = "please_select_SSID";
+const String defaultPASSWD = "default_pw";
 String ssid = defaultSSID;
 String passwd = defaultPASSWD;
 
-// scan SSID
-#define SSIDLIMIT 30
-String ssid_rssi_str[SSIDLIMIT];
-String ssid_str[SSIDLIMIT];
+#define SSID_N_MAX 30
 
 // SSIDent
-SSIDent ssidEnt[SSIDLIMIT];
+SSIDent ssidEnt[SSID_N_MAX];
 
 NetSetup netSetup;
 
@@ -39,60 +36,54 @@ ConfigData confData;
 
 void setup() {
   Serial.begin(115200);
-  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(PIN_LED, OUTPUT);
 
   // put your setup code here, to run once:
 
-  confData.readConfigFile(CONFIG_FILE);
+  confData.readConfigFile();
   confData.print();
 
+  ssid = confData.ssid;
+  passwd = confData.ssid_pw;
+
   // wifi connect
-  uint8_t retry = 0;
-  WiFi.begin(confData.ssid.c_str(), confData.ssid_pw.c_str());
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print('.');
-    delay(200); // 200ms
-    retry ++;
-    if (retry > 50) { // 200ms x 50 = 10 sec
-      Serial.println("wifi connection timeout");
-      webconfig(); // enter webconfig
+  WiFi.begin(ssid.c_str(), passwd.c_str());
+  for (int i=0; i < 10; i++) {
+    if (WiFi.status() == WL_CONNECTED) {
+      Serial.println("Connected.");
+      Serial.print("IP address: ");
+      Serial.println(WiFi.localIP());
+      delay(500);
+      return;
     }
-  }
-  Serial.println();
-  Serial.printf("Connected, IP address: ");
-  Serial.println(WiFi.localIP());
-  delay(500);
-}
 
-void loop() {
-  // put your main code here, to run repeatedly:  
-  
-  delay(100);
-}
+    Serial.print('.');
+    delay(1000);
+  } // for(i)
 
+  Serial.println("timed out");
 
-//*******************************************
-void webconfig() {
-  
   Serial.println("WebConfig mode: ");
-  digitalWrite(LED_BUILTIN, HIGH);
+  digitalWrite(PIN_LED, HIGH);
 
-  configserver();
+  config_server();
   
-  uint8_t configloop = 1;
-  while (configloop == 1) {
+  boolean configloop = true;
+  while (configloop) {
     dnsServer.processNextRequest();
     webServer.handleClient();
+    Serial.print(".");
+    delay(100);
   }
 
-  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(PIN_LED, LOW);
   
   WiFi.disconnect(true);
   WiFi.mode(WIFI_OFF);
-}
+} // setup()
 
-void configserver() {
-  Serial.println("configserver>");
+void config_server() {
+  Serial.println("config_server>");
 
   WiFi.disconnect(true);
   WiFi.mode(WIFI_OFF);
@@ -101,21 +92,22 @@ void configserver() {
   WiFi.mode(WIFI_AP);
   WiFi.softAP(WIFIMGR_ssid); // no password
   //   WiFi.softAP(WIFIMGR_ssid,WIFIMGR_pass); // with password  
-  Serial.println("configserver> " + String(WIFIMGR_ssid));
+  Serial.println("config_server> " + String(WIFIMGR_ssid));
 
   delay(300); // Important! This delay is necessary 
-  WiFi.softAPConfig(apIP,apIP,IPAddress(255,255,255,0)); 
+  WiFi.softAPConfig(apIP, apIP, IPAddress(255,255,255,0)); 
 
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start(53, "*", apIP);
   Serial.println("DNS server: start");
   
-  webServer.on("/", wifimgr_top);
-  webServer.on("/wifiinput", HTTP_GET, wifiinput);
-  webServer.on("/wifiset", HTTP_GET, wifiset);
-  webServer.on("/reboot", reboot);
-  webServer.on("/doreboot", doreboot);
-  webServer.onNotFound(wifimgr_top);
+  webServer.on("/", handle_top);
+  webServer.on("/select_ssid", HTTP_GET, select_ssid);
+  webServer.on("/save_ssid", HTTP_GET, save_ssid);
+  webServer.on("/confirm_reboot", confirm_reboot);
+  webServer.on("/do_reboot", do_reboot);
+  webServer.onNotFound(handle_top);
+
   webServer.begin();
   Serial.println("webServer.begin()");
 }
@@ -123,48 +115,69 @@ void configserver() {
 String maskpasswd(String passwd){
   String maskpasswd = "";
 
-  for (int i=0; i<passwd.length(); i++) maskpasswd = maskpasswd + "*";
+  for (int i=0; i<passwd.length(); i++) {
+    maskpasswd = maskpasswd + "*";
+  }
   if (passwd.length() == 0) maskpasswd = "(null)";
 
   return maskpasswd;
 }
 
-void wifimgr_top() {
-  const char* myname = "wifimgr_top";
+void handle_top() {
+  const char* myname = "handle_top";
   Serial.printf("%s> ssid=%s, passwd=%s\n",
                 myname, ssid.c_str(), passwd.c_str());
 
-  String html = Headder_str();
-  html += "<a href='/wifiinput'>WIFI setup</a>";
-  html += "<hr><h3>Current Settings</h3>";
-  html += "SSID: " + ssid + "<br>";
-  html += "passwd: " + maskpasswd(passwd) + "<br>";
-  html += "<hr><p><center><a href='/reboot'>Reboot</a></center>";
+  String html = HTML_header();
+  html += "<hr>";
+  html += "<h2>Current SSID: " + ssid + "</h2>";
+  //html += "<h2>passwd: " + maskpasswd(passwd) + "</h2>";
+  html += "<a href='/select_ssid'>Select WiFi SSID</a>";
+  html += "<hr>";
+  html += "<a href='/confirm_reboot'>Reboot</a>";
   html += "</body></html>";
   webServer.send(200, "text/html", html);
 }
 
-String Headder_str() {
-  Serial.println("Headder_str> ");
-  
+String HTML_header() {
   String html = "";
-  html += "<!DOCTYPE html><html><head>";
+  html += "<!DOCTYPE html>";
+  html += "<html>";
+  html += "<head>";
+
   html += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
   html += "<meta http-equiv='Pragma' content='no-cache'>";
-  html += "<meta http-equiv='Cache-Control' content='no-cache'></head>";
+  html += "<meta http-equiv='Cache-Control' content='no-cache'>";
   html += "<meta http-equiv='Expires' content='0'>";
   html += "<meta http-equiv='Content-type' CONTENT='text/html; charset=utf-8'>";
+
   html += "<style>";
-  html += "a:link, a:visited { background-color: #009900; color: white; padding: 5px 15px;";
-  html += "text-align: center; text-decoration: none;  display: inline-block;}";
-  html += "a:hover, a:active { background-color: green;}";
-  html += "bo32{ background-color: #EEEEEE;}";
+  html += "a:link, a:visited {";
+  html += " background-color: #00AA00;";
+  html += " color: white;";
+  html += " border: none;";
+  html += " padding: 5px 15px;";
+  html += " text-align: center;";
+  html += " text-decoration: none;";
+  html += " display: inline-block;";
+  html += "}";
+  html += "a:hover, a:active {";
+  html += " background-color: #00FF00;";
+  html += "}";
   html += "input[type=button], input[type=submit], input[type=reset] {";
-  html += "background-color: #000099;  border: none;  color: white;  padding: 5px 20px;";
-  html += "text-decoration: none;  margin: 4px 2px;";
+  html += " background-color: #0000AA;";
+  html += " color: white;";
+  html += " text-decoration: none;";
+  html += " font-size: large;";
+  html += " border: none;";
+  html += " padding: 5px 20px;";
+  html += " margin: 4px 2px;";
+  html += "}";
   html += "</style>";
+
+  html += "</head>";
   html += "<body>"; 
-  html += "<h2>WIFI設定</h2>";
+  html += "<h2>WIFI Setup</h2>";
   return html;
 }
 
@@ -173,119 +186,118 @@ void InitialConfigFile(){
 
   confData.ssid = defaultSSID;
   confData.ssid_pw = defaultPASSWD;
-  
-  //WriteConfigFile();
+
   confData.writeConfigFile(CONFIG_FILE);
 }
 
-void wifiinput() {
-  String html = Headder_str();
-  html += "<a href='/'>TOP</a> ";
-  html += "<hr><p>";
-  html += "<h3>WiFi Selector</h3>";
+void select_ssid() {
+  String html = HTML_header();
+  html += "<hr>";
+  html += "<h3>Select WiFi SSID</h3>";
   html += WIFI_Form_str();
-  html += "<br><hr><p><center><a href='/'>Cancel</a></center>";
+  html += "<hr>";
+  html += "<a href='/'>Cancel</a>";
   html += "</body></html>";
   webServer.send(200, "text/html", html);
 }
 
-//*******************************************
+//======================================================================
 String WIFI_Form_str(){
-  // XXX
   uint8_t ssid_n = netSetup.scanSSID();
   Serial.println(ssid_n);
-  Serial.println(netSetup.ssid_n);
-  for (int i=0; i < netSetup.ssid_n; i++) {
-    Serial.println(netSetup.ssid(i));
-    Serial.println(netSetup.ssid(i, true));
-  }
 
-  // WiFi.scanNetworks will return the number of networks found
-  Serial.print("wifi scan start .. ");
-  uint8_t ssid_num = WiFi.scanNetworks();
-  
-  if (ssid_num == 0) {
-    Serial.println("no SSIDs found\n");
-  } else {
-    Serial.printf("%d SSIDs found\n", ssid_num);
-    if (ssid_num > SSIDLIMIT) ssid_num = SSIDLIMIT;
-    
-    for (int i = 0; i < ssid_num; i++) {
-      ssid_str[i] = WiFi.SSID(i);
-      ssidEnt[i].set(WiFi.SSID(i), WiFi.RSSI(i), WiFi.encryptionType(i));
-      
-      ssid_rssi_str[i] = ssid_str[i] + "("
-        + String(WiFi.RSSI(i)) + "dBm "
-        + SSIDent::encTypeStr(WiFi.encryptionType(i))
-        + ")";
-      Serial.printf("%d: %s\n", i, ssid_rssi_str[i].c_str());
-      Serial.printf("%d: %s\n", i, ssidEnt[i].toString().c_str());
-      delay(10);
-    }
+  for (int i=0; i < netSetup.ssid_n; i++) {
+    Serial.print(netSetup.ssid(i));
+    Serial.print(" ");
+    Serial.print(String(netSetup.dbm(i)));
+    Serial.print(" ");
+    Serial.print(netSetup.encType(i));
+    Serial.println();
+  } // for(i)
+
+
+  String str = "<form action='/save_ssid' method='GET'>";
+
+  str += "SSID<br />";
+  str += "<select name='ssid' id='ssid'>";
+  for(int i=0; i < netSetup.ssid_n; i++){
+    str += "<option value=" + netSetup.ssid(i) + ">";
+    str += netSetup.ssid(i);
+    str += " (";
+    str += String(netSetup.dbm(i));
+    str += ", ";
+    str += netSetup.encType(i);
+    str += ")";
+    str += "</option>\n";
   }
-  
-  String str = "";
-  str += "<form action='/wifiset' method='get'>";
-  str += "<select name='ssid' id ='ssid'>";
-  for(int i=0; i<ssid_num; i++){
-    str += "<option value=" + ssid_str[i] + ">" + ssid_rssi_str[i] + "</option>";
-  }
-  str += "<option value=" + ssid + ">" + ssid + "(current)</option>";
+  str += "<option value=" + ssid + ">" + ssid + " (current)</option>\n";
   if (ssid != defaultSSID){
-    str += "<option value=" + defaultSSID + ">" + defaultSSID + "(default)</option>";
+    str += "<option value=" + defaultSSID + ">";
+    str += defaultSSID + " (default)";
+    str += "</option>\n";
   }
-  str += "</select><br>\n";
-  str += "Password<br><input type='password' name='passwd' value='" + passwd + "'>";
-  str += "<br><input type='submit' value='保存'>";
-  str += "</form><br>";
+  str += "</select><br />\n";
+  str += "<br />";
+  str += "Password<br />";
+  str += "<input type='password' name='passwd' value='" + passwd + "' />";
+  str += "<br>";
+  str += "<input type='submit' value='Save' />";
+  str += "</form>";
+  str += "<br />";
   str += "<script>document.getElementById('ssid').value = '"+ ssid +"';</script>";
   return str;
 }
 
 
-void wifiset(){
-  Serial.println("wifiset>");
+void save_ssid(){
+  Serial.println("save_ssid>");
 
   confData.ssid = webServer.arg("ssid");
-  confData.ssid_pw = webServer.arg("passwd");
   confData.ssid.trim();
+  confData.ssid_pw = webServer.arg("passwd");
   confData.ssid_pw.trim();
   confData.print();
  
-  confData.writeConfigFile(CONFIG_FILE);
+  confData.writeConfigFile();
 
   ssid = confData.ssid;
   passwd = confData.ssid_pw;
   
-  // 「/」に転送
+  // 自動転送
   webServer.sendHeader("Location", String("/"), true);
   webServer.send(302, "text/plain", "");
 }
 
-void reboot() {
-  String html = Headder_str();
+void confirm_reboot() {
+  String html = HTML_header();
   html += "<hr><p>";
   html += "<h3>reboot confirmation</h3><p>";
   html += "Are you sure to reboot?<p>";
-  html += "<center><a href='/doreboot'>YES</a> <a href='/'>no</a></center>";
+  html += "<center><a href='/do_reboot'>YES</a> <a href='/'>no</a></center>";
   html += "<p><hr>";
   html += "</body></html>";
   webServer.send(200, "text/html", html);
 }
 
-void doreboot() {
-  String html = Headder_str();
-  html += "<hr><p>";
-  html += "<h3>rebooting</h3><p>";
-  html += "The setting WiFi connection will be disconnected...<p>";
+void do_reboot() {
+  String html = HTML_header();
+  html += "<hr>";
+  html += "<h3>rebooting</h3>";
+  html += "<p>The setting WiFi connection will be disconnected...</p>";
   html += "<hr>";
   html += "</body></html>";
   webServer.send(200, "text/html", html);
 
-  // reboot esp32
-  Serial.println("reboot esp32 now.");
-  digitalWrite(LED_BUILTIN, LOW);
+  Serial.println("reboot esp32 ..\n");
+  digitalWrite(PIN_LED, LOW);
     
-  delay(2000); // hold 2 sec
-  ESP.restart(); // restart ESP32
+  delay(2000);
+  ESP.restart();
+}
+
+//======================================================================
+void loop() {
+  // put your main code here, to run repeatedly:  
+  
+  delay(100);
 }

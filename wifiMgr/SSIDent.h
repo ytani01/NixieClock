@@ -19,12 +19,16 @@ class SSIDent {
   static String encTypeStr(wifi_auth_mode_t enc_type);
 
   String ssid();
-  String toString();
+  int dbm();
+  String encType();
+  
+  String toString(boolean f_ssid = true,
+                  boolean f_dbm = false,
+                  boolean f_enctype = false);
   
  private:
   String _ssid;
-  // String _pw;
-  String _dbm;
+  int _dbm;
   wifi_auth_mode_t _enc_type;
 };
 

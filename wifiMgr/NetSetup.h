@@ -22,7 +22,10 @@ class NetSetup {
   NetSetup();
 
   uint8_t scanSSID();
-  String  ssid(int i, boolean long_flag = false);
+
+  String  ssid(int i);
+  int dbm(int i);
+  String encType(int i);
 
  private:
   SSIDent _ssid_ent[SSID_N_MAX];

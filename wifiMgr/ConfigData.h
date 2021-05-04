@@ -20,8 +20,8 @@ class ConfigData {
 
   ConfigData();
 
-  int readConfigFile(const char* config_file);
-  int writeConfigFile(const char* config_file);
+  int readConfigFile(const char* config_file = CONFIG_FILE);
+  int writeConfigFile(const char* config_file = CONFIG_FILE);
 
   void print();
   

@@ -53,14 +53,32 @@ String SSIDent::ssid() {
 /**
  *
  */
-String SSIDent::toString() {
+int SSIDent::dbm() {
+  return this->_dbm;
+} // SSIDent::dbm()
+
+/**
+ *
+ */
+String SSIDent::encType() {
+  return SSIDent::encTypeStr(this->_enc_type);
+} // SSIDent::encType()
+
+/**
+ *
+ */
+String SSIDent::toString(boolean flag_ssid, boolean flag_dbm, boolean flag_enctype) {
   String str = "";
-  str += this->_ssid;
-  str += " (";
-  str += String(this->_dbm);
-  str += "dBm, ";
-  str += SSIDent::encTypeStr(this->_enc_type);
-  str += ")";
+  if ( flag_ssid ) {
+    str += this->_ssid + " ";
+  }
+  if ( flag_dbm ) {
+    str += String(this->_dbm) + "dBm ";
+  }
+  if ( flag_enctype ) {
+    str += SSIDent::encTypeStr(this->_enc_type) + " ";
+  }
+  str.trim();
 
   return str;
 } // SSIDent::toString()

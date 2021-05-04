@@ -39,10 +39,20 @@ uint8_t NetSetup::scanSSID() {
 /**
  *
  */
-String NetSetup::ssid(int i, boolean long_flag) {
-  if ( long_flag ) {
-    return this->_ssid_ent[i].toString();
-  } else {
-    return this->_ssid_ent[i].ssid();
-  }
+String NetSetup::ssid(int i) {
+  return this->_ssid_ent[i].ssid();
 } // NetSetup::ssid()
+
+/**
+ *
+ */
+int NetSetup::dbm(int i) {
+  return this->_ssid_ent[i].dbm();
+} // NetSetup::dbm()
+
+/**
+ *
+ */
+String NetSetup::encType(int i) {
+  return this->_ssid_ent[i].encType();
+} // NetSetup::encType()
