@@ -8,11 +8,15 @@
 
 static const char CONFIG_FILE[] = "/config.txt";
 
+/**
+ *
+ */
 class ConfigData {
  public:
 
   String ssid = "";
   String ssid_pw = "";
+  String ntp_svr[3];
 
   ConfigData();
 
@@ -25,4 +29,4 @@ class ConfigData {
   
 };
 
-#endif /* CONFIG_DATA_H */
+#endif // CONFIG_DATA_H

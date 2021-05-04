@@ -3,13 +3,13 @@
    by kghr labo 2020
 */
 
-// include the library code:
 #include <WiFi.h>
 #include <WebServer.h>
 #include <DNSServer.h>
 #include "SPIFFS.h"
 
 #include "ConfigData.h"
+#include "NetSetup.h"
 
 #define LED_BUILTIN 2
 
@@ -30,7 +30,11 @@ String passwd = defaultPASSWD;
 String ssid_rssi_str[SSIDLIMIT];
 String ssid_str[SSIDLIMIT];
 
-// ConfigData
+// SSIDent
+SSIDent ssidEnt[SSIDLIMIT];
+
+NetSetup netSetup;
+
 ConfigData confData;
 
 void setup() {
@@ -187,23 +191,35 @@ void wifiinput() {
 
 //*******************************************
 String WIFI_Form_str(){
-  Serial.println("wifi scan start");
+  // XXX
+  uint8_t ssid_n = netSetup.scanSSID();
+  Serial.println(ssid_n);
+  Serial.println(netSetup.ssid_n);
+  for (int i=0; i < netSetup.ssid_n; i++) {
+    Serial.println(netSetup.ssid(i));
+    Serial.println(netSetup.ssid(i, true));
+  }
 
   // WiFi.scanNetworks will return the number of networks found
+  Serial.print("wifi scan start .. ");
   uint8_t ssid_num = WiFi.scanNetworks();
-  Serial.println("scan done\r\n");
   
   if (ssid_num == 0) {
-    Serial.println("no networks found");
+    Serial.println("no SSIDs found\n");
   } else {
-    Serial.printf("%d networks found\r\n\r\n", ssid_num);
+    Serial.printf("%d SSIDs found\n", ssid_num);
     if (ssid_num > SSIDLIMIT) ssid_num = SSIDLIMIT;
-    for (int i = 0; i < ssid_num; ++i) {
+    
+    for (int i = 0; i < ssid_num; i++) {
       ssid_str[i] = WiFi.SSID(i);
-      String wifi_auth_open = ((WiFi.encryptionType(i) == WIFI_AUTH_OPEN)?" ":"*");
-      ssid_rssi_str[i] = ssid_str[i] + " (" + WiFi.RSSI(i) + "dBm)" + wifi_auth_open;
-      ssid_rssi_str[i] = ssid_str[i] + wifi_auth_open;
-      Serial.printf("%d: %s\r\n", i, ssid_rssi_str[i].c_str());
+      ssidEnt[i].set(WiFi.SSID(i), WiFi.RSSI(i), WiFi.encryptionType(i));
+      
+      ssid_rssi_str[i] = ssid_str[i] + "("
+        + String(WiFi.RSSI(i)) + "dBm "
+        + SSIDent::encTypeStr(WiFi.encryptionType(i))
+        + ")";
+      Serial.printf("%d: %s\n", i, ssid_rssi_str[i].c_str());
+      Serial.printf("%d: %s\n", i, ssidEnt[i].toString().c_str());
       delay(10);
     }
   }
@@ -218,7 +234,7 @@ String WIFI_Form_str(){
   if (ssid != defaultSSID){
     str += "<option value=" + defaultSSID + ">" + defaultSSID + "(default)</option>";
   }
-  str += "</select><br>\r\n";
+  str += "</select><br>\n";
   str += "Password<br><input type='password' name='passwd' value='" + passwd + "'>";
   str += "<br><input type='submit' value='保存'>";
   str += "</form><br>";
