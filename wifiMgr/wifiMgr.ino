@@ -72,8 +72,8 @@ void setup() {
   while (configloop) {
     dnsServer.processNextRequest();
     webServer.handleClient();
-    Serial.print(".");
-    delay(100);
+    //Serial.print(".");
+    //delay(100);
   }
 
   digitalWrite(PIN_LED, LOW);
