@@ -7,3 +7,8 @@
 * [junk/NixieTubeClock1/](NixieTubeClock1/) (old)
 * [junk/NixieClock2/](NixieClock2/) (クロスフェード動作確認)
 * [junk/NixiClock1/](NixiClock1/) (最初の動作確認)
+
+
+## References
+
+* [github: arduino-esp32 WiFi](https://github.com/espressif/arduino-esp32/tree/master/libraries/WiFi/src)
