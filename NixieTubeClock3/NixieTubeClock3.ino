@@ -62,7 +62,9 @@ uint8_t colonPins[NIXIE_COLON_N][NIXIE_COLON_DOT_N] =
   {{PIN_COLON_R_TOP},
    {PIN_COLON_L_TOP} };
 //----------------------------------------------------------------------
-NixieArray *nixieArray;
+NixieArray nixieArray(PIN_HV5812_CLK,  PIN_HV5812_STOBE,
+                      PIN_HV5812_DATA, PIN_HV5812_BLANK,
+                      nixiePins, colonPins);
 Button *btnObj[3];
 //----------------------------------------------------------------------
 unsigned long loopCount  = 0;
@@ -99,7 +101,7 @@ void ntp_adjust() {
 } // ntp_adjust()
 
 long change_mode() {
-  nixieArray->end_all_effect();
+  nixieArray.end_all_effect();
   prevMode = curMode;
   curMode = (curMode + 1) % MODE_N;
   Serial.println("change_mode(): curMode=" + String(curMode));
@@ -110,6 +112,8 @@ void btn_handler() {
   static unsigned long prev_msec = 0;
   unsigned long cur_msec = millis();
 
+  Serial.println("btn_handler>");
+  
   if ( cur_msec - prev_msec < DEBOUNCE ) {
     return;
   }
@@ -143,16 +147,18 @@ void setup() {
   Serial.println("setup> sec=" + String(sec));
   randomSeed(sec);
 
+  /*
   nixieArray = new NixieArray(PIN_HV5812_CLK,  PIN_HV5812_STOBE,
                               PIN_HV5812_DATA, PIN_HV5812_BLANK,
                               nixiePins, colonPins);
-  nixieArray->blightness = 10;
+  */
+  nixieArray.blightness = 10;
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // 各モードオブジェクト生成
   //Mode[0] = new ModeClock1(nixieArray);
-  Mode[0] = new ModeClock2(nixieArray);
-  Mode[1] = new ModeTest1(nixieArray);
-  Mode[2] = new ModeTest2(nixieArray);
+  Mode[0] = new ModeClock2(&nixieArray);
+  Mode[1] = new ModeTest1(&nixieArray);
+  Mode[2] = new ModeTest2(&nixieArray);
 
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // ボタンの初期化
@@ -176,7 +182,7 @@ void setup() {
   prevMsec = millis();
   curMsec = millis();
   //---------------------------------------------------------------------
-  nixieArray->display(curMsec); // 初期状態表示
+  nixieArray.display(curMsec); // 初期状態表示
   //---------------------------------------------------------------------
 
   //---------------------------------------------------------------------
@@ -203,8 +209,6 @@ void setup() {
 
 //=======================================================================
 void loop() {
-  char dt_str[128];
-
   prevMsec = curMsec;
   curMsec = millis();
   loopCount++;
@@ -217,11 +221,10 @@ void loop() {
 
   if (loopCount % 2000 == 0) {
     DateTime now = Rtc.now();
-    sprintf(dt_str, "%04d/%02d/%02d(%s) %02d:%02d:%02d",
-            now.year(), now.month(), now.day(),
-            dayOfTheWeek[now.dayOfTheWeek()],
-            now.hour(), now.minute(), now.second());
-    // Serial.println("dt_str(RTC)=" + String(dt_str));
+    Serial.printf("loop> now=%04d/%02d/%02d(%s) %02d:%02d:%02d\n",
+                  now.year(), now.month(), now.day(),
+                  dayOfTheWeek[now.dayOfTheWeek()],
+                  now.hour(), now.minute(), now.second());
   }
 
   //---------------------------------------------------------------------
@@ -249,7 +252,7 @@ void loop() {
   }
   //---------------------------------------------------------------------
   // 表示
-  nixieArray->display(curMsec);
+  nixieArray.display(curMsec);
 
   //---------------------------------------------------------------------
   delayMicroseconds(LOOP_DELAY_US);
