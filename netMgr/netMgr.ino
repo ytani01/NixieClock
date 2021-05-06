@@ -59,7 +59,8 @@ unsigned int changeMode(unsigned int mode) {
   loopCount = 0;
   curMode = mode;
   modeStartMs = millis();
-  Serial.printf("changeMode> modeStartMs=%d mode=%02X\n", modeStartMs, curMode);
+  Serial.printf("changeMode> modeStartMs=%lu mode=%02X\n",
+                modeStartMs, (int)curMode);
   return curMode;
 } // changeMode()
 
@@ -236,7 +237,7 @@ void setup() {
   confData.load();
   ssid = confData.ssid;
   ssid_pw = confData.ssid_pw;
-  Serial.printf("setup> ssid=%s, ssid_pw=%s\n", ssid, ssid_pw);
+  Serial.printf("setup> ssid=%s, ssid_pw=%s\n", ssid.c_str(), ssid_pw.c_str());
 } // setup()
 
 /**
@@ -244,9 +245,7 @@ void setup() {
  */
 void loop() {
   String ssid, ssid_pw;
-  unsigned long ms_unit = 100;
 
-  unsigned long cur_ms = millis();
   loopCount++;
     
   switch (curMode) {
