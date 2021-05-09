@@ -71,7 +71,7 @@ void ModeClock2::loop(unsigned long cur_ms) {
 
 void ModeClock2::btn_intr(unsigned long cur_ms, Button *btn) {
   Serial.printf("ModeClock2::btn_intr> %s %d\n",
-                btn->get_name(), btn->get_click_count());
+                btn->get_name().c_str(), btn->get_click_count());
 
   boolean flag = false;
 
