@@ -17,8 +17,18 @@ void NetMgr::loop() {
   this->_loop_count++;
 
   switch (this->cur_mode) {
+  case MODE_NULL:
+    break;
+    
   case MODE_START:
     Serial.println(myname + "> MODE_START");
+
+    uint8_t baseMac[6];
+    esp_read_mac(baseMac, ESP_MAC_WIFI_STA);
+    Serial.printf("%s> Mac Addr=%02X:%02X:%02X:%02X:%02X:%02X\n",
+                  myname.c_str(),
+                  baseMac[0], baseMac[1], baseMac[2],
+                  baseMac[3], baseMac[4], baseMac[5]);
 
     this->conf_data.load();
     this->ssid = this->conf_data.ssid;
@@ -39,7 +49,6 @@ void NetMgr::loop() {
 
       this->net_is_available = true;
       this->cur_mode = MODE_NULL;
-      Serial.println(myname + "> ==> MODE_NULL");
     }
 
     if (this->_loop_count > WIFI_TRY_COUNT_MAX) {
@@ -54,13 +63,25 @@ void NetMgr::loop() {
     break;
 
   case MODE_SVR_INIT:
-    Serial.printf(" ");
+    Serial.println(myname + "> MODE_SVR_INIT");
+
+    // XXX
+    //WiFi.mode(WIFI_AP);
+    //Serial.printf("WiFi.softAP(%s) .. ", this->ap_ssid.c_str());
+
+    this->cur_mode = MODE_SVR_RUN;
     break;
 
   case MODE_SVR_RUN:
+    // XXX
+    //dns_svr.processNextRequest();
+    //web_svr.handleClient();
+
+    this->cur_mode = MODE_NULL;
     break;
 
   default:
+    Serial.println(myname + "> unknown mode ???");
     break;
   } // switch
 }

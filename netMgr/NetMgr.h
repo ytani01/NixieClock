@@ -4,6 +4,7 @@
 #ifndef NETMGR_H
 #define NETMGR_H
 
+#include <esp_system.h>
 #include <WiFi.h>
 #include <WebServer.h>
 #include <DNSServer.h>
@@ -23,6 +24,7 @@ class NetMgr {
   static const netmgr_mode_t MODE_TRY_WIFI = 0x02;
   static const netmgr_mode_t MODE_SVR_INIT = 0x10;
   static const netmgr_mode_t MODE_SVR_RUN  = 0x11;
+  static const netmgr_mode_t MODE_STOP     = 0xF0;
 
   static const unsigned int SSID_N_MAX = 30;
 
@@ -37,6 +39,8 @@ class NetMgr {
   String ssid = "";
   String ssid_pw = "";
   String ntp_svr[3] = {"ntp.nict.jp", "time.goole.com", ""};
+  String    ap_ssid;
+  String    ap_ssid_pw;
   IPAddress ap_ip;
   IPAddress ap_netmask;
   DNSServer dns_svr;
@@ -47,6 +51,9 @@ class NetMgr {
   NetMgr() {
     this->net_is_available = false;
     this->cur_mode = NetMgr::MODE_START;
+
+    this->ap_ssid = "NIXIE_CLOCK1";
+    this->ap_ssid_pw = "xxxxxxxx"; // unused
     this->ap_ip = IPAddress(192,168,1,100);
     this->ap_netmask = IPAddress(255,255,255,0);
     this->_loop_count = 0;
