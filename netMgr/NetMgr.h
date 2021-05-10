@@ -42,14 +42,22 @@ class NetMgr {
   DNSServer dns_svr;
   WebServer web_svr;
 
-  NetMgr();
-  void start();
+  ConfigData conf_data;
+
+  NetMgr() {
+    this->net_is_available = false;
+    this->cur_mode = NetMgr::MODE_START;
+    this->ap_ip = IPAddress(192,168,1,100);
+    this->ap_netmask = IPAddress(255,255,255,0);
+    this->_loop_count = 0;
+  };
 
   boolean netIsAvailable();
   netmgr_mode_t curMode();
   void loop();
 
  private:
+  unsigned int _loop_count;
 };
 
 

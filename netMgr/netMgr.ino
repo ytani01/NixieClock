@@ -271,6 +271,8 @@ void setup() {
 void loop() {
   loopCount++;
     
+  netMgr.loop();
+
   switch (curMode) {
 
   case MODE_START:
@@ -288,8 +290,10 @@ void loop() {
     break;
 
   case MODE_TRY_WIFI:
+    /*
     Serial.printf("loop:MODE_TRY_WIFI> ssid=%s, ssid_pw=%s\n",
                   ssid.c_str(), ssid_pw.c_str());
+    */
 
     if (WiFi.status() == WL_CONNECTED) {
       Serial.print("WiFi connected. IP address: ");

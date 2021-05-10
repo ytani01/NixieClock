@@ -3,13 +3,6 @@
  */
 #include "netMgr.h"
 
-NetMgr::NetMgr() {
-  this->net_is_available = false;
-  this->cur_mode = NetMgr::MODE_START;
-  this->ap_ip = IPAddress(192,168,1,100);
-  this->ap_netmask = IPAddress(255,255,255,0);
-} // constructor
-
 boolean NetMgr::netIsAvailable() {
   return this->net_is_available;
 }
@@ -19,4 +12,55 @@ netmgr_mode_t NetMgr::curMode() {
 }
 
 void NetMgr::loop() {
+  String myname = "NetMgr::loop";
+  
+  this->_loop_count++;
+
+  switch (this->cur_mode) {
+  case MODE_START:
+    Serial.println(myname + "> MODE_START");
+
+    this->conf_data.load();
+    this->ssid = this->conf_data.ssid;
+    this->ssid_pw = this->conf_data.ssid_pw;
+    Serial.printf("%s> ssid|%s|%s|\n",
+                  myname.c_str(), this->ssid.c_str(), this->ssid_pw.c_str());
+
+    // WiFi.begin()
+    delay(100);
+    this->cur_mode = MODE_TRY_WIFI;
+    this->_loop_count = 0;
+    break;
+
+  case MODE_TRY_WIFI:
+    if (WiFi.status() == WL_CONNECTED) {
+      Serial.println(myname + "> ");
+      Serial.println(WiFi.localIP());
+
+      this->net_is_available = true;
+      this->cur_mode = MODE_NULL;
+      Serial.println(myname + "> ==> MODE_NULL");
+    }
+
+    if (this->_loop_count > WIFI_TRY_COUNT_MAX) {
+      Serial.println(myname + "> WiFi faild");
+
+      WiFi.disconnect(true);
+      WiFi.mode(WIFI_OFF);
+
+      this->cur_mode = MODE_SVR_INIT;
+      break;
+    }
+    break;
+
+  case MODE_SVR_INIT:
+    Serial.printf(" ");
+    break;
+
+  case MODE_SVR_RUN:
+    break;
+
+  default:
+    break;
+  } // switch
 }
