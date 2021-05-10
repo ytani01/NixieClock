@@ -151,7 +151,7 @@ void handle_top() {
   webServer.send(200, "text/html", html);
 }
 
-String ssid_form_str(){
+void handle_select_ssid() {
   uint8_t ssid_n = scanSSID(ssidEnt);
   Serial.println(ssid_n);
 
@@ -164,38 +164,40 @@ String ssid_form_str(){
     Serial.println();
   } // for(i)
 
-
-  String str = "<form action='/save_ssid' method='GET'>";
-
-  str += "SSID<br />";
-  str += "<select name='ssid' id='ssid'>";
-  for(int i=0; i < ssid_n; i++){
-    str += "<option value=" + ssidEnt[i].ssid() + ">";
-    str += ssidEnt[i].ssid();
-    str += " (";
-    str += String(ssidEnt[i].dbm());
-    str += ", ";
-    str += ssidEnt[i].encType();
-    str += ")";
-    str += "</option>\n";
-  }
-  str += "<option value=" + ssid + ">" + ssid + " (current)</option>\n";
-  str += "</select><br />\n";
-  str += "<br />";
-  str += "Password<br />";
-  str += "<input type='password' name='passwd' value='" + ssid_pw + "' />";
-  str += "<br>";
-  str += "<input type='submit' value='Save' />";
-  str += "</form>";
-  str += "<br />";
-  str += "<script>document.getElementById('ssid').value = '"+ ssid +"';</script>";
-  return str;
-}
-
-void handle_select_ssid() {
   String html = html_header("Please, select SSID");
   html += "<hr>";
-  html += ssid_form_str();
+
+  html += "<form action='/save_ssid' method='GET'>";
+
+  html += "SSID<br />";
+  html += "<select name='ssid' id='ssid'>";
+  for(int i=0; i < ssid_n; i++){
+    html += "<option value=" + ssidEnt[i].ssid();
+    if ( ssidEnt[i].ssid() == ssid ) {
+      html += " selected";
+    }
+    html += ">";
+    html += ssidEnt[i].ssid();
+    html += " (";
+    html += String(ssidEnt[i].dbm());
+    html += ", ";
+    html += ssidEnt[i].encType();
+    html += ")";
+    html += "</option>\n";
+  }
+  /*
+  html += "<option value=" + ssid + ">" + ssid + " (current)</option>\n";
+  */
+  html += "</select><br />\n";
+  html += "<br />";
+  html += "Password<br />";
+  html += "<input type='password' name='passwd' value='" + ssid_pw + "' />";
+  html += "<br>";
+  html += "<input type='submit' value='Save' />";
+  html += "</form>";
+  html += "<br />";
+  // html += "<script>document.getElementById('ssid').value = '"+ ssid +"';</script>";
+
   html += "<hr>";
   html += "<a href='/'>Cancel</a>";
   html += "</body></html>";
@@ -267,8 +269,6 @@ void setup() {
  *
  */
 void loop() {
-  String ssid, ssid_pw;
-
   loopCount++;
     
   switch (curMode) {
@@ -278,7 +278,8 @@ void loop() {
 
     ssid = confData.ssid;
     ssid_pw = confData.ssid_pw;
-    Serial.printf("setup> ssid=%s, ssid_pw=%s\n", ssid.c_str(), ssid_pw.c_str());
+    Serial.printf("loop:MODE_START> ssid=%s, ssid_pw=%s\n",
+                  ssid.c_str(), ssid_pw.c_str());
 
     WiFi.begin(ssid.c_str(), ssid_pw.c_str());
 
@@ -287,6 +288,9 @@ void loop() {
     break;
 
   case MODE_TRY_WIFI:
+    Serial.printf("loop:MODE_TRY_WIFI> ssid=%s, ssid_pw=%s\n",
+                  ssid.c_str(), ssid_pw.c_str());
+
     if (WiFi.status() == WL_CONNECTED) {
       Serial.print("WiFi connected. IP address: ");
       Serial.println(WiFi.localIP());
@@ -312,6 +316,9 @@ void loop() {
     break;
 
   case MODE_SVR_INIT:
+    Serial.printf("loop:MODE_SVR_INIT> ssid=%s, ssid_pw=%s\n",
+                  ssid.c_str(), ssid_pw.c_str());
+
     WiFi.mode(WIFI_AP);
     Serial.printf("WiFi.softAP(%s) .. ", SVR_SSID.c_str());
     if (! WiFi.softAP(SVR_SSID.c_str()) ) {
