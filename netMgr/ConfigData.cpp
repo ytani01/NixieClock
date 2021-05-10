@@ -38,10 +38,12 @@ int ConfigData::load(const char* config_file) {
   }
 
   this->ssid = read_line(file);
-  Serial.printf("%s> SSID: %s\n", myname, ssid.c_str());
+  this->ssid.trim();
+  Serial.printf("%s> SSID: %s\n", myname, this->ssid.c_str());
   
   this->ssid_pw = read_line(file);
-  Serial.printf("%s> SSID PW: %s\n", myname, ssid_pw.c_str());
+  this->ssid_pw.trim();
+  Serial.printf("%s> SSID PW: %s\n", myname, this->ssid_pw.c_str());
 
   file.close();
   return 0;

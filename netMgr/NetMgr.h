@@ -22,9 +22,10 @@ class NetMgr {
   static const netmgr_mode_t MODE_NULL     = 0x00;
   static const netmgr_mode_t MODE_START    = 0x01;
   static const netmgr_mode_t MODE_TRY_WIFI = 0x02;
-  static const netmgr_mode_t MODE_SVR_INIT = 0x10;
-  static const netmgr_mode_t MODE_SVR_RUN  = 0x11;
-  static const netmgr_mode_t MODE_STOP     = 0xF0;
+  static const netmgr_mode_t MODE_AP_INIT  = 0x10;
+  static const netmgr_mode_t MODE_AP_LOOP  = 0x11;
+  static const netmgr_mode_t MODE_WIFI_ON  = 0x20;
+  static const netmgr_mode_t MODE_WIFI_OFF = 0x21;
 
   static const unsigned int SSID_N_MAX = 30;
 
@@ -34,37 +35,42 @@ class NetMgr {
   static const int DNS_PORT    = 53;
   static const int WEBSVR_PORT = 80;
 
-  boolean net_is_available = false;
-  netmgr_mode_t cur_mode = MODE_NULL;
-  String ssid = "";
-  String ssid_pw = "";
-  String ntp_svr[3] = {"ntp.nict.jp", "time.goole.com", ""};
-  String    ap_ssid;
-  String    ap_ssid_pw;
-  IPAddress ap_ip;
-  IPAddress ap_netmask;
+  boolean net_is_available = false;;
+  netmgr_mode_t cur_mode = MODE_START;
+
+  String    ntp_svr[3] = {"ntp.nict.jp",
+                          "time.google.com",
+                          ""};
+
+  String    ap_ssid_hdr = "NIXIE_CLOCK_";
+  String    ap_ssid     = ap_ssid_hdr;
+  String    ap_ssid_pw  = "xxxxxxxx"; // unused
+
+  int       ap_ip_int[4]      = {192,168,100,1};
+  int       ap_netmask_int[4] = {255,255,255,0};
+
+  IPAddress ap_ip;       // initialize in constructor
+  IPAddress ap_netmask;  // initialize in constructor
   DNSServer dns_svr;
-  WebServer web_svr;
+  // WebServer web_svr(NetMgr::WEBSVR_PORT); // declared in NetMgr.cpp
 
-  ConfigData conf_data;
+  //ConfigData conf_data;
 
-  NetMgr() {
-    this->net_is_available = false;
-    this->cur_mode = NetMgr::MODE_START;
-
-    this->ap_ssid = "NIXIE_CLOCK1";
-    this->ap_ssid_pw = "xxxxxxxx"; // unused
-    this->ap_ip = IPAddress(192,168,1,100);
-    this->ap_netmask = IPAddress(255,255,255,0);
-    this->_loop_count = 0;
-  };
-
-  boolean netIsAvailable();
-  netmgr_mode_t curMode();
-  void loop();
+  NetMgr();
+  netmgr_mode_t loop();
 
  private:
-  unsigned int _loop_count;
+  unsigned int _loop_count = 0;
+
+  static unsigned int scan_ssid(SSIDent ssid_ent[]);
+
+  static String html_header(String title);
+
+  static void handle_top();
+  static void handle_select_ssid();
+  static void handle_save_ssid();
+  static void handle_confirm_reboot();
+  static void handle_do_reboot();
 };
 
 

@@ -2,9 +2,6 @@
  * (c) 2021 Yoichi Tanibayashi
  */
 
-#include <WiFi.h>
-#include <WebServer.h>
-#include <DNSServer.h>
 #include "SPIFFS.h"
 
 #include "ConfigData.h"
@@ -17,8 +14,8 @@ boolean netAvailable = false;
 
 const unsigned int MODE_START    = 0x00;
 const unsigned int MODE_TRY_WIFI = 0x01;
-const unsigned int MODE_SVR_INIT = 0x10;
-const unsigned int MODE_SVR_RUN  = 0x11;
+const unsigned int MODE_AP_INIT = 0x10;
+const unsigned int MODE_AP_RUN  = 0x11;
 const unsigned int MODE_ON       = 0x80;
 
 unsigned int  curMode     = MODE_START;
@@ -30,8 +27,9 @@ const unsigned int WIFI_TRY_COUNT_MAX = 10;
 
 const unsigned int SVR_LOOP_INTERVAL = 1; // ms
 
-const String SVR_SSID    = "NIXIE_CLOCK1";
-const String SVR_SSID_PW = "xxxxxxxx";
+const String AP_SSID_HDR = "NIXIE_CLOCK_";
+String AP_SSID = AP_SSID_HDR;
+const String AP_SSID_PW  = "xxxxxxxx";
 
 const int DNS_PORT     = 53;
 const int WEB_SVR_PORT = 80;
@@ -132,124 +130,6 @@ String html_header(String title) {
   return html;
 }
 
-/**
- *
- */
-void handle_top() {
-  const char* myname = "handle_top";
-  Serial.printf("%s> ssid=%s, ssid_pw=%s\n",
-                myname, ssid.c_str(), ssid_pw.c_str());
-
-  String html = html_header("WiFi Setup");
-  html += "<hr>";
-  html += "<h2>Current SSID: " + ssid + "</h2>";
-  //html += "<h2>ssid_pw: " + maskpasswd(ssid_pw) + "</h2>";
-  html += "<a href='/select_ssid'>Select WiFi SSID</a>";
-  html += "<hr />";
-  html += "<a href='/confirm_reboot'>Reboot</a>";
-  html += "</body></html>";
-  webServer.send(200, "text/html", html);
-}
-
-void handle_select_ssid() {
-  uint8_t ssid_n = scanSSID(ssidEnt);
-  Serial.println(ssid_n);
-
-  for (int i=0; i < ssid_n; i++) {
-    Serial.print(ssidEnt[i].ssid());
-    Serial.print(" ");
-    Serial.print(String(ssidEnt[i].dbm()));
-    Serial.print(" ");
-    Serial.print(ssidEnt[i].encType());
-    Serial.println();
-  } // for(i)
-
-  String html = html_header("Please, select SSID");
-  html += "<hr>";
-
-  html += "<form action='/save_ssid' method='GET'>";
-
-  html += "SSID<br />";
-  html += "<select name='ssid' id='ssid'>";
-  for(int i=0; i < ssid_n; i++){
-    html += "<option value=" + ssidEnt[i].ssid();
-    if ( ssidEnt[i].ssid() == ssid ) {
-      html += " selected";
-    }
-    html += ">";
-    html += ssidEnt[i].ssid();
-    html += " (";
-    html += String(ssidEnt[i].dbm());
-    html += ", ";
-    html += ssidEnt[i].encType();
-    html += ")";
-    html += "</option>\n";
-  }
-  /*
-  html += "<option value=" + ssid + ">" + ssid + " (current)</option>\n";
-  */
-  html += "</select><br />\n";
-  html += "<br />";
-  html += "Password<br />";
-  html += "<input type='password' name='passwd' value='" + ssid_pw + "' />";
-  html += "<br>";
-  html += "<input type='submit' value='Save' />";
-  html += "</form>";
-  html += "<br />";
-  // html += "<script>document.getElementById('ssid').value = '"+ ssid +"';</script>";
-
-  html += "<hr>";
-  html += "<a href='/'>Cancel</a>";
-  html += "</body></html>";
-  webServer.send(200, "text/html", html);
-}
-
-void handle_save_ssid(){
-  Serial.println("save_ssid>");
-
-  confData.ssid = webServer.arg("ssid");
-  confData.ssid.trim();
-  confData.ssid_pw = webServer.arg("passwd");
-  confData.ssid_pw.trim();
-  confData.print();
- 
-  confData.save();
-
-  ssid = confData.ssid;
-  ssid_pw = confData.ssid_pw;
-  
-  // 自動転送
-  webServer.sendHeader("Location", String("/"), true);
-  webServer.send(302, "text/plain", "");
-}
-
-void handle_confirm_reboot() {
-  String html = html_header("Reboot confirmation");
-  html += "<hr />";
-  html += "<p>Are you sure to reboot?</p>\n";
-  html += "<a href='/do_reboot'>Yes</a>";
-  html += " or ";
-  html += "<a href='/'>No</a>";
-  html += "<hr />";
-  html += "</body></html>";
-  webServer.send(200, "text/html", html);
-}
-
-void handle_do_reboot() {
-  String html = html_header("Rebooting ..");
-  html += "<hr>";
-  html += "<p>The setting WiFi connection will be disconnected...</p>";
-  html += "<hr>";
-  html += "</body></html>";
-  webServer.send(200, "text/html", html);
-
-  Serial.println("reboot esp32 ..\n");
-  digitalWrite(PIN_LED, LOW);
-    
-  delay(2000);
-  ESP.restart();
-}
-
 //======================================================================
 /**
  *
@@ -257,138 +137,26 @@ void handle_do_reboot() {
 void setup() {
   Serial.begin(115200);
   pinMode(PIN_LED, OUTPUT);
-
-  /*
-  confData.load();
-  ssid = confData.ssid;
-  ssid_pw = confData.ssid_pw;
-  */
 } // setup()
 
 /**
  *
  */
 void loop() {
+  netmgr_mode_t netmgr_mode;
+
   loopCount++;
     
-  netMgr.loop();
-
-  switch (curMode) {
-
-  case MODE_START:
-    confData.load();
-
-    ssid = confData.ssid;
-    ssid_pw = confData.ssid_pw;
-    Serial.printf("loop:MODE_START> ssid=%s, ssid_pw=%s\n",
-                  ssid.c_str(), ssid_pw.c_str());
-
-    WiFi.begin(ssid.c_str(), ssid_pw.c_str());
-
-    delay(100);
-    changeMode(MODE_TRY_WIFI);
-    break;
-
-  case MODE_TRY_WIFI:
-    /*
-    Serial.printf("loop:MODE_TRY_WIFI> ssid=%s, ssid_pw=%s\n",
-                  ssid.c_str(), ssid_pw.c_str());
-    */
-
-    if (WiFi.status() == WL_CONNECTED) {
-      Serial.print("WiFi connected. IP address: ");
-      Serial.println(WiFi.localIP());
-      
-      netAvailable = true;
-      
-      changeMode(MODE_ON);
-      break;
-    }
-
-    if (loopCount >= WIFI_TRY_COUNT_MAX) {
-      Serial.printf("WiFi failed\n");
-
-      WiFi.disconnect(true);
-      WiFi.mode(WIFI_OFF);
-
-      changeMode(MODE_SVR_INIT);
-      break;
-    }
-
-    delay(WIFI_TRY_INTERVAL);
-    Serial.print(".");
-    break;
-
-  case MODE_SVR_INIT:
-    Serial.printf("loop:MODE_SVR_INIT> ssid=%s, ssid_pw=%s\n",
-                  ssid.c_str(), ssid_pw.c_str());
-
-    WiFi.mode(WIFI_AP);
-    Serial.printf("WiFi.softAP(%s) .. ", SVR_SSID.c_str());
-    if (! WiFi.softAP(SVR_SSID.c_str()) ) {
-      Serial.println("failed");
-
-      WiFi.mode(WIFI_OFF);
-
-      changeMode(MODE_ON);
-      break;
-    }
-
-    Serial.println("started");
-    delay(300); // Important!
-
-    WiFi.softAPConfig(netMgr.ap_ip, netMgr.ap_ip, netMgr.ap_netmask);
-
-    dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
-    dnsServer.start(DNS_PORT, "*", netMgr.ap_ip);
-    Serial.printf("DNS server[%d] started\n", DNS_PORT);
-    
-    webServer.on("/", handle_top);
-    webServer.on("/select_ssid", handle_select_ssid);
-    webServer.on("/save_ssid", handle_save_ssid);
-    webServer.on("/confirm_reboot", handle_confirm_reboot);
-    webServer.on("/do_reboot", handle_do_reboot);
-    webServer.onNotFound(handle_top);
-    webServer.begin();
-    Serial.printf("Web server[%d] started\n", WEB_SVR_PORT);
-
-    changeMode(MODE_SVR_RUN);
-    break;
-
-  case MODE_SVR_RUN:
-    //===== AP mode
-    dnsServer.processNextRequest();
-    webServer.handleClient();
-    break;
-    
-  case MODE_ON:
-    if (loopCount > 10) {
-      Serial.println();
-      
-      confData.ssid = "ytnet_a1x";
-      //confData.ssid_pw = "a1@ytnet";
-      confData.save();
-
-      WiFi.disconnect(true);
-      WiFi.mode(WIFI_OFF);
-      
-      changeMode(MODE_START);
-      break;
-    }
-
-    //===== main
-
-
-    delay(1000);
-    Serial.print(".");
-    break;
-    
-  default:
-    changeMode(MODE_START);
-
-    delay(1000);
-    break;
+  netmgr_mode = netMgr.loop();
+  if (netmgr_mode == NetMgr::MODE_WIFI_ON) {
+    Serial.println("WiFi connected");
   }
+  if (netmgr_mode == NetMgr::MODE_WIFI_OFF) {
+    Serial.println("WiFi disconnectd");
+    netMgr.cur_mode = NetMgr::MODE_START;
+  }
+
+  delay(1000);
 }
 // Local Variables:
 // Mode: c++
