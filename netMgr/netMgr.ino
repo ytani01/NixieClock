@@ -3,6 +3,8 @@
  */
 #include "NetMgr.h"
 
+static const String MY_NAME = "Nixie Clock Setup";
+
 #define PIN_LED 2
 
 NetMgr netMgr;
@@ -15,6 +17,7 @@ unsigned int loopCount = 0;
 void setup() {
   Serial.begin(115200);
   pinMode(PIN_LED, OUTPUT);
+  NetMgr::myName = MY_NAME;
 } // setup()
 
 /**
@@ -34,7 +37,9 @@ void loop() {
   case NetMgr::MODE_WIFI_OFF:
     Serial.println("WiFi disconnectd");
     netMgr.cur_mode = NetMgr::MODE_START;
-    
+
+  default:
+    return;
   }
 
   delay(1000);

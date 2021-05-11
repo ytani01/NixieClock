@@ -3,7 +3,11 @@
  */
 #include "netMgr.h"
 
-WebServer web_svr(NetMgr::WEBSVR_PORT);
+static WebServer web_svr(NetMgr::WEBSVR_PORT);
+String NetMgr::myName = "NetMgr";
+
+static SSIDent ssidEnt[NetMgr::SSID_N_MAX];
+static unsigned int ssidN;
 
 NetMgr::NetMgr() {
   this->ap_ip      = IPAddress(this->ap_ip_int[0],
@@ -139,6 +143,74 @@ netmgr_mode_t NetMgr::loop() {
 /**
  *
  */
+String NetMgr::html_header(String title) {
+  String html = "";
+  html += "<!DOCTYPE html>";
+  html += "<html>";
+  html += "<head>";
+
+  html += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
+  html += "<meta http-equiv='Pragma' content='no-cache'>";
+  html += "<meta http-equiv='Cache-Control' content='no-cache'>";
+  html += "<meta http-equiv='Expires' content='0'>";
+  html += "<meta http-equiv='Content-type' CONTENT='text/html; charset=utf-8'>";
+
+  html += "<style>";
+  html += ".myname {";
+  html += "  font-size: xx-large;";
+  html += "  text-align: center;";
+  html += "  color: #FF0000;";
+  html += "  background-color: #444444;";
+  html += "}";
+  html += ".ssid {";
+  html += " font-size: x-large;";
+  html += "}";
+  html += "a:link, a:visited {";
+  html += " background-color: #00AA00;";
+  html += " color: white;";
+  html += " border: none;";
+  html += " padding: 5px 15px;";
+  html += " text-align: center;";
+  html += " text-decoration: none;";
+  html += " display: inline-block;";
+  html += "}";
+  html += "a:hover, a:active {";
+  html += " background-color: #00DD00;";
+  html += "}";
+  html += "input[type=button], input[type=submit], input[type=reset] {";
+  html += " background-color: #0000DD;";
+  html += " color: white;";
+  html += " text-decoration: none;";
+  html += " font-size: large;";
+  html += " border: none;";
+  html += " padding: 5px 20px;";
+  html += " margin: 4px 2px;";
+  html += "}";
+  html += "</style>";
+
+  html += "</head>";
+  html += "<body style='background: linear-gradient(to left, #8EE, #4CC);'>";
+  html += "<br />";
+  html += "<div class='myname'>";
+  html += NetMgr::myName;
+  html += "</div>";
+  html += "<div style='font-size:x-large; color:#00F; background-color: #DDD;'>";
+  html += title;
+  html += "</div>";
+  html += "<hr>";
+  return html;
+} // NetMgr::handle_header()
+
+String NetMgr::html_footer() {
+  String html = "";
+  html += "</body>";
+  html += "</html>\n";
+  return html;
+} // NetMgr::html_footer();
+
+/**
+ *
+ */
 void NetMgr::handle_top() {
   String myname = "NetMgr::handle_top";
   ConfigData conf_data;
@@ -151,13 +223,18 @@ void NetMgr::handle_top() {
   Serial.printf("%s> ssid=%s, ssid_pw=%s\n",
                 myname.c_str(), ssid.c_str(), ssid_pw.c_str());
 
-  String html = html_header("WiFi Setup");
-  html += "<hr>";
-  html += "<h2>Current SSID: " + ssid + "</h2>";
-  html += "<a href='/select_ssid'>Select WiFi SSID</a>";
+  String html = NetMgr::html_header("WiFi Setting");
+  html += "<span style='font-size: large;'>";
+  html += "SSID: ";
+  html += "</span>";
+  html += "<span style='font-size: x-large; font-weight: bold'>";
+  html += ssid;
+  html += "</span>";
   html += "<hr />";
-  html += "<a href='/confirm_reboot'>Reboot</a>";
-  html += "</body></html>";
+  html += "<a href='/select_ssid'>Change</a>\n";
+  html += "or\n";
+  html += "<a href='/confirm_reboot'>OK (Reboot clock)</a>\n";
+  html += NetMgr::html_footer();
   web_svr.send(200, "text/html", html);
 }
 
@@ -183,114 +260,68 @@ unsigned int NetMgr::scan_ssid(SSIDent ssid_ent[]) {
   return ssid_n;
 } // NetMgr::ssid_scan()
 
-/**
- *
- */
-String NetMgr::html_header(String title) {
-  String html = "";
-  html += "<!DOCTYPE html>";
-  html += "<html>";
-  html += "<head>";
-
-  html += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
-  html += "<meta http-equiv='Pragma' content='no-cache'>";
-  html += "<meta http-equiv='Cache-Control' content='no-cache'>";
-  html += "<meta http-equiv='Expires' content='0'>";
-  html += "<meta http-equiv='Content-type' CONTENT='text/html; charset=utf-8'>";
-
-  html += "<style>";
-  html += "a:link, a:visited {";
-  html += " background-color: #00AA00;";
-  html += " color: white;";
-  html += " border: none;";
-  html += " padding: 5px 15px;";
-  html += " text-align: center;";
-  html += " text-decoration: none;";
-  html += " display: inline-block;";
-  html += "}";
-  html += "a:hover, a:active {";
-  html += " background-color: #00FF00;";
-  html += "}";
-  html += "input[type=button], input[type=submit], input[type=reset] {";
-  html += " background-color: #0000AA;";
-  html += " color: white;";
-  html += " text-decoration: none;";
-  html += " font-size: large;";
-  html += " border: none;";
-  html += " padding: 5px 20px;";
-  html += " margin: 4px 2px;";
-  html += "}";
-  html += "</style>";
-
-  html += "</head>";
-  html += "<body>";
-  html += "<h2>" + title + "</h2>";
-  return html;
-}
 
 void NetMgr::handle_select_ssid() {
   ConfigData conf_data;
   String ssid, ssid_pw;
-  SSIDent ssid_ent[SSID_N_MAX];
   
 
   conf_data.load();
   ssid = conf_data.ssid;
   ssid_pw = conf_data.ssid_pw;
   
-  uint8_t ssid_n = NetMgr::scan_ssid(ssid_ent);
-  Serial.println(ssid_n);
+  ssidN = NetMgr::scan_ssid(ssidEnt);
+  Serial.println("ssidN=" + String(ssidN));
 
-  for (int i=0; i < ssid_n; i++) {
-    Serial.print(ssid_ent[i].ssid());
+  for (int i=0; i < ssidN; i++) {
+    Serial.print(ssidEnt[i].ssid());
     Serial.print(" ");
-    Serial.print(String(ssid_ent[i].dbm()));
+    Serial.print(String(ssidEnt[i].dbm()));
     Serial.print(" ");
-    Serial.print(ssid_ent[i].encType());
+    Serial.print(ssidEnt[i].encType());
     Serial.println();
   } // for(i)
 
-  String html = html_header("Please, select SSID");
-  html += "<hr>";
-
+  String html = NetMgr::html_header("Please, select SSID");
   html += "<form action='/save_ssid' method='GET'>";
+  html += "<div class='ssid'>";
+  html += "SSID ";
+  html += "<select name='ssid' id='ssid' style='font-size:large;'>";
 
-  html += "SSID<br />";
-  html += "<select name='ssid' id='ssid'>";
-
-  for(int i=0; i < ssid_n; i++){
-    html += "<option value=" + ssid_ent[i].ssid();
-    if ( ssid_ent[i].ssid() == ssid ) {
+  for(int i=0; i < ssidN; i++){
+    html += "<option value=" + ssidEnt[i].ssid();
+    if ( ssidEnt[i].ssid() == ssid ) {
       html += " selected";
     }
     html += ">";
-    html += ssid_ent[i].ssid();
+    html += ssidEnt[i].ssid();
+    /*
     html += " (";
-    html += String(ssid_ent[i].dbm());
+    html += String(ssidEnt[i].dbm());
     html += ", ";
-    html += ssid_ent[i].encType();
+    html += ssidEnt[i].encType();
     html += ")";
+    */
     html += "</option>\n";
   } // for(i)
 
   html += "<option value="">(clear)</option>\n";
 
-  html += "</select>\n";
-  html += "<br />";
-  html += "<br />";
-  html += "Password";
-  html += "<br />";
-  html += "<input type='password' name='passwd' value='" + ssid_pw + "' />";
-  html += "<br>";
-  html += "<input type='submit' value='Save' />";
+  html += "</select><br />\n";
+  html += "Password ";
+  html += "<span style='font-size: xx-large'>";
+  html += "<input type='password'";
+  html += " name='passwd'";
+  html += " value='" + ssid_pw + "'";
+  html += " />";
+  html += "</span>";
+  html += "</div>\n";
+  html += "<hr />\n";
+  html += "<input type='submit' value='Save' />\n";
+  html += "or\n";
+  html += "<a href='/'>Cancel</a>\n";
   html += "</form>";
-  html += "<br />";
-  // html += "<script>document.getElementById('ssid').value = '"+ ssid +"';</script>";
-
-  html += "<hr>";
-  //html += "<a href='/confirm_reboot'>Reboot</a>";
-  html += "<a href='/'>Cancel</a>";
-  html += "</body></html>";
+  html += NetMgr::html_footer();
   web_svr.send(200, "text/html", html);
 }
 
@@ -315,27 +346,23 @@ void NetMgr::handle_save_ssid(){
 }
 
 void NetMgr::handle_confirm_reboot() {
-  String html = html_header("Reboot confirmation");
-  html += "<hr />";
+  String html = NetMgr::html_header("Reboot confirmation");
   html += "<p>Are you sure to reboot?</p>\n";
   html += "<a href='/do_reboot'>Yes</a>";
   html += " or ";
   html += "<a href='/'>No</a>";
-  html += "<hr />";
-  html += "</body></html>";
+  html += NetMgr::html_footer();
   web_svr.send(200, "text/html", html.c_str());
 }
 
 void NetMgr::handle_do_reboot() {
-  String html = html_header("Rebooting ..");
-  html += "<hr>";
-  html += "<p>The setting WiFi connection will be disconnected...</p>";
-  html += "<hr>";
-  html += "</body></html>";
+  String html = NetMgr::html_header("Rebooting ..");
+  html += "Please reconnect WiFi ..";
+  html += "<hr />";
+  html += NetMgr::html_footer();
   web_svr.send(200, "text/html", html.c_str());
 
   Serial.println("reboot esp32 ..\n");
-  //digitalWrite(PIN_LED, LOW);
     
   delay(2000);
   ESP.restart();

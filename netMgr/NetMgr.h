@@ -35,12 +35,14 @@ class NetMgr {
   static const int DNS_PORT    = 53;
   static const int WEBSVR_PORT = 80;
 
-  boolean net_is_available = false;;
-  netmgr_mode_t cur_mode = MODE_START;
+  static String myName;
 
-  String    ntp_svr[3] = {"ntp.nict.jp",
-                          "time.google.com",
-                          ""};
+  boolean net_is_available = false;;
+  netmgr_mode_t cur_mode   = MODE_START;
+
+  String    ntp_svr[3]  = {"ntp.nict.jp",
+                           "time.google.com",
+                           ""};
 
   String    ap_ssid_hdr = "NIXIE_CLOCK_";
   String    ap_ssid     = ap_ssid_hdr;
@@ -52,9 +54,6 @@ class NetMgr {
   IPAddress ap_ip;       // initialize in constructor
   IPAddress ap_netmask;  // initialize in constructor
   DNSServer dns_svr;
-  // WebServer web_svr(NetMgr::WEBSVR_PORT); // declared in NetMgr.cpp
-
-  //ConfigData conf_data;
 
   NetMgr();
   netmgr_mode_t loop();
@@ -65,6 +64,7 @@ class NetMgr {
   static unsigned int scan_ssid(SSIDent ssid_ent[]);
 
   static String html_header(String title);
+  static String html_footer();
 
   static void handle_top();
   static void handle_select_ssid();
@@ -72,6 +72,5 @@ class NetMgr {
   static void handle_confirm_reboot();
   static void handle_do_reboot();
 };
-
 
 #endif // NETMGR_H
