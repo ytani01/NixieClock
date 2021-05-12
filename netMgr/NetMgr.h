@@ -62,6 +62,8 @@ class NetMgr {
   unsigned int _loop_count = 0;
 
   static unsigned int scan_ssid(SSIDent ssid_ent[]);
+  static void async_scan_ssid_start();
+  static unsigned int async_scan_ssid_wait(SSIDent ssid_ent[]);
 
   static String html_header(String title);
   static String html_footer();

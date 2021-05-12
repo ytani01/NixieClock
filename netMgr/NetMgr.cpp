@@ -37,7 +37,8 @@ netmgr_mode_t NetMgr::loop() {
     conf_data.load();
     ssid = conf_data.ssid;
     ssid_pw = conf_data.ssid_pw;
-    Serial.printf("%s> |%s|%s|\n", myname.c_str(), ssid.c_str(), ssid_pw.c_str());
+    Serial.printf("%s> |%s|%s|\n",
+                  myname.c_str(), ssid.c_str(), ssid_pw.c_str());
 
     WiFi.begin(ssid.c_str(), ssid_pw.c_str());
     delay(100);
@@ -69,11 +70,11 @@ netmgr_mode_t NetMgr::loop() {
     break;
 
   case MODE_AP_INIT:
-    Serial.println(myname + "> MODE_AP_INIT");
-
     uint8_t mac_int[6];
     char    mac_str[13];
     
+    Serial.println(myname + "> MODE_AP_INIT");
+
     esp_read_mac(mac_int, ESP_MAC_WIFI_STA);
     sprintf(mac_str, "%02X%02X%02X%02X%02X%02X",
             mac_int[0], mac_int[1], mac_int[2],
@@ -112,6 +113,9 @@ netmgr_mode_t NetMgr::loop() {
     Serial.printf("%s> Web server[%d] started\n", myname.c_str(), WEBSVR_PORT);
 
     this->cur_mode = MODE_AP_LOOP;
+
+    NetMgr::async_scan_ssid_start();
+
     break;
 
   case MODE_AP_LOOP:
@@ -208,6 +212,60 @@ String NetMgr::html_footer() {
   return html;
 } // NetMgr::html_footer();
 
+void NetMgr::async_scan_ssid_start() {
+  Serial.println("NetMgr::async_scan_ssid_start> ..");
+  WiFi.scanNetworks(true);
+}
+
+unsigned int NetMgr::async_scan_ssid_wait(SSIDent ssid_ent[]) {
+  int16_t ret;
+
+  Serial.print("NetMgr::async_scan_ssid_wait> ");
+  while ( (ret = WiFi.scanComplete()) == WIFI_SCAN_RUNNING ) {
+    Serial.print(".");
+    delay(200);
+  }
+  Serial.println();
+  if ( ret == WIFI_SCAN_FAILED ) {
+    return 0;
+  }
+
+  if ( ret > NetMgr::SSID_N_MAX ) {
+    ret = NetMgr::SSID_N_MAX;
+  }
+
+  for (int i=0; i < ret; i++) {
+    ssid_ent[i].set(WiFi.SSID(i), WiFi.RSSI(i), WiFi.encryptionType(i));
+  } // for()
+
+  return ret;
+}
+
+/**
+ *
+ */
+unsigned int NetMgr::scan_ssid(SSIDent ssid_ent[]) {
+  Serial.println("NetMgr::scan_ssid> scan start ..");
+
+  int ssid_n = WiFi.scanNetworks();
+
+  Serial.printf("NetMgr::scan_ssid> %d SSIDs found\n", ssid_n);
+
+  if (ssid_n <= 0) {
+    return 0;
+  }
+
+  if ( ssid_n > NetMgr::SSID_N_MAX ) {
+    ssid_n = NetMgr::SSID_N_MAX;
+  }
+
+  for (int i=0; i < ssid_n; i++) {
+    ssid_ent[i].set(WiFi.SSID(i), WiFi.RSSI(i), WiFi.encryptionType(i));
+  } // for()
+
+  return ssid_n;
+} // NetMgr::ssid_scan()
+
 /**
  *
  */
@@ -238,29 +296,6 @@ void NetMgr::handle_top() {
   web_svr.send(200, "text/html", html);
 }
 
-unsigned int NetMgr::scan_ssid(SSIDent ssid_ent[]) {
-  Serial.println("NetMgr::scan_ssid> scan start ..");
-
-  int ssid_n = WiFi.scanNetworks();
-
-  Serial.printf("NetMgr::scan_ssid> %d SSIDs found\n", ssid_n);
-
-  if (ssid_n <= 0) {
-    return 0;
-  }
-
-  if ( ssid_n > NetMgr::SSID_N_MAX ) {
-    ssid_n = NetMgr::SSID_N_MAX;
-  }
-
-  for (int i=0; i < ssid_n; i++) {
-    ssid_ent[i].set(WiFi.SSID(i), WiFi.RSSI(i), WiFi.encryptionType(i));
-  } // for()
-
-  return ssid_n;
-} // NetMgr::ssid_scan()
-
-
 void NetMgr::handle_select_ssid() {
   ConfigData conf_data;
   String ssid, ssid_pw;
@@ -270,7 +305,8 @@ void NetMgr::handle_select_ssid() {
   ssid = conf_data.ssid;
   ssid_pw = conf_data.ssid_pw;
   
-  ssidN = NetMgr::scan_ssid(ssidEnt);
+  //ssidN = NetMgr::scan_ssid(ssidEnt);
+  ssidN = NetMgr::async_scan_ssid_wait(ssidEnt);
   Serial.println("ssidN=" + String(ssidN));
 
   for (int i=0; i < ssidN; i++) {
