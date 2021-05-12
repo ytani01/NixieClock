@@ -1,7 +1,7 @@
 /**
  * (c) 2021 Yoichi Tanibayashi
  */
-#include "netMgr.h"
+#include "NetMgr.h"
 
 static WebServer web_svr(NetMgr::WEBSVR_PORT);
 String NetMgr::myName = "NetMgr";
@@ -103,9 +103,12 @@ netmgr_mode_t NetMgr::loop() {
     this->dns_svr.start(DNS_PORT, "*", this->ap_ip);
     Serial.printf("%s> DNS server[%d] started\n", myname.c_str(), DNS_PORT);
 
+    NetMgr::async_scan_ssid_start();
+
     web_svr.on("/", NetMgr::handle_top);
     web_svr.on("/select_ssid", NetMgr::handle_select_ssid);
     web_svr.on("/save_ssid", NetMgr::handle_save_ssid);
+    web_svr.on("/scan_ssid", NetMgr::handle_do_scan);
     web_svr.on("/confirm_reboot", NetMgr::handle_confirm_reboot);
     web_svr.on("/do_reboot", NetMgr::handle_do_reboot);
     web_svr.onNotFound(NetMgr::handle_top);
@@ -113,8 +116,6 @@ netmgr_mode_t NetMgr::loop() {
     Serial.printf("%s> Web server[%d] started\n", myname.c_str(), WEBSVR_PORT);
 
     this->cur_mode = MODE_AP_LOOP;
-
-    NetMgr::async_scan_ssid_start();
 
     break;
 
@@ -166,34 +167,37 @@ String NetMgr::html_header(String title) {
   html += "  color: #FF0000;";
   html += "  background-color: #444444;";
   html += "}";
+
   html += ".ssid {";
   html += " font-size: x-large;";
   html += "}";
+
   html += "a:link, a:visited {";
   html += " background-color: #00AA00;";
   html += " color: white;";
   html += " border: none;";
-  html += " padding: 5px 15px;";
   html += " text-align: center;";
   html += " text-decoration: none;";
   html += " display: inline-block;";
+  html += " padding: 3px 7px;";
   html += "}";
+
   html += "a:hover, a:active {";
   html += " background-color: #00DD00;";
   html += "}";
+
   html += "input[type=button], input[type=submit], input[type=reset] {";
   html += " background-color: #0000DD;";
   html += " color: white;";
   html += " text-decoration: none;";
   html += " font-size: large;";
   html += " border: none;";
-  html += " padding: 5px 20px;";
-  html += " margin: 4px 2px;";
+  html += " padding: 4px 8px;";
   html += "}";
   html += "</style>";
 
   html += "</head>";
-  html += "<body style='background: linear-gradient(to left, #8EE, #4CC);'>";
+  html += "<body style='background: linear-gradient(to right, #9FF, #5DD);'>";
   html += "<br />";
   html += "<div class='myname'>";
   html += NetMgr::myName;
@@ -215,7 +219,7 @@ String NetMgr::html_footer() {
 void NetMgr::async_scan_ssid_start() {
   Serial.println("NetMgr::async_scan_ssid_start> ..");
   WiFi.scanNetworks(true);
-}
+} // NetMgr::async_scan_ssid_start()
 
 unsigned int NetMgr::async_scan_ssid_wait(SSIDent ssid_ent[]) {
   int16_t ret;
@@ -239,7 +243,7 @@ unsigned int NetMgr::async_scan_ssid_wait(SSIDent ssid_ent[]) {
   } // for()
 
   return ret;
-}
+} // NetMgr::async_scan_ssid_wait()
 
 /**
  *
@@ -294,7 +298,7 @@ void NetMgr::handle_top() {
   html += "<a href='/confirm_reboot'>OK (Reboot clock)</a>\n";
   html += NetMgr::html_footer();
   web_svr.send(200, "text/html", html);
-}
+} // NetMgr::handle_top()
 
 void NetMgr::handle_select_ssid() {
   ConfigData conf_data;
@@ -354,12 +358,12 @@ void NetMgr::handle_select_ssid() {
   html += "</div>\n";
   html += "<hr />\n";
   html += "<input type='submit' value='Save' />\n";
-  html += "or\n";
+  html += "<a href='/scan_ssid'>Rescan</a>\n";
   html += "<a href='/'>Cancel</a>\n";
   html += "</form>";
   html += NetMgr::html_footer();
   web_svr.send(200, "text/html", html);
-}
+} // NetMgr::handle_select_ssid()
 
 void NetMgr::handle_save_ssid(){
   ConfigData conf_data;
@@ -379,8 +383,11 @@ void NetMgr::handle_save_ssid(){
   // 自動転送
   web_svr.sendHeader("Location", String("/"), true);
   web_svr.send(302, "text/plain", "");
-}
+} // NetMgr::handle_save_ssid()
 
+/**
+ *
+ */
 void NetMgr::handle_confirm_reboot() {
   String html = NetMgr::html_header("Reboot confirmation");
   html += "<p>Are you sure to reboot?</p>\n";
@@ -389,8 +396,22 @@ void NetMgr::handle_confirm_reboot() {
   html += "<a href='/'>No</a>";
   html += NetMgr::html_footer();
   web_svr.send(200, "text/html", html.c_str());
-}
+} // NetMgr::handle_confirm_reboot()
 
+/**
+ *
+ */
+void NetMgr::handle_do_scan() {
+  NetMgr::async_scan_ssid_start();
+
+  // 自動転送
+  web_svr.sendHeader("Location", String("/select_ssid"), true);
+  web_svr.send(302, "text/plain", "");
+} // NetMgr::handle_do_rescan()
+
+/**
+ *
+ */
 void NetMgr::handle_do_reboot() {
   String html = NetMgr::html_header("Rebooting ..");
   html += "Please reconnect WiFi ..";
@@ -402,4 +423,4 @@ void NetMgr::handle_do_reboot() {
     
   delay(2000);
   ESP.restart();
-}
+} // NetMgr::handle_do_reboot()
