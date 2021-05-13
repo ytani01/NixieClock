@@ -1,5 +1,5 @@
 /*
- * (c) 2020 Yoichi Tanibayashi
+ * (c) 2021 Yoichi Tanibayashi
  */
 #include "Nixie.h"
 #include "Button.h"
@@ -12,18 +12,9 @@
 
 static const String MY_NAME = "Nixie Tube Clock";
 
-#define LOOP_DELAY_US       5 // micro sbeconds
+#define LOOP_DELAY_US       2 // micro sbeconds
 #define WIFI_TRY_MAX       10 // count
 #define DEBOUNCE          200 // msec
-
-
-//============================================================================
-NetMgr netMgr;
-
-const char* SSID = "fablabkannai";
-const char* SSID_PW = "kannai201";
-boolean     wifiActive = false;
-boolean     prev_wifiActive = false;
 
 //============================================================================
 #define PIN_HV5812_CLK     26
@@ -42,6 +33,11 @@ boolean     prev_wifiActive = false;
 #define PIN_BTN1           34
 #define PIN_BTN2           35
 #define BTN_N               3
+
+//============================================================================
+NetMgr netMgr;
+boolean wifiActive = false;
+boolean prev_wifiActive = false;
 
 //======================================================================
 /* for NTP */
@@ -216,7 +212,7 @@ void loop() {
     ntpActive = false;
     if ( wifiActive != prev_wifiActive ) {
       Serial.println("loop> WiFi OFF");
-      netMgr.cur_mode = NetMgr::MODE_START;
+      netMgr.cur_mode = NetMgr::MODE_AP_INIT;
     }
   }
   
@@ -259,6 +255,7 @@ void loop() {
         btnObj[2]->get();
         if (btnObj[2]->is_long_pressed() && btnObj[2]->is_repeated()) {
           netMgr.cur_mode = NetMgr::MODE_AP_INIT;
+          delay(500);
         } else {
           change_mode();
         }

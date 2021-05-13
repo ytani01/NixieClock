@@ -3,6 +3,20 @@
  */
 #include "ModeClock2.h"
 
+static const unsigned int C_FADE_OFF = 0;
+static const unsigned int C_FADE_IN  = 1;
+static const unsigned int C_FADE_OUT = 2;
+int colon_fade_mode[NIXIE_COLON_N] = {C_FADE_OFF, C_FADE_OFF};
+
+static const unsigned long C_FADE_TICK0 = 35;
+static const unsigned long C_FADE_TICK1 = 120;
+static unsigned long cFadeTick = C_FADE_TICK0;
+
+extern boolean wifiActive;
+
+/**
+ *
+ */
 ModeClock2::ModeClock2(NixieArray *nxa): ModeBase::ModeBase(nxa,
                                                             "ModeClock2",
                                                             ModeClock2::TICK_MS) {
@@ -11,6 +25,9 @@ ModeClock2::ModeClock2(NixieArray *nxa): ModeBase::ModeBase(nxa,
   Serial.println("RTC start");
 }
 
+/**
+ *
+ */
 void ModeClock2::init(unsigned long start_ms) {
   ModeBase::init(start_ms);
 
@@ -26,6 +43,9 @@ void ModeClock2::init(unsigned long start_ms) {
   } // for(i)
 }
 
+/**
+ *
+ */
 void ModeClock2::loop(unsigned long cur_ms) {
   const char* WDAY[] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
   char time_str[6 + 1];
@@ -40,7 +60,14 @@ void ModeClock2::loop(unsigned long cur_ms) {
     }
   }
 
+  if ( wifiActive ) {
+    cFadeTick = C_FADE_TICK0;
+  } else {
+    cFadeTick = C_FADE_TICK1;
+  }
+
   sprintf(time_str, "%02d%02d%02d", now.hour(), now.minute(), now.second());
+
   for (int i=0; i < NIXIE_NUM_N; i++) {
     prev_num[i] = this->_num[i];
     this->_num[i] = int(time_str[i] - '0');
@@ -52,14 +79,23 @@ void ModeClock2::loop(unsigned long cur_ms) {
 
   for (int i=0; i < NIXIE_COLON_N; i++) {
     if ( this->_num[5] != prev_num[5] ) {
-      this->_nxa->colon[i].fadeout_start(cur_ms, 40,
+      this->_nxa->colon[i].fadeout_start(cur_ms, cFadeTick,
                                          NIXIE_COLON_DOT_DOWN);
-    } else {
-      if ( this->_nxa->colon[i].effect_is_active() ) {
-        // Serial.println("FADE active!");
-      } else {
-        this->_nxa->colon[i].element[0].set_blightness(this->_nxa->blightness);
-      }
+      colon_fade_mode[i] = C_FADE_OUT;
+      //Serial.println("ModeClock2::loop> " + String(i) + ":fadeout start");
+      continue;
+    }
+
+    if (this->_nxa->colon[i].effect_is_active()) {
+      continue;
+    }
+
+    // effect is inactive
+    if(colon_fade_mode[i] == C_FADE_OUT) {
+      this->_nxa->colon[i].fadein_start(cur_ms, cFadeTick,
+                                        NIXIE_COLON_DOT_DOWN);
+      colon_fade_mode[i] = C_FADE_IN;
+      //Serial.println("ModeClock2::loop> " + String(i) + "fadein start");
     }
   } // for(COLON)
 
@@ -113,6 +149,6 @@ void ModeClock2::btn_intr(unsigned long cur_ms, Button *btn) {
 
 // for emacs
 // Local Variables:
-// Mode: arduino
+// Mode: c++
 // Coding: utf-8-unix
 // End:

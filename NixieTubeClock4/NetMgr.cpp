@@ -314,6 +314,12 @@ void NetMgr::handle_select_ssid() {
   //ssidN = NetMgr::scan_ssid(ssidEnt);
   ssidN = NetMgr::async_scan_ssid_wait(ssidEnt);
   Serial.println("ssidN=" + String(ssidN));
+  if (ssidN == 0) {
+    Serial.println("NetMgr::handle_select_ssid> rescan SSID");
+    NetMgr::async_scan_ssid_start();
+    ssidN = NetMgr::async_scan_ssid_wait(ssidEnt);
+  }
+    
 
   for (int i=0; i < ssidN; i++) {
     Serial.print(ssidEnt[i].ssid());
