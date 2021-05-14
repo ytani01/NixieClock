@@ -80,9 +80,9 @@ void ModeTest1::loop(unsigned long cur_ms) {
   this->_digit = (this->_digit + 1) % 10;
 } // ModeTest1::loop()
 
-void ModeTest1::btn_intr(unsigned long cur_ms, Button *btn) {
-  Serial.println("ModeTest1::btn_intr(" + btn->get_name() + ")");
-} // ModeTest1::btn_intr()
+void ModeTest1::btn_hdr(unsigned long cur_ms, Button *btn) {
+  Serial.println("ModeTest1::btn_hdr(" + btn->get_name() + ")");
+} // ModeTest1::btn_hdr()
 
 // for emacs
 // Local Variables:

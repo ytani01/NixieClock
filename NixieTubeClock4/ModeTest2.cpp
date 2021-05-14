@@ -59,8 +59,8 @@ void ModeTest2::loop(unsigned long cur_ms) {
   Serial.println(msg);
 } // ModeTest2::loop()
 
-void ModeTest2::btn_intr(unsigned long cur_ms, Button *btn) {
-  Serial.println("ModeTest2::btn_intr(" + btn->get_name() + ")");
+void ModeTest2::btn_hdr(unsigned long cur_ms, Button *btn) {
+  Serial.println("ModeTest2::btn_hdr(" + btn->get_name() + ")");
 
 
   if ( btn->get_name() == "BTN1" ) {
@@ -77,7 +77,7 @@ void ModeTest2::btn_intr(unsigned long cur_ms, Button *btn) {
       this->_nxa->num[this->_cur].blink_start(cur_ms, 200, this->_cur);
     }
   }
-} // ModeTest2::btn_intr()
+} // ModeTest2::btn_hdr()
 
 // for emacs
 // Local Variables:

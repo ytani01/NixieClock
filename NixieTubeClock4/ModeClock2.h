@@ -18,7 +18,7 @@ class ModeClock2 : public ModeBase {
   ModeClock2(NixieArray *nxa);
   void init(unsigned long start_ms);
   void loop(unsigned long cur_ms);
-  void btn_intr(unsigned long cur_ms, Button *btn);
+  void btn_hdr(unsigned long cur_ms, Button *btn);
 
  private:
   RTC_DS3231 _rtc;

@@ -18,7 +18,7 @@ class ModeBase {
 
   virtual void init(unsigned long start_ms); // モード変更時の初期化:loop()内
   virtual void loop(unsigned long cur_ms);   // loop()内での処理
-  virtual void btn_intr(unsigned long cur_ms, Button *btn); // ボタン処理
+  virtual void btn_hdr(unsigned long cur_ms, Button *btn); // ボタン処理
 
  protected:
   String        _name;         // モード名

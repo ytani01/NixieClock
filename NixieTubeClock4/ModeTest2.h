@@ -15,7 +15,7 @@ class ModeTest2 : public ModeBase {
   ModeTest2(NixieArray *nxa);
   void init(unsigned long start_ms);
   void loop(unsigned long cur_ms);
-  void btn_intr(unsigned long cur_ms, Button *btn);
+  void btn_hdr(unsigned long cur_ms, Button *btn);
 
  private:
   int *_digit;

@@ -14,6 +14,8 @@ static unsigned long cFadeTick = C_FADE_TICK0;
 
 extern boolean wifiActive;
 
+#define Nxa this->_nxa
+
 /**
  *
  */
@@ -105,41 +107,53 @@ void ModeClock2::loop(unsigned long cur_ms) {
 
 } // ModeClock2::loop()
 
-void ModeClock2::btn_intr(unsigned long cur_ms, Button *btn) {
-  Serial.printf("ModeClock2::btn_intr> %s %d\n",
+void ModeClock2::btn_hdr(unsigned long cur_ms, Button *btn) {
+  Serial.printf("ModeClock2::btn_hdr> %s %d\n",
                 btn->get_name().c_str(), btn->get_click_count());
 
   boolean flag = false;
 
-  if ( btn->get_name() == "BTN1" && btn->get_click_count() > 0 ) {
-    this->_nxa->blightness += btn->get_click_count();
-    if (this->_nxa->blightness > BLIGHTNESS_RESOLUTION) {
-      this->_nxa->blightness = BLIGHTNESS_RESOLUTION;
+  unsigned int bl = this->_nxa->blightness;
+  
+  if ( btn->get_name() == "BTN1") {
+    if ( btn->get_click_count() > 0 ) {
+      bl += btn->get_click_count();
+    }
+    if ( btn->is_repeated() ) {
+      bl++;
+    }
+
+    if (bl > BLIGHTNESS_RESOLUTION) {
+      bl = BLIGHTNESS_RESOLUTION;
     }
     flag = true;
   }
-  if ( btn->get_name() == "BTN2" && btn->get_click_count() > 0 ) {
-    this->_nxa->blightness -= btn->get_click_count();
-    if (this->_nxa->blightness < 1 || this->_nxa->blightness > BLIGHTNESS_RESOLUTION) {
-      this->_nxa->blightness = 1;
+  if ( btn->get_name() == "BTN2" ) {
+    if ( btn->get_click_count() > 0 ) {
+      bl -= btn->get_click_count();
+    }
+    if ( btn->is_repeated() ) {
+      bl--;
+    }
+    
+    if (bl < 1 || bl > BLIGHTNESS_RESOLUTION) {
+      bl = 1;
     }
     flag = true;
   }
   
-  if (flag) { // 
-    Serial.println("ModeClock2::this->_nxa->blightness="
-                   + String(this->_nxa->blightness));
+  if (flag) {
+    Serial.println("ModeClock2::btn_hdr> bl=" + String(bl));
+    Nxa->blightness = bl;
     for (int i=0; i < NIXIE_NUM_N; i++) {
-      this->_nxa->num[i].element[this->_num[i]].set_blightness(this->_nxa->blightness);
+      this->_nxa->num[i].element[this->_num[i]].set_blightness(bl);
     } // for(NUM)
 
     for (int i=0; i < NIXIE_COLON_N; i++) {
-      for (int e=0; e < NIXIE_COLON_DOT_N; e++) {
-        this->_nxa->colon[i].element[e].set_blightness(this->_nxa->blightness);
-      } // for(e)
+      this->_nxa->colon[i].element[NIXIE_COLON_DOT_DOWN].set_blightness(bl);
     } // for(COLON)
   }
-} // ModeClock2::btn_intr()
+} // ModeClock2::btn_hdr()
 
 // for emacs
 // Local Variables:

@@ -50,9 +50,9 @@ void ModeBase::loop(unsigned long cur_ms) {
   Serial.println("ModeBase::loop()");
 }
 
-void ModeBase::btn_intr(unsigned long cur_ms, Button *btn) {
-  Serial.println("ModeBase::btn_intr()");
-} // ModeBase::btn_intr()
+void ModeBase::btn_hdr(unsigned long cur_ms, Button *btn) {
+  Serial.println("ModeBase::btn_hdr()");
+} // ModeBase::btn_hdr()
 
 // for emacs
 // Local Variables:

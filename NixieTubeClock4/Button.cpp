@@ -21,7 +21,8 @@ Button::Button(uint8_t pin, String name)
 
   pinMode(this->_pin, INPUT_PULLUP);
 } // Button::Button()
-/*
+
+/**
  * return:
  *	true	changed
  *	false	to be ignored
@@ -140,7 +141,7 @@ void Button::print(boolean interrupt)
 {
   String str = interrupt ? "!" : " ";
   
-  str += "Btn(" + this->_name + ") ";
+  str += "Btn[" + this->_name + "] ";
   str += this->_value ? "H "  : "L ";
   str += String(this->_count) + " ";
   str += String(this->_click_count) + " ";

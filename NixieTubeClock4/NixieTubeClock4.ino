@@ -7,7 +7,6 @@
 #include "ModeBase.h"
 #include "ModeTest1.h"
 #include "ModeTest2.h"
-#include "ModeClock1.h"
 #include "ModeClock2.h"
 
 static const String MY_NAME = "Nixie Tube Clock";
@@ -87,7 +86,7 @@ long prevMode = -1;
 void ntp_adjust() {
   struct tm time_info;
 
-  getLocalTime(&time_info);
+  getLocalTime(&time_info); // NTP
   DateTime now = DateTime(time_info.tm_year + 1900,
                           time_info.tm_mon + 1,
                           time_info.tm_mday,
@@ -96,12 +95,14 @@ void ntp_adjust() {
                           time_info.tm_sec);
   Rtc.adjust(now);
 
-  char dt_str[128];
-  sprintf(dt_str, "%04d/%02d/%02d(%s) %02d:%02d:%02d",
-          time_info.tm_year + 1900, time_info.tm_mon + 1, time_info.tm_mday,
-          dayOfTheWeek[time_info.tm_wday],
-          time_info.tm_hour, time_info.tm_min, time_info.tm_sec);
-  Serial.println("ntp_adjust> " + String(dt_str));
+  Serial.printf("ntp_adjust> %04d/%02d/%02d(%s) %02d:%02d:%02d\n",
+                time_info.tm_year + 1900,
+                time_info.tm_mon + 1,
+                time_info.tm_mday,
+                dayOfTheWeek[time_info.tm_wday],
+                time_info.tm_hour,
+                time_info.tm_min,
+                time_info.tm_sec);
 } // ntp_adjust()
 
 long change_mode() {
@@ -112,11 +113,11 @@ long change_mode() {
   return curMode;
 } // change_mode()
 
-void btn_handler() {
+void btn_hdr() {
   static unsigned long prev_msec = 0;
   unsigned long cur_msec = millis();
 
-  Serial.println("btn_handler>");
+  Serial.println("btn_hdr>");
   
   if ( cur_msec - prev_msec < DEBOUNCE ) {
     return;
@@ -130,10 +131,10 @@ void btn_handler() {
 	change_mode();
       }
       btnObj[b]->print();
-      Mode[curMode]->btn_intr(curMsec, btnObj[b]);
+      Mode[curMode]->btn_hdr(curMsec, btnObj[b]);
     }
   } // for(b)
-} // btn_handler
+} // btn_hdr
 
 //=======================================================================
 void setup() {
@@ -157,7 +158,6 @@ void setup() {
   ntpActive = false;
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // 各モードオブジェクト生成
-  //Mode[0] = new ModeClock1(nixieArray);
   Mode[0] = new ModeClock2(&nixieArray);
   Mode[1] = new ModeTest1(&nixieArray);
   Mode[2] = new ModeTest2(&nixieArray);
@@ -176,9 +176,9 @@ void setup() {
   Serial.println(" " + String(PIN_BTN1) + " --> " + String(intr_pin1));
   Serial.println(" " + String(PIN_BTN2) + " --> " + String(intr_pin2));
 
-  attachInterrupt(intr_pin0, btn_handler, CHANGE);
-  attachInterrupt(intr_pin1, btn_handler, CHANGE);
-  attachInterrupt(intr_pin2, btn_handler, CHANGE);
+  attachInterrupt(intr_pin0, btn_hdr, CHANGE);
+  attachInterrupt(intr_pin1, btn_hdr, CHANGE);
+  attachInterrupt(intr_pin2, btn_hdr, CHANGE);
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // 時間
   prevMsec = millis();
@@ -198,6 +198,8 @@ void loop() {
   curMsec = millis();
   loopCount++;
 
+  //---------------------------------------------------------------------
+  // NetMgr
   netmgr_mode = netMgr.loop();
   prev_wifiActive = wifiActive;
   if (netmgr_mode == NetMgr::MODE_WIFI_ON) {
@@ -227,13 +229,15 @@ void loop() {
     }
   }
 
+  /*
+  DateTime now = Rtc.now();
   if (loopCount % 2000 == 0) {
-    DateTime now = Rtc.now();
     Serial.printf("loop> now=%04d/%02d/%02d(%s) %02d:%02d:%02d\n",
                   now.year(), now.month(), now.day(),
                   dayOfTheWeek[now.dayOfTheWeek()],
                   now.hour(), now.minute(), now.second());
   }
+  */
 
   //---------------------------------------------------------------------
   // モード実行
@@ -246,32 +250,39 @@ void loop() {
   }
 
   //---------------------------------------------------------------------
-  // ボタン
+  // check buttions
   for (int b=0; b < BTN_N; b++) {
-    if ( btnObj[b]->get() ) {
-      btnObj[b]->print();
-      if ( b == 0 &&
-           btnObj[b]->is_long_pressed() && ! btnObj[b]->is_repeated()) {
+    if ( ! btnObj[b]->get() ) {
+      continue;
+    }
 
-        btnObj[2]->get();
-        if (btnObj[2]->is_long_pressed() && btnObj[2]->is_repeated()) {
-          netMgr.cur_mode = NetMgr::MODE_AP_INIT;
-          delay(500);
-        } else {
-          change_mode();
-        }
+    // button status was chenged
+    btnObj[b]->print();
+    if ( b != 0 ) {
+      Mode[curMode]->btn_hdr(curMsec, btnObj[b]);
+      continue;
+    }
 
+    // BTN0
+    if ( btnObj[b]->is_long_pressed() && ! btnObj[b]->is_repeated()) {
+      
+      btnObj[2]->get();
+      if (btnObj[2]->get_value() == Button::ON ) {
+        netMgr.cur_mode = NetMgr::MODE_AP_INIT;
+        wifiActive = false;
+        prev_wifiActive = false;
+        delay(500);
       } else {
-        Mode[curMode]->btn_intr(curMsec, btnObj[b]);
+        change_mode();
       }
     }
-  }
+  } // for(b)
   //---------------------------------------------------------------------
   // 表示
   nixieArray.display(curMsec);
 
   //---------------------------------------------------------------------
-  delayMicroseconds(LOOP_DELAY_US);
+  //delayMicroseconds(LOOP_DELAY_US);
 } // loop()
 
 //=======================================================================
