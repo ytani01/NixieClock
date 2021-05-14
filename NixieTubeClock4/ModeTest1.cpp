@@ -48,7 +48,8 @@ void ModeTest1::loop(unsigned long cur_ms) {
   // num
   int num = 0;
   this->_nxa->num[num].element[this->_prev_digit].set_blightness(0);
-  this->_nxa->num[num].element[this->_digit].set_blightness(BLIGHTNESS_RESOLUTION);
+  //this->_nxa->num[num].element[this->_digit].set_blightness(BLIGHTNESS_RESOLUTION);
+  this->_nxa->num[num].element[this->_digit].set_blightness(1);
   
   num = 1;
   this->_nxa->num[num].element[this->_prev_digit].set_blightness(0);

@@ -120,7 +120,7 @@ void ModeClock2::btn_intr(unsigned long cur_ms, Button *btn) {
   }
   if ( btn->get_name() == "BTN2" && btn->get_click_count() > 0 ) {
     this->_nxa->blightness -= btn->get_click_count();
-    if (this->_nxa->blightness < 1) {
+    if (this->_nxa->blightness < 1 || this->_nxa->blightness > BLIGHTNESS_RESOLUTION) {
       this->_nxa->blightness = 1;
     }
     flag = true;
@@ -130,18 +130,12 @@ void ModeClock2::btn_intr(unsigned long cur_ms, Button *btn) {
     Serial.println("ModeClock2::this->_nxa->blightness="
                    + String(this->_nxa->blightness));
     for (int i=0; i < NIXIE_NUM_N; i++) {
-      for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
-        if (this->_nxa->num[i].element[e].get_blightness() > 0) {
-          this->_nxa->num[i].element[e].set_blightness(this->_nxa->blightness);
-        }
-      } // for(e)
+      this->_nxa->num[i].element[this->_num[i]].set_blightness(this->_nxa->blightness);
     } // for(NUM)
 
     for (int i=0; i < NIXIE_COLON_N; i++) {
       for (int e=0; e < NIXIE_COLON_DOT_N; e++) {
-        if (this->_nxa->colon[i].element[e].get_blightness() > 0) {
-          this->_nxa->colon[i].element[e].set_blightness(this->_nxa->blightness);
-        }
+        this->_nxa->colon[i].element[e].set_blightness(this->_nxa->blightness);
       } // for(e)
     } // for(COLON)
   }

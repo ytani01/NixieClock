@@ -13,8 +13,8 @@
 static const String MY_NAME = "Nixie Tube Clock";
 
 #define LOOP_DELAY_US       2 // micro sbeconds
-#define WIFI_TRY_MAX       10 // count
-#define DEBOUNCE          200 // msec
+#define WIFI_TRY_MAX       15 // count
+#define DEBOUNCE          300 // msec
 
 //============================================================================
 #define PIN_HV5812_CLK     26
@@ -121,6 +121,7 @@ void btn_handler() {
   if ( cur_msec - prev_msec < DEBOUNCE ) {
     return;
   }
+
   prev_msec = cur_msec;
 
   for (int b=0; b < BTN_N; b++) {
@@ -151,7 +152,7 @@ void setup() {
   Serial.println("setup> sec=" + String(sec));
   randomSeed(sec);
 
-  nixieArray.blightness = 10;
+  nixieArray.blightness = 3;
 
   ntpActive = false;
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

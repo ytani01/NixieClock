@@ -13,6 +13,8 @@ class ModeClock2 : public ModeBase {
   static const unsigned long SHUFFLE_COUNT = 60;
   static const unsigned long DT_STR_LEN = 64;      // chars
 
+  unsigned long blightness = 3;
+
   ModeClock2(NixieArray *nxa);
   void init(unsigned long start_ms);
   void loop(unsigned long cur_ms);

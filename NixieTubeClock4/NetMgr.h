@@ -19,6 +19,14 @@ typedef unsigned int netmgr_mode_t;
  */
 class NetMgr {
  public:
+  static const unsigned int WIFI_TRY_INTERVAL  = 500; // ms
+  static const unsigned int WIFI_TRY_COUNT_MAX = 10;
+
+  static const unsigned int SSID_N_MAX = 30;
+
+  static const int DNS_PORT    = 53;
+  static const int WEBSVR_PORT = 80;
+
   static const netmgr_mode_t MODE_NULL          = 0x00;
   static const netmgr_mode_t MODE_START         = 0x01;
   static const netmgr_mode_t MODE_TRY_WIFI      = 0x02;
@@ -27,14 +35,6 @@ class NetMgr {
   static const netmgr_mode_t MODE_SCANNING_SSID = 0x20;
   static const netmgr_mode_t MODE_WIFI_ON       = 0xf0;
   static const netmgr_mode_t MODE_WIFI_OFF      = 0xf1;
-
-  static const unsigned int SSID_N_MAX = 30;
-
-  static const unsigned int WIFI_TRY_INTERVAL  = 500; // ms
-  static const unsigned int WIFI_TRY_COUNT_MAX = 10;
-
-  static const int DNS_PORT    = 53;
-  static const int WEBSVR_PORT = 80;
 
   static String myName;
 
