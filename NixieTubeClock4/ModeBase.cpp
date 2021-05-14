@@ -43,7 +43,7 @@ void ModeBase::init(unsigned long start_ms) {
   Serial.println(msg);
 }
 
-void ModeBase::loop(unsigned long cur_ms) {
+void ModeBase::loop(unsigned long cur_ms, DateTime& now) {
   if ( ! this->tick(cur_ms) ) {
     return;
   }
@@ -56,6 +56,6 @@ void ModeBase::btn_hdr(unsigned long cur_ms, Button *btn) {
 
 // for emacs
 // Local Variables:
-// Mode: arduino
+// Mode: c++-mode
 // Coding: utf-8-unix
 // End:

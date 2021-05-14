@@ -8,7 +8,7 @@ static const unsigned int C_FADE_IN  = 1;
 static const unsigned int C_FADE_OUT = 2;
 int colon_fade_mode[NIXIE_COLON_N] = {C_FADE_OFF, C_FADE_OFF};
 
-static const unsigned long C_FADE_TICK0 = 35;
+static const unsigned long C_FADE_TICK0 = 20;
 static const unsigned long C_FADE_TICK1 = 120;
 static unsigned long cFadeTick = C_FADE_TICK0;
 
@@ -48,13 +48,9 @@ void ModeClock2::init(unsigned long start_ms) {
 /**
  *
  */
-void ModeClock2::loop(unsigned long cur_ms) {
-  const char* WDAY[] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
+void ModeClock2::loop(unsigned long cur_ms, DateTime& now) {
   char time_str[6 + 1];
-  char dt_str[ModeClock2::DT_STR_LEN];
-  DateTime now = this->_rtc.now();
   int prev_num[NIXIE_NUM_N];
-  // int ch_flag[NIXIE_NUM_N];
 
   if ( cur_ms != 0 ) {
     if ( ! this->tick(cur_ms) ) {
@@ -81,11 +77,14 @@ void ModeClock2::loop(unsigned long cur_ms) {
 
   for (int i=0; i < NIXIE_COLON_N; i++) {
     if ( this->_num[5] != prev_num[5] ) {
-      this->_nxa->colon[i].fadeout_start(cur_ms, cFadeTick,
+      this->_nxa->colon[i].element[NIXIE_COLON_DOT_DOWN].set_blightness(this->_nxa->blightness);
+      if ( wifiActive ) {
+        this->_nxa->colon[i].fadeout_start(cur_ms, cFadeTick,
                                          NIXIE_COLON_DOT_DOWN);
-      colon_fade_mode[i] = C_FADE_OUT;
-      //Serial.println("ModeClock2::loop> " + String(i) + ":fadeout start");
-      continue;
+        colon_fade_mode[i] = C_FADE_OUT;
+        //Serial.println("ModeClock2::loop> " + String(i) + ":fadeout start");
+        continue;
+      }
     }
 
     if (this->_nxa->colon[i].effect_is_active()) {
@@ -97,19 +96,15 @@ void ModeClock2::loop(unsigned long cur_ms) {
       this->_nxa->colon[i].fadein_start(cur_ms, cFadeTick,
                                         NIXIE_COLON_DOT_DOWN);
       colon_fade_mode[i] = C_FADE_IN;
-      //Serial.println("ModeClock2::loop> " + String(i) + "fadein start");
     }
   } // for(COLON)
-
-  sprintf(dt_str, "%04d/%02d/%02d(%s) %02d:%02d:%02d",
-          now.year(), now.month(), now.day(), WDAY[now.dayOfTheWeek()],
-          now.hour(), now.minute(), now.second());
-
 } // ModeClock2::loop()
 
 void ModeClock2::btn_hdr(unsigned long cur_ms, Button *btn) {
+  /*
   Serial.printf("ModeClock2::btn_hdr> %s %d\n",
                 btn->get_name().c_str(), btn->get_click_count());
+  */
 
   boolean flag = false;
 
@@ -117,10 +112,10 @@ void ModeClock2::btn_hdr(unsigned long cur_ms, Button *btn) {
   
   if ( btn->get_name() == "BTN1") {
     if ( btn->get_click_count() > 0 ) {
-      bl += btn->get_click_count();
+      bl *= 2 * btn->get_click_count();
     }
     if ( btn->is_repeated() ) {
-      bl++;
+      bl *= 2;
     }
 
     if (bl > BLIGHTNESS_RESOLUTION) {
@@ -130,10 +125,10 @@ void ModeClock2::btn_hdr(unsigned long cur_ms, Button *btn) {
   }
   if ( btn->get_name() == "BTN2" ) {
     if ( btn->get_click_count() > 0 ) {
-      bl -= btn->get_click_count();
+      bl /= 2 * btn->get_click_count();
     }
     if ( btn->is_repeated() ) {
-      bl--;
+      bl /= 2;
     }
     
     if (bl < 1 || bl > BLIGHTNESS_RESOLUTION) {

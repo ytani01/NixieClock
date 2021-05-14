@@ -117,7 +117,7 @@ void btn_hdr() {
   static unsigned long prev_msec = 0;
   unsigned long cur_msec = millis();
 
-  Serial.println("btn_hdr>");
+  //Serial.println("btn_hdr>");
   
   if ( cur_msec - prev_msec < DEBOUNCE ) {
     return;
@@ -130,7 +130,7 @@ void btn_hdr() {
       if ( b == 0 && btnObj[b]->get_click_count() >= 2 ) {
 	change_mode();
       }
-      btnObj[b]->print();
+      // btnObj[b]->print();
       Mode[curMode]->btn_hdr(curMsec, btnObj[b]);
     }
   } // for(b)
@@ -153,7 +153,7 @@ void setup() {
   Serial.println("setup> sec=" + String(sec));
   randomSeed(sec);
 
-  nixieArray.blightness = 3;
+  nixieArray.blightness = 8;
 
   ntpActive = false;
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -193,6 +193,7 @@ void setup() {
 //=======================================================================
 void loop() {
   netmgr_mode_t netmgr_mode;
+  DateTime now = Rtc.now();
 
   prevMsec = curMsec;
   curMsec = millis();
@@ -210,12 +211,12 @@ void loop() {
       configTime(9 * 3600L, 0, ntpSvr[0], ntpSvr[1], ntpSvr[2]);
       ntp_adjust();
     }
-  } else {
+  } else if ( netmgr_mode == NetMgr::MODE_WIFI_OFF ) {
     wifiActive = false;
     ntpActive = false;
     if ( wifiActive != prev_wifiActive ) {
-      Serial.println("loop> WiFi OFF");
-      netMgr.cur_mode = NetMgr::MODE_AP_INIT;
+      Serial.println("loop> WiFi OFF .. try reconnect");
+      netMgr.cur_mode = NetMgr::MODE_START;
     }
   }
   
@@ -229,15 +230,12 @@ void loop() {
     }
   }
 
-  /*
-  DateTime now = Rtc.now();
   if (loopCount % 2000 == 0) {
     Serial.printf("loop> now=%04d/%02d/%02d(%s) %02d:%02d:%02d\n",
                   now.year(), now.month(), now.day(),
                   dayOfTheWeek[now.dayOfTheWeek()],
                   now.hour(), now.minute(), now.second());
   }
-  */
 
   //---------------------------------------------------------------------
   // モード実行
@@ -246,7 +244,7 @@ void loop() {
     Mode[curMode]->init(curMsec);
     prevMode = curMode;
   } else {
-    Mode[curMode]->loop(curMsec);
+    Mode[curMode]->loop(curMsec, now);
   }
 
   //---------------------------------------------------------------------
@@ -264,17 +262,19 @@ void loop() {
     }
 
     // BTN0
-    if ( btnObj[b]->is_long_pressed() && ! btnObj[b]->is_repeated()) {
-      
-      btnObj[2]->get();
-      if (btnObj[2]->get_value() == Button::ON ) {
-        netMgr.cur_mode = NetMgr::MODE_AP_INIT;
-        wifiActive = false;
-        prev_wifiActive = false;
-        delay(500);
+    if ( btnObj[b]->get_click_count() == 1 ) {
+      change_mode();
+      break;
+    } else if ( btnObj[b]->get_click_count() >= 2 ) {
+      wifiActive = false;
+      prev_wifiActive = false;
+      if ( netMgr.cur_mode == NetMgr::MODE_AP_LOOP ) {
+        netMgr.cur_mode = NetMgr::MODE_START;
       } else {
-        change_mode();
+        netMgr.cur_mode = NetMgr::MODE_AP_INIT;
       }
+      delay(500);
+      break;
     }
   } // for(b)
   //---------------------------------------------------------------------
@@ -287,6 +287,6 @@ void loop() {
 
 //=======================================================================
 // Local Variables:
-// Mode: c++
+// Mode: c++-mode
 // Coding: utf-8-unix
 // End:

@@ -32,21 +32,11 @@ void ModeTest2::init(unsigned long start_ms) {
   this->_nxa->num[this->_cur].blink_start(start_ms, 200, NIXIE_NUM_DIGIT_N);
 }
 
-void ModeTest2::loop(unsigned long cur_ms) {
+void ModeTest2::loop(unsigned long cur_ms, DateTime& now) {
   if ( ! this->tick(cur_ms) ) {
     return;
   }
 
-  /*
-  if ( cur_ms - this->_start_ms > 1000 ) {
-    for (int i=0; i < NIXIE_NUM_N; i++) {
-      if (this->_nxa->num[i]._ef->_id != EFFECT_BLINK) {
-        this->_nxa->num[i].end_effect();
-      }
-    }
-  }
-  */
-  
   String msg = "_digit=[ ";
   for (int i=0; i < NIXIE_NUM_N; i++) {
     if (i == this->_cur) {

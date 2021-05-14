@@ -108,7 +108,7 @@ void EffectFadeIn::start(unsigned long start_ms, unsigned long tick_ms,
   Effect::start(start_ms, tick_ms);
 
   this->_el_i = el_i;
-  this->_el[this->_el_i].set_blightness(0);
+  //this->_el[this->_el_i].set_blightness(0);
 } // EffectFadeIn::start()
 
 void EffectFadeIn::loop(unsigned long cur_ms) {
@@ -138,7 +138,7 @@ void EffectFadeOut::start(unsigned long start_ms,
   Effect::start(start_ms, tick_ms);
 
   this->_el_i = el_i;
-  this->_el[this->_el_i].set_blightness(BLIGHTNESS_RESOLUTION);
+  //this->_el[this->_el_i].set_blightness(BLIGHTNESS_RESOLUTION);
 }
 
 void EffectFadeOut::loop(unsigned long cur_ms) {

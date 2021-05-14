@@ -12,3 +12,5 @@
 ## References
 
 * [github: arduino-esp32 WiFi](https://github.com/espressif/arduino-esp32/tree/master/libraries/WiFi/src)
+
+* [github: EspExceptionDecoder(スタックトレース表示)](https://github.com/me-no-dev/EspExceptionDecoder/releases/)

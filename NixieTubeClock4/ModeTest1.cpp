@@ -38,7 +38,7 @@ void ModeTest1::init(unsigned long start_ms) {
   Serial.println("ModeTest1::init> done");
 }
 
-void ModeTest1::loop(unsigned long cur_ms) {
+void ModeTest1::loop(unsigned long cur_ms, DateTime& now) {
   if ( ! this->tick(cur_ms) ) {
     return;
   }
