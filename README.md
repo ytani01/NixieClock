@@ -19,15 +19,14 @@
 1. [BTN0] を ダブルクリック
 
 2. スマホのWiFi設定で、「NIXIE_CLOCK_XXXXXXXX」に接続
-   ![](docs/wifi01.png)
 
 3. 接続すると、ブラウザが自動起動される
-   ![](docs/wifi02.png)
 
 4. SSIDを設定し、保存
 
 5. [OK]で、時計を再起動
 
+![](docs/wifi1.png)
 
 ### 2.2 表示モード変更 [BTN1]
 
