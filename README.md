@@ -5,7 +5,7 @@
 ### ボタン
 
 ```
-   +---------- [BTN0] WiFi設定
+   +---------- [BTN0] WiFi設定(ダブルクリック)
    |  +------- [BTN1] 表示モード変更
    |  |  +---- [BTN2] 明るさ変更
    |  |  |
@@ -14,11 +14,10 @@
  -----------
 ```
 
-* [NixieTubeClock3/](NixieTubeClock3/) New
-* [junk/NixieTubeClock2/](NixieTubeClock2/) (CmdQueue, CmdDispatcher)
-* [junk/NixieTubeClock1/](NixieTubeClock1/) (old)
-* [junk/NixieClock2/](NixieClock2/) (クロスフェード動作確認)
-* [junk/NixiClock1/](NixiClock1/) (最初の動作確認)
+### 操作法
+
+#### [BTN0]
+
 
 
 ## References
