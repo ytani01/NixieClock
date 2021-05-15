@@ -1,11 +1,11 @@
 /*
  * (c) 2020 Yoichi Tanibayashi
  */
-#ifndef MODE_CLOCK2_H
-#define MODE_CLOCK2_H
+#ifndef MODE_CLOCK_H
+#define MODE_CLOCK_H
 #include "ModeBase.h"
 
-class ModeClock2 : public ModeBase {
+class ModeClock : public ModeBase {
  public:
   static const unsigned long TICK_MS = 10;         // ms
   static const unsigned long FADE_TICK_MS = 50;    // ms
@@ -15,7 +15,7 @@ class ModeClock2 : public ModeBase {
 
   unsigned long blightness = 3;
 
-  ModeClock2(NixieArray *nxa);
+  ModeClock(NixieArray *nxa);
   void init(unsigned long start_ms);
   void loop(unsigned long cur_ms, DateTime& now);
   void btn_hdr(unsigned long cur_ms, Button *btn);
@@ -24,7 +24,7 @@ class ModeClock2 : public ModeBase {
   RTC_DS3231 _rtc;
   int _num[NIXIE_NUM_N];
 };
-#endif // MODE_CLOCK2_H
+#endif // MODE_CLOCK_H
 
 // Local Variables:
 // Mode: arduino

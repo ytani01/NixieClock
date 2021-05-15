@@ -71,6 +71,6 @@ void ModeTest2::btn_hdr(unsigned long cur_ms, Button *btn) {
 
 // for emacs
 // Local Variables:
-// Mode: arduino
+// Mode: c++-mode
 // Coding: utf-8-unix
 // End:
