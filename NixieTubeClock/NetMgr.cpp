@@ -5,7 +5,6 @@
 
 static WebServer web_svr(NetMgr::WEBSVR_PORT);
 String NetMgr::myName = "NetMgr";
-
 static SSIDent ssidEnt[NetMgr::SSID_N_MAX];
 static unsigned int ssidN;
 
@@ -21,9 +20,9 @@ NetMgr::NetMgr() {
 }
 
 netmgr_mode_t NetMgr::loop() {
-  String myname = "NetMgr::loop";
+  String     myname = "NetMgr::loop";
   ConfigData conf_data;
-  String ssid, ssid_pw;
+  String     ssid, ssid_pw;
   
   this->_loop_count++;
 
@@ -276,9 +275,9 @@ unsigned int NetMgr::scan_ssid(SSIDent ssid_ent[]) {
  *
  */
 void NetMgr::handle_top() {
-  String myname = "NetMgr::handle_top";
+  String     myname = "NetMgr::handle_top";
   ConfigData conf_data;
-  String ssid, ssid_pw;
+  String     ssid, ssid_pw;
 
   conf_data.load();
   ssid = conf_data.ssid;
@@ -287,7 +286,7 @@ void NetMgr::handle_top() {
   Serial.printf("%s> ssid=%s, ssid_pw=%s\n",
                 myname.c_str(), ssid.c_str(), ssid_pw.c_str());
 
-  String html = NetMgr::html_header("Current Settings");
+  String html = NetMgr::html_header("Current settings");
   html += "<span style='font-size: large;'>";
   html += "SSID: ";
   html += "</span>";
@@ -304,7 +303,7 @@ void NetMgr::handle_top() {
 
 void NetMgr::handle_select_ssid() {
   ConfigData conf_data;
-  String ssid, ssid_pw;
+  String     ssid, ssid_pw;
   
 
   conf_data.load();
@@ -330,7 +329,7 @@ void NetMgr::handle_select_ssid() {
     Serial.println();
   } // for(i)
 
-  String html = NetMgr::html_header("Please, select SSID");
+  String html = NetMgr::html_header("Please change settings and save");
   html += "<form action='/save_ssid' method='GET'>";
   html += "<div class='ssid'>";
   html += "SSID ";
@@ -375,8 +374,8 @@ void NetMgr::handle_select_ssid() {
 
 void NetMgr::handle_save_ssid(){
   ConfigData conf_data;
-  String ssid = web_svr.arg("ssid");
-  String ssid_pw = web_svr.arg("passwd");
+  String     ssid       = web_svr.arg("ssid");
+  String     ssid_pw    = web_svr.arg("passwd");
   
   Serial.printf("save_ssid> |%s|%s|\n", ssid.c_str(), ssid_pw.c_str());
 

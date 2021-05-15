@@ -14,14 +14,12 @@ static unsigned long cFadeTick = C_FADE_TICK0;
 
 extern boolean wifiActive;
 
-#define Nxa this->_nxa
-
 /**
  *
  */
 ModeClock::ModeClock(NixieArray *nxa): ModeBase::ModeBase(nxa,
-                                                            "Clock",
-                                                            ModeClock::TICK_MS) {
+                                                          "Clock",
+                                                          ModeClock::TICK_MS) {
 }
 
 /**
@@ -34,19 +32,21 @@ void ModeClock::init(unsigned long start_ms) {
     this->_num[i] = i;
     for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
       if ( this->_num[i] == e ) {
-        this->_nxa->num[i].element[e].set_blightness(this->_nxa->blightness);
+        NxNumEl(i, e).set_blightness(Nx->blightness);
       } else {
-        this->_nxa->num[i].element[e].set_blightness(0);
+        NxNumEl(i, e).set_blightness(0);
       }
     } // for(e)
   } // for(i)
 }
 
+static DateTime prev_dt = DateTime(2000,1,1,0,0,0);
+
 /**
  *
  */
 void ModeClock::loop(unsigned long cur_ms, DateTime& now) {
-  char time_str[6 + 1];
+  char disp_str[6 + 1];
   int  prev_num[NIXIE_NUM_N];
 
   if ( cur_ms != 0 ) {
@@ -61,45 +61,92 @@ void ModeClock::loop(unsigned long cur_ms, DateTime& now) {
     cFadeTick = C_FADE_TICK1;
   }
 
-  sprintf(time_str, "%02d%02d%02d", now.hour(), now.minute(), now.second());
-
+  switch ( this->mode ) {
+  case ModeClock::MODE_HMS:
+    sprintf(disp_str, "%02d%02d%02d", now.hour(), now.minute(), now.second());
+    break;
+  case MODE_DHM:
+    sprintf(disp_str, "%02d%02d%02d", now.day(), now.hour(), now.minute());
+    break;
+  case ModeClock::MODE_YMD:
+    sprintf(disp_str, "%02d%02d%02d",
+            now.year() % 100, now.month(), now.day());
+    break;
+  default:
+    sprintf(disp_str, "%02d%02d%02d", now.hour(), now.minute(), now.second());
+    break;
+  } // switch (mode)
+  
   for (int i=0; i < NIXIE_NUM_N; i++) {
     prev_num[i] = this->_num[i];
-    this->_num[i] = int(time_str[i] - '0');
+    this->_num[i] = int(disp_str[i] - '0');
     if ( this->_num[i] != prev_num[i] ) {
-      this->_nxa->num[i].xfade_start(cur_ms, ModeClock::FADE_TICK_MS,
-                                     this->_num[i], prev_num[i]);
+      NxNum(i).xfade_start(cur_ms, ModeClock::FADE_TICK_MS,
+                           this->_num[i], prev_num[i]);
     }
   } // for(NUM)
 
   for (int i=0; i < NIXIE_COLON_N; i++) {
-    if ( this->_num[5] != prev_num[5] ) {
-      this->_nxa->colon[i].element[NIXIE_COLON_DOT_DOWN].set_blightness(this->_nxa->blightness);
+    if ( prev_dt.second() != now.second() ) {
+      NxColEl(i, NIXIE_COLON_DOT_DOWN).set_blightness(Nx->blightness);
       if ( wifiActive ) {
-        this->_nxa->colon[i].fadeout_start(cur_ms, cFadeTick,
+        NxCol(i).fadeout_start(cur_ms, cFadeTick,
                                          NIXIE_COLON_DOT_DOWN);
         colon_fade_mode[i] = C_FADE_OUT;
         continue;
       }
     }
 
-    if (this->_nxa->colon[i].effect_is_active()) {
+    if (NxCol(i).effect_is_active()) {
       continue;
     }
 
     // effect is inactive
     if(colon_fade_mode[i] == C_FADE_OUT) {
-      this->_nxa->colon[i].fadein_start(cur_ms, cFadeTick,
-                                        NIXIE_COLON_DOT_DOWN);
+      NxCol(i).fadein_start(cur_ms, cFadeTick, NIXIE_COLON_DOT_DOWN);
       colon_fade_mode[i] = C_FADE_IN;
     }
   } // for(COLON)
+  prev_dt = DateTime(now);
 } // ModeClock::loop()
+
+void ModeClock::change_mode(unsigned long mode=ModeClock::MODE_NULL) {
+  Serial.printf("change_mode(%d)> ", this->mode);
+
+  if ( mode != MODE_NULL ) {
+    this->mode = mode;
+  } else {
+    switch ( this->mode ) {
+    case MODE_HMS:
+      this->mode = MODE_DHM;
+      break;
+    case MODE_DHM:
+      this->mode = MODE_YMD;
+      break;
+    case MODE_YMD:
+      this->mode = MODE_HMS;
+      break;
+    default:
+      this->mode = MODE_HMS;
+      break;
+    } // switch(mode)
+  }
+  Serial.printf("%d\n", this->mode);
+}
 
 void ModeClock::btn_hdr(unsigned long cur_ms, Button *btn) {
   boolean      flag = false;
-  unsigned int bl = this->_nxa->blightness;
+  unsigned int bl = Nx->blightness;
   
+  if ( btn->get_name() == "BTN1" ) {
+    int count = btn->get_click_count();
+
+    for (int i=0; i < count; i++) {
+      this->change_mode();
+    }
+    return;
+  }
+
   if ( btn->get_name() == "BTN1") {
     if ( btn->get_click_count() > 0 ) {
       bl *= 2 * btn->get_click_count();
@@ -128,13 +175,13 @@ void ModeClock::btn_hdr(unsigned long cur_ms, Button *btn) {
   }
   
   if (flag) {
-    Nxa->blightness = bl;
+    Nx->blightness = bl;
     for (int i=0; i < NIXIE_NUM_N; i++) {
-      this->_nxa->num[i].element[this->_num[i]].set_blightness(bl);
+      NxNumEl(i, this->_num[i]).set_blightness(bl);
     } // for(NUM)
 
     for (int i=0; i < NIXIE_COLON_N; i++) {
-      this->_nxa->colon[i].element[NIXIE_COLON_DOT_DOWN].set_blightness(bl);
+      NxColEl(i, NIXIE_COLON_DOT_DOWN).set_blightness(bl);
     } // for(COLON)
   }
 } // ModeClock::btn_hdr()

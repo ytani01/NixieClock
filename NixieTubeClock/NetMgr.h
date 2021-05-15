@@ -41,9 +41,7 @@ class NetMgr {
   boolean net_is_available = false;;
   netmgr_mode_t cur_mode   = MODE_START;
 
-  String    ntp_svr[3]  = {"ntp.nict.jp",
-                           "time.google.com",
-                           ""};
+  String    ntp_svr[3]  = { "ntp.nict.jp", "time.google.com", "" };
 
   String    ap_ssid_hdr = "NIXIE_CLOCK_";
   String    ap_ssid     = ap_ssid_hdr;

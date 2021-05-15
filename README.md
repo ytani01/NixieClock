@@ -1,6 +1,18 @@
 # NixiClock
 
-最下位層のドライバ関数を試作中
+## 仕様案
+
+### ボタン
+
+```
+   +---------- [BTN0] WiFi設定
+   |  +------- [BTN1] 表示モード変更
+   |  |  +---- [BTN2] 明るさ変更
+   |  |  |
+ --v--v--v--
+|  O  O  O  | -> 前
+ -----------
+```
 
 * [NixieTubeClock3/](NixieTubeClock3/) New
 * [junk/NixieTubeClock2/](NixieTubeClock2/) (CmdQueue, CmdDispatcher)

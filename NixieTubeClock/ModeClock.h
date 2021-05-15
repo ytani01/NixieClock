@@ -5,19 +5,33 @@
 #define MODE_CLOCK_H
 #include "ModeBase.h"
 
+#define Nx           this->_nxa
+#define NxNum(i)     Nx->num[i]
+#define NxNumEl(i,j) NxNum(i).element[j]
+#define NxCol(i)     Nx->colon[i]
+#define NxColEl(i,j) NxCol(i).element[j]
+
 class ModeClock : public ModeBase {
  public:
+  static const unsigned long MODE_NULL = 0x00;
+  static const unsigned long MODE_HMS = 0x01;
+  static const unsigned long MODE_DHM = 0x02;
+  static const unsigned long MODE_YMD = 0x03;
+    
   static const unsigned long TICK_MS = 10;         // ms
   static const unsigned long FADE_TICK_MS = 40;    // ms
   static const unsigned long SHUFFLE_TICK_MS = 10; // ms
   static const unsigned long SHUFFLE_COUNT = 60;
   static const unsigned long DT_STR_LEN = 64;      // chars
 
-  unsigned long blightness = 3;
+  unsigned long mode = MODE_HMS;
+  unsigned long ch_mode_ms = 0;
+  static const unsigned long CH_MODE_MS_LIMIT = 2000;
 
   ModeClock(NixieArray *nxa);
   void init(unsigned long start_ms);
   void loop(unsigned long cur_ms, DateTime& now);
+  void change_mode(unsigned long mode);
   void btn_hdr(unsigned long cur_ms, Button *btn);
 
  private:
@@ -27,6 +41,6 @@ class ModeClock : public ModeBase {
 #endif // MODE_CLOCK_H
 
 // Local Variables:
-// Mode: arduino
+// Mode: c++-mode
 // Coding: utf-8-unix
 // End:
