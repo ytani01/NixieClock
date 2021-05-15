@@ -39,10 +39,16 @@
 
 #define NIXIE_ELEMENT_N_MAX  (NIXIE_NUM_DIGIT_N > NIXIE_COLON_DOT_N ? NIXIE_NUM_DIGIT_N : NIXIE_COLON_DOT_N)
 
+#define Nx           this->_nxa
+#define NxNum(i)     Nx->num[i]
+#define NxNumEl(i,j) NxNum(i).element[j]
+#define NxCol(i)     Nx->colon[i]
+#define NxColEl(i,j) NxCol(i).element[j]
+
 #endif // NIXIE_H
 
 // for emacs ..
 // Local Variables:
-// Mode: arduino
+// Mode: c++-mode
 // Coding: utf-8-unix
 // End:
