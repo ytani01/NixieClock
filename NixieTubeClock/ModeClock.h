@@ -11,6 +11,9 @@
 #define NxCol(i)     Nx->colon[i]
 #define NxColEl(i,j) NxCol(i).element[j]
 
+/**
+ *
+ */
 class ModeClock : public ModeBase {
  public:
   static const unsigned long MODE_NULL = 0x00;
