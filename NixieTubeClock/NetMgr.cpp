@@ -287,7 +287,7 @@ void NetMgr::handle_top() {
   Serial.printf("%s> ssid=%s, ssid_pw=%s\n",
                 myname.c_str(), ssid.c_str(), ssid_pw.c_str());
 
-  String html = NetMgr::html_header("WiFi Setting");
+  String html = NetMgr::html_header("Current Settings");
   html += "<span style='font-size: large;'>";
   html += "SSID: ";
   html += "</span>";
@@ -297,7 +297,7 @@ void NetMgr::handle_top() {
   html += "<hr />";
   html += "<a href='/select_ssid'>Change</a>\n";
   html += "or\n";
-  html += "<a href='/confirm_reboot'>OK (Reboot clock)</a>\n";
+  html += "<a href='/confirm_reboot'>OK</a>\n";
   html += NetMgr::html_footer();
   web_svr.send(200, "text/html", html);
 } // NetMgr::handle_top()
@@ -398,7 +398,9 @@ void NetMgr::handle_save_ssid(){
  */
 void NetMgr::handle_confirm_reboot() {
   String html = NetMgr::html_header("Reboot confirmation");
-  html += "<p>Are you sure to reboot?</p>\n";
+  html += "<p>Are you sure to reboot ";
+  html += NetMgr::myName;
+  html += " ?</p>\n";
   html += "<a href='/do_reboot'>Yes</a>";
   html += " or ";
   html += "<a href='/'>No</a>";

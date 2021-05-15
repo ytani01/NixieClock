@@ -254,7 +254,7 @@ void loop() {
                   now.year(), now.month(), now.day(),
                   dayOfWeekStr[now.dayOfTheWeek()].c_str(),
                   now.hour(), now.minute(), now.second());
-    Serial.printf(" blightness=%d", nixieArray.blightness);
+    Serial.printf(", blightness=%d", nixieArray.blightness);
     Serial.println();
   }
 

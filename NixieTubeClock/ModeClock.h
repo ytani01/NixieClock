@@ -8,7 +8,7 @@
 class ModeClock : public ModeBase {
  public:
   static const unsigned long TICK_MS = 10;         // ms
-  static const unsigned long FADE_TICK_MS = 50;    // ms
+  static const unsigned long FADE_TICK_MS = 40;    // ms
   static const unsigned long SHUFFLE_TICK_MS = 10; // ms
   static const unsigned long SHUFFLE_COUNT = 60;
   static const unsigned long DT_STR_LEN = 64;      // chars
