@@ -5,12 +5,6 @@
 #define MODE_CLOCK_H
 #include "ModeBase.h"
 
-#define Nx           this->_nxa
-#define NxNum(i)     Nx->num[i]
-#define NxNumEl(i,j) NxNum(i).element[j]
-#define NxCol(i)     Nx->colon[i]
-#define NxColEl(i,j) NxCol(i).element[j]
-
 /**
  *
  */
@@ -35,15 +29,11 @@ class ModeClock : public ModeBase {
   void init(unsigned long start_ms);
   void loop(unsigned long cur_ms, DateTime& now);
   void change_mode(unsigned long mode);
-  void btn_hdr(unsigned long cur_ms, Button *btn);
+  void btn_intr_hdr(unsigned long cur_ms, Button *btn);
+  void btn_loop_hdr(unsigned long cur_ms, Button *btn);
 
  private:
   RTC_DS3231 _rtc;
   int _num[NIXIE_NUM_N];
 };
 #endif // MODE_CLOCK_H
-
-// Local Variables:
-// Mode: c++-mode
-// Coding: utf-8-unix
-// End:

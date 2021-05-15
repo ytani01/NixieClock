@@ -1,5 +1,5 @@
-/*
- * (c) 2020 Yoichi Tanibayashi
+/**
+ * (c) 2021 Yoichi Tanibayashi
  */
 #include "ModeClock.h"
 
@@ -134,7 +134,10 @@ void ModeClock::change_mode(unsigned long mode=ModeClock::MODE_NULL) {
   Serial.printf("%d\n", this->mode);
 }
 
-void ModeClock::btn_hdr(unsigned long cur_ms, Button *btn) {
+void ModeClock::btn_intr_hdr(unsigned long cur_ms, Button *btn) {
+} // ModeClock::btn_intr_hdr()
+
+void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   boolean      flag = false;
   unsigned int bl = Nx->blightness;
   
@@ -184,10 +187,4 @@ void ModeClock::btn_hdr(unsigned long cur_ms, Button *btn) {
       NxColEl(i, NIXIE_COLON_DOT_DOWN).set_blightness(bl);
     } // for(COLON)
   }
-} // ModeClock::btn_hdr()
-
-// for emacs
-// Local Variables:
-// Mode: c++
-// Coding: utf-8-unix
-// End:
+} // ModeClock::btn_loop_hdr()

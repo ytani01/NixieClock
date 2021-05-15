@@ -1,8 +1,11 @@
-/*
- * (c) 2020 Yoichi Tanibayashi
+/**
+ * (c) 2021 Yoichi Tanibayashi
  */
 #include "Button.h"
 
+/**
+ *
+ */
 Button::Button(uint8_t pin, String name)
 {
   this->_pin               = pin;
@@ -150,8 +153,3 @@ void Button::print(boolean interrupt)
 
   Serial.println(str);
 }
-//============================================================================
-// Local Variables:
-// Mode: arduino
-// Coding: utf-8-unix
-// End:

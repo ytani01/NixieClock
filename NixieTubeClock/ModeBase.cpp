@@ -60,12 +60,10 @@ void ModeBase::loop(unsigned long cur_ms, DateTime& now) {
   Serial.println("ModeBase::loop()");
 }
 
-void ModeBase::btn_hdr(unsigned long cur_ms, Button *btn) {
-  Serial.println("ModeBase::btn_hdr()");
-} // ModeBase::btn_hdr()
+void ModeBase::btn_intr_hdr(unsigned long cur_ms, Button *btn) {
+  Serial.println("ModeBase::btn_intr_hdr()");
+} // ModeBase::btn_intr_hdr()
 
-// for emacs
-// Local Variables:
-// Mode: c++-mode
-// Coding: utf-8-unix
-// End:
+void ModeBase::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
+  Serial.println("ModeBase::btn_loop_hdr()");
+} // ModeBase::btn_loop_hdr()

@@ -19,7 +19,8 @@ class ModeBase {
 
   virtual void init(unsigned long start_ms); // モード変更時の初期化:loop()内
   virtual void loop(unsigned long cur_ms, DateTime& now);   // loop()内での処理
-  virtual void btn_hdr(unsigned long cur_ms, Button *btn); // ボタン処理
+  virtual void btn_intr_hdr(unsigned long cur_ms, Button *btn); // ボタン処理
+  virtual void btn_loop_hdr(unsigned long cur_ms, Button *btn); // ボタン処理
 
  protected:
   String        _name;         // モード名
@@ -30,8 +31,3 @@ class ModeBase {
   unsigned long _prev_tick;
 };
 #endif // MODE_BASE_H
-
-// Local Variables:
-// Mode: c++-mode
-// Coding: utf-8-unix
-// End:

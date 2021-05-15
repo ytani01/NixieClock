@@ -1,5 +1,5 @@
-/*
- * (c) 2020 Yoichi Tanibayashi
+/**
+ * (c) 2021 Yoichi Tanibayashi
  */
 #ifndef MODE_TEST2_H
 #define MODE_TEST2_H
@@ -15,15 +15,11 @@ class ModeTest2 : public ModeBase {
   ModeTest2(NixieArray *nxa);
   void init(unsigned long start_ms);
   void loop(unsigned long cur_ms, DateTime& now);
-  void btn_hdr(unsigned long cur_ms, Button *btn);
+  void btn_intr_hdr(unsigned long cur_ms, Button *btn);
+  void btn_loop_hdr(unsigned long cur_ms, Button *btn);
 
  private:
   int *_digit;
   int _cur;
 };
 #endif // MODE_TEST2_H
-
-// Local Variables:
-// Mode: c++-mode
-// Coding: utf-8-unix
-// End:

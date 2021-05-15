@@ -1,4 +1,4 @@
-/*
+/**
  * (c) 2021 Yoichi Tanibayashi
  */
 #include "Nixie.h"
@@ -6,13 +6,15 @@
 #include "NetMgr.h"
 #include "ModeBase.h"
 #include "ModeClock.h"
+#include "ModeSetClock.h"
 #include "ModeTest1.h"
 #include "ModeTest2.h"
 
 static const String MY_NAME = "Nixie Tube Clock";
 
-#define LOOP_DELAY_US       2 // micro sbeconds
-#define DEBOUNCE          300 // msec
+#define LOOP_DELAY_US   2   // micro sbeconds
+#define DEBOUNCE        300 // msec
+
 String dayOfWeekStr[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 
 //======================================================================
@@ -27,8 +29,6 @@ String dayOfWeekStr[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 #define PIN_COLON_R_BOTTOM 16
 #define PIN_COLON_L_TOP    17
 #define PIN_COLON_L_BOTTOM 17
-
-#define PIN_LED            27
 
 #define PIN_BTN0           33
 #define PIN_BTN1           34
@@ -59,17 +59,17 @@ uint8_t intrPin2 = digitalPinToInterrupt(PIN_BTN2);
 //======================================================================
 // NetMgr
 //----------------------------------------------------------------------
-NetMgr netMgr;
-boolean wifiActive = false;
+NetMgr  netMgr;
+boolean wifiActive      = false;
 boolean prev_wifiActive = false;
 
 //======================================================================
 // NTP
 //----------------------------------------------------------------------
-const String        ntpSvr[] = {"ntp.nict.jp", "time.google.com", ""};
+const String        ntpSvr[]    = {"ntp.nict.jp", "time.google.com", ""};
 const unsigned long ntpInterval = 1000 * 30; // msec
-unsigned long       ntpLast = 0;
-boolean             ntpActive = false;
+unsigned long       ntpLast     = 0;
+boolean             ntpActive   = false;
 
 //======================================================================
 // RTC DS3231
@@ -88,8 +88,11 @@ NixieArray nixieArray(PIN_HV5812_CLK,  PIN_HV5812_STOBE,
 ModeClock m0 = ModeClock(&nixieArray);
 ModeTest1 m1 = ModeTest1(&nixieArray);
 ModeTest2 m2 = ModeTest2(&nixieArray);
+
 ModeBase* Mode[] = {&m0, &m1, &m2};
+
 const unsigned long MODE_N = sizeof(Mode) / sizeof(&Mode[0]);
+
 long curMode = 0;
 long prevMode = -1;
 
@@ -99,16 +102,22 @@ long prevMode = -1;
 Button b0 = Button(PIN_BTN0, "BTN0");
 Button b1 = Button(PIN_BTN1, "BTN1");
 Button b2 = Button(PIN_BTN2, "BTN2");
+
 Button* Btn[] = {&b0, &b1, &b2};
+
 const unsigned long BTN_N = sizeof(Btn) / sizeof(&Btn[0]);
+
 //======================================================================
 // global variables
 //----------------------------------------------------------------------
-unsigned long loopCount  = 0;
-unsigned long curMsec    = 0; // msec
-unsigned long prevMsec   = 0;
+unsigned long loopCount = 0;
+unsigned long curMsec   = 0; // msec
+unsigned long prevMsec  = 0; // msec
 
 //======================================================================
+/**
+ *
+ */
 void ntp_adjust() {
   struct tm time_info;
 
@@ -131,6 +140,9 @@ void ntp_adjust() {
                 time_info.tm_sec);
 } // ntp_adjust()
 
+/**
+ *
+ */
 long change_mode() {
   nixieArray.end_all_effect();
   prevMode = curMode;
@@ -139,30 +151,61 @@ long change_mode() {
   return curMode;
 } // change_mode()
 
-void btn_hdr() {
-  static unsigned long prev_msec = 0;
-  unsigned long cur_msec = millis();
-
-  //Serial.println("btn_hdr>");
-  
-  if ( cur_msec - prev_msec < DEBOUNCE ) {
-    return;
-  }
-
-  prev_msec = cur_msec;
-
+/**
+ *
+ */
+void btn_intr_hdr() {
   for (int b=0; b < BTN_N; b++) {
     if ( Btn[b]->get() ) {
-      if ( b == 0 && Btn[b]->get_click_count() >= 2 ) {
-	change_mode();
-      }
-      // Btn[b]->print();
-      Mode[curMode]->btn_hdr(curMsec, Btn[b]);
+      Serial.print("btn_intr_hdr> ");
+      Btn[b]->print();
+      
+      Mode[curMode]->btn_intr_hdr(curMsec, Btn[b]);
     }
   } // for(b)
-} // btn_hdr
+}
+
+/**
+ *
+ */
+void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
+  static unsigned long prev_msec = 0;
+
+  if ( cur_ms - prev_msec < DEBOUNCE ) {
+    return;
+  }
+  prev_msec = cur_ms;
+
+  Serial.print("btn_loop_hdr> ");
+  btn->print();
+
+  // BTN0
+  if ( btn->get_name() == "BTN0" ) {
+    if ( btn->get_click_count() >= 3 ) {
+      change_mode();
+      return;
+    }
+
+    if ( btn->get_click_count() >= 2 ) {
+      wifiActive = false;
+      prev_wifiActive = false;
+      if ( netMgr.cur_mode == NetMgr::MODE_AP_LOOP ) {
+        netMgr.cur_mode = NetMgr::MODE_START;
+      } else {
+        netMgr.cur_mode = NetMgr::MODE_AP_INIT;
+      }
+      delay(500);
+      return;
+    }
+  }
+
+  Mode[curMode]->btn_loop_hdr(cur_ms, btn);
+} // btn_loop_hdr()
 
 //=======================================================================
+/**
+ *
+ */
 void setup() {
   Serial.begin(115200);
   Serial.println("setup> begin");
@@ -203,12 +246,15 @@ void setup() {
   Serial.printf(" %d --> %d\n", PIN_BTN1, intrPin1);
   Serial.printf(" %d --> %d\n", PIN_BTN2, intrPin2);
 
-  attachInterrupt(intrPin0, btn_hdr, CHANGE);
-  attachInterrupt(intrPin1, btn_hdr, CHANGE);
-  attachInterrupt(intrPin2, btn_hdr, CHANGE);
+  attachInterrupt(intrPin0, btn_intr_hdr, CHANGE);
+  attachInterrupt(intrPin1, btn_intr_hdr, CHANGE);
+  attachInterrupt(intrPin2, btn_intr_hdr, CHANGE);
 } // setup()
 
 //=======================================================================
+/**
+ *
+ */
 void loop() {
   netmgr_mode_t netmgr_mode;
   DateTime now = Rtc.now();
@@ -259,6 +305,16 @@ void loop() {
   }
 
   //---------------------------------------------------------------------
+  // check buttions
+  for (int b=0; b < BTN_N; b++) {
+    if ( ! Btn[b]->get() ) {
+      continue;
+    }
+
+    btn_loop_hdr(curMsec, Btn[b]);
+  } // for(b)
+
+  //---------------------------------------------------------------------
   // モード実行
   if (curMode != prevMode) {
     // モード変更時の初期化
@@ -269,47 +325,9 @@ void loop() {
   }
 
   //---------------------------------------------------------------------
-  // check buttions
-  for (int b=0; b < BTN_N; b++) {
-    if ( ! Btn[b]->get() ) {
-      continue;
-    }
-
-    // button status was chenged
-    Btn[b]->print();
-    if ( b != 0 ) {
-      Mode[curMode]->btn_hdr(curMsec, Btn[b]);
-      continue;
-    }
-
-    // BTN0
-    if ( Btn[b]->get_click_count() >= 3 ) {
-      change_mode();
-      break;
-    }
-
-    if ( Btn[b]->get_click_count() >= 2 ) {
-      wifiActive = false;
-      prev_wifiActive = false;
-      if ( netMgr.cur_mode == NetMgr::MODE_AP_LOOP ) {
-        netMgr.cur_mode = NetMgr::MODE_START;
-      } else {
-        netMgr.cur_mode = NetMgr::MODE_AP_INIT;
-      }
-      delay(500);
-      break;
-    }
-  } // for(b)
-  //---------------------------------------------------------------------
   // 表示
   nixieArray.display(curMsec);
 
   //---------------------------------------------------------------------
   //delayMicroseconds(LOOP_DELAY_US);
 } // loop()
-
-//=======================================================================
-// Local Variables:
-// Mode: c++-mode
-// Coding: utf-8-unix
-// End:

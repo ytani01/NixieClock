@@ -1,11 +1,8 @@
-/*
+/**
  * (c) 2021 Yoichi Tanibayashi
  */
 #include "NixieElement.h"
 
-//============================================================================
-// class NixieElement
-//----------------------------------------------------------------------------
 void NixieElement::setup(uint8_t pin) {
   this->set_pin(pin);
 
@@ -46,8 +43,3 @@ void NixieElement::off() {
 boolean NixieElement::is_on() {
   return this->_on;
 }
-
-// Local Variables:
-// Mode: arduino
-// Coding: utf-8-unix
-// End:

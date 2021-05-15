@@ -335,8 +335,3 @@ void EffectRandomOnOff::end() {
 
   this->_el[this->_el_i].set_blightness(BLIGHTNESS_RESOLUTION);
 } // EffectRandomOnOff::end()
-  
-// Local Variables:
-// Mode: c++
-// Coding: utf-8-unix
-// End:

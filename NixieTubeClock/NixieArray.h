@@ -1,5 +1,5 @@
-/*
- * (c) 2020 Yoichi Tanibayashi
+/**
+ * (c) 2021 Yoichi Tanibayashi
  *
  *----------------------------------------------------------------------------
  * [ Data structure ( not a class tree ) ]
@@ -49,9 +49,3 @@ class NixieArray {
 };
 
 #endif // NIXIE_ARRAY_H
-
-// for emacs ..
-// Local Variables:
-// Mode: c++
-// Coding: utf-8-unix
-// End:

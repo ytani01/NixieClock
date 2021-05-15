@@ -1,5 +1,5 @@
-/*
- * (c) 2020 Yoichi Tanibayashi
+/**
+ * (c) 2021 Yoichi Tanibayashi
  */
 #include "ModeTest2.h"
 
@@ -49,8 +49,13 @@ void ModeTest2::loop(unsigned long cur_ms, DateTime& now) {
   Serial.println(msg);
 } // ModeTest2::loop()
 
-void ModeTest2::btn_hdr(unsigned long cur_ms, Button *btn) {
-  Serial.println("ModeTest2::btn_hdr(" + btn->get_name() + ")");
+void ModeTest2::btn_intr_hdr(unsigned long cur_ms, Button *btn) {
+  Serial.println("ModeTest2::btn_intr_hdr(" + btn->get_name() + ")");
+
+} // ModeTest2::btn_intr_hdr()
+
+void ModeTest2::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
+  Serial.println("ModeTest2::btn_loop_hdr(" + btn->get_name() + ")");
 
 
   if ( btn->get_name() == "BTN1" ) {
@@ -67,10 +72,4 @@ void ModeTest2::btn_hdr(unsigned long cur_ms, Button *btn) {
       this->_nxa->num[this->_cur].blink_start(cur_ms, 200, this->_cur);
     }
   }
-} // ModeTest2::btn_hdr()
-
-// for emacs
-// Local Variables:
-// Mode: c++-mode
-// Coding: utf-8-unix
-// End:
+} // ModeTest2::btn_loop_hdr()

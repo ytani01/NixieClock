@@ -1,5 +1,5 @@
 /**
- * (c) 2020 Yoichi Tanibayashi
+ * (c) 2021 Yoichi Tanibayashi
  *
  *  ==========================================================================
  *  example1
@@ -88,7 +88,3 @@ class Button {
 };
 
 #endif
-// Local Variables:
-// Mode: arduino
-// Coding: utf-8-unix
-// End:

@@ -154,9 +154,3 @@ class EffectRandomOnOff : public Effect {
   int _el_i;
 }; // class EffectRandomOnOff
 #endif // EFFECT_H
-
-// for emacs ..
-// Local Variables:
-// Mode: arduino
-// Coding: utf-8-unix
-// End:

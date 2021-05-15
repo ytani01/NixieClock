@@ -1,4 +1,4 @@
-/*
+/**
  * (c) 2020 Yoichi Tanibayashi
  *
  *----------------------------------------------------------------------------
@@ -46,9 +46,3 @@
 #define NxColEl(i,j) NxCol(i).element[j]
 
 #endif // NIXIE_H
-
-// for emacs ..
-// Local Variables:
-// Mode: c++-mode
-// Coding: utf-8-unix
-// End:

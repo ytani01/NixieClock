@@ -1,4 +1,4 @@
-/*
+/**
  * (c) 2021 Yoichi Tanibayashi
  */
 #include "NixieTube.h"
@@ -106,8 +106,3 @@ void NixieTube::randomOnOff_start(unsigned long start_ms,
   this->_ef = this->init_effect(EFFECT_RANDOM_ONOFF);
   this->_ef->start(start_ms, tick_ms, el);
 }
-
-// Local Variables:
-// Mode: arduino
-// Coding: utf-8-unix
-// End:

@@ -1,4 +1,4 @@
-/*
+/**
  * (c) 2020 Yoichi Tanibayashi
  */
 #include "ModeTest1.h"
@@ -80,12 +80,10 @@ void ModeTest1::loop(unsigned long cur_ms, DateTime& now) {
   this->_digit = (this->_digit + 1) % 10;
 } // ModeTest1::loop()
 
-void ModeTest1::btn_hdr(unsigned long cur_ms, Button *btn) {
-  Serial.println("ModeTest1::btn_hdr(" + btn->get_name() + ")");
-} // ModeTest1::btn_hdr()
+void ModeTest1::btn_intr_hdr(unsigned long cur_ms, Button *btn) {
+  Serial.println("ModeTest1::btn_intr_hdr(" + btn->get_name() + ")");
+} // ModeTest1::btn_intr_hdr()
 
-// for emacs
-// Local Variables:
-// Mode: arduino
-// Coding: utf-8-unix
-// End:
+void ModeTest1::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
+  Serial.println("ModeTest1::btn_loop_hdr(" + btn->get_name() + ")");
+} // ModeTest1::btn_loop_hdr()
