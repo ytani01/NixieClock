@@ -138,7 +138,7 @@ void ModeClock2::btn_hdr(unsigned long cur_ms, Button *btn) {
   }
   
   if (flag) {
-    Serial.println("ModeClock2::btn_hdr> bl=" + String(bl));
+    //Serial.println("ModeClock2::btn_hdr> bl=" + String(bl));
     Nxa->blightness = bl;
     for (int i=0; i < NIXIE_NUM_N; i++) {
       this->_nxa->num[i].element[this->_num[i]].set_blightness(bl);

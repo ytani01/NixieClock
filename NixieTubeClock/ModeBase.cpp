@@ -3,6 +3,9 @@
  */
 #include "ModeBase.h"
 
+/**
+ *
+ */
 ModeBase::ModeBase(NixieArray *nxa, String name, unsigned long tick_ms) {
   this->_nxa = nxa;
   this->_name = name;
@@ -16,6 +19,13 @@ ModeBase::ModeBase(NixieArray *nxa, String name, unsigned long tick_ms) {
   msg += ".";
   Serial.println(msg);
 }
+
+/**
+ *
+ */
+String ModeBase::name() {
+  return this->_name;
+} // ModeBase::name()
 
 /**
  * tick: loopで処理する間隔
