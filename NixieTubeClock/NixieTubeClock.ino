@@ -182,12 +182,10 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
 
   // BTN0
   if ( btn->get_name() == "BTN0" ) {
-    /*
     if ( btn->get_click_count() >= 3 ) {
       change_mode();
       return;
     }
-    */
 
     if ( btn->get_click_count() >= 2 ) {
       wifiActive = false;
@@ -289,6 +287,7 @@ void loop() {
   }
   
   //---------------------------------------------------------------------
+  // NTP
   if ((curMsec - ntpLast) >= ntpInterval) {
     ntpLast = curMsec;
     if (ntpActive) {
@@ -298,6 +297,7 @@ void loop() {
     }
   }
 
+  //---------------------------------------------------------------------
   if (loopCount % 3000 == 0) {
     Serial.printf("loop> now=%04d/%02d/%02d(%s) %02d:%02d:%02d",
                   now.year(), now.month(), now.day(),
