@@ -92,18 +92,19 @@ netmgr_mode_t NetMgr::loop() {
     Serial.println(myname + "> ap_ssid=" + this->ap_ssid);
 
     WiFi.mode(WIFI_AP);
-    Serial.printf("%s> WiFi.softAP(%s) .. \n", myname, this->ap_ssid.c_str());
+    Serial.printf("%s> WiFi.softAP(%s) .. \n",
+                  myname.c_str(), this->ap_ssid.c_str());
     delay(100);
 
     if ( ! WiFi.softAP(this->ap_ssid.c_str()) ) {
-      Serial.printf("%s> .. failed\n", myname);
+      Serial.printf("%s> .. failed\n", myname.c_str());
       WiFi.mode(WIFI_OFF);
 
       this->cur_mode = MODE_WIFI_OFF;
       break;
     }
 
-    Serial.printf("%s> .. start\n");
+    Serial.printf("%s> .. start\n", myname.c_str());
     delay(300);
 
     WiFi.softAPConfig(this->ap_ip, this->ap_ip, this->ap_netmask);
