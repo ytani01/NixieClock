@@ -121,6 +121,13 @@ unsigned long prevMsec  = 0; // msec
 void ntp_adjust() {
   struct tm time_info;
 
+  if (ntpActive) {
+    Serial.printf("ntp_adjust> ntpActive=true\n");
+  } else {
+    Serial.printf("ntp_adjust> ntpActive=false\n");
+    return;
+  }
+  
   getLocalTime(&time_info); // NTP
   DateTime now = DateTime(time_info.tm_year + 1900,
                           time_info.tm_mon + 1,
@@ -182,15 +189,18 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
 
   // BTN0
   if ( btn->get_name() == "BTN0" ) {
+    /*
     if ( btn->get_count() >= 3 ) {
       change_mode();
       return;
     }
+    */
 
     if ( btn->get_count() >= 2 ) {
       Serial.printf("btn_loop_hdr> netMgr.cur_mode=0x%02X\n", netMgr.cur_mode);
       wifiActive = false;
       prev_wifiActive = false;
+      ntpActive = false;
       if ( netMgr.cur_mode == NetMgr::MODE_AP_LOOP
            || netMgr.cur_mode == NetMgr::MODE_WIFI_OFF ) {
         //netMgr.cur_mode = NetMgr::MODE_START;
@@ -300,11 +310,7 @@ void loop() {
   // NTP
   if ((curMsec - ntpLast) >= ntpInterval) {
     ntpLast = curMsec;
-    if (ntpActive) {
-      ntp_adjust();
-    } else {
-      Serial.println("loop> ntpActive=false");
-    }
+    ntp_adjust();
   }
 
   //---------------------------------------------------------------------

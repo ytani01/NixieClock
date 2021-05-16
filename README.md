@@ -63,6 +63,14 @@
 
 
 
+## 9. 開発環境
+
+* Windows 10
+* Arduino IDE 1.8.15(Windows store 1.8.49.0)
+  - ボード・ライブラリ: ESP32 1.0.6
+  - RTCライブラリ: RTClib by Adafruit 1.13.0
+
+
 ## A. References
 
 * [github: arduino-esp32 WiFi](https://github.com/espressif/arduino-esp32/tree/master/libraries/WiFi/src)
