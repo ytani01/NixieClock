@@ -147,7 +147,8 @@ long change_mode() {
   nixieArray.end_all_effect();
   prevMode = curMode;
   curMode = (curMode + 1) % MODE_N;
-  Serial.printf("change_mode> curMode=%d:%s\n", curMode, Mode[curMode]->name());
+  Serial.printf("change_mode> curMode=%d:%s\n",
+                (int)curMode, Mode[curMode]->name().c_str());
   return curMode;
 } // change_mode()
 
@@ -181,10 +182,12 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
 
   // BTN0
   if ( btn->get_name() == "BTN0" ) {
+    /*
     if ( btn->get_click_count() >= 3 ) {
       change_mode();
       return;
     }
+    */
 
     if ( btn->get_click_count() >= 2 ) {
       wifiActive = false;

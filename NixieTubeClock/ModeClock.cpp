@@ -111,7 +111,7 @@ void ModeClock::loop(unsigned long cur_ms, DateTime& now) {
 } // ModeClock::loop()
 
 void ModeClock::change_mode(unsigned long mode=ModeClock::MODE_NULL) {
-  Serial.printf("change_mode(%d)> ", this->mode);
+  Serial.printf("change_mode(%d)> ", (int)this->mode);
 
   if ( mode != MODE_NULL ) {
     this->mode = mode;
@@ -131,7 +131,7 @@ void ModeClock::change_mode(unsigned long mode=ModeClock::MODE_NULL) {
       break;
     } // switch(mode)
   }
-  Serial.printf("%d\n", this->mode);
+  Serial.printf("%d\n", (int)this->mode);
 }
 
 void ModeClock::btn_intr_hdr(unsigned long cur_ms, Button *btn) {
