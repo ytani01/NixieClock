@@ -3,6 +3,9 @@
  */
 #include "NetMgr.h"
 
+/**
+ *
+ */
 static WebServer web_svr(NetMgr::WEBSVR_PORT);
 String NetMgr::myName = "NetMgr";
 static SSIDent ssidEnt[NetMgr::SSID_N_MAX];
@@ -17,8 +20,11 @@ NetMgr::NetMgr() {
                                this->ap_netmask_int[1],
                                this->ap_netmask_int[2],
                                this->ap_netmask_int[3]);
-}
+} // static WebServer()
 
+/**
+ *
+ */
 netmgr_mode_t NetMgr::loop() {
   String     myname = "NetMgr::loop";
   ConfigData conf_data;
@@ -86,16 +92,18 @@ netmgr_mode_t NetMgr::loop() {
     Serial.println(myname + "> ap_ssid=" + this->ap_ssid);
 
     WiFi.mode(WIFI_AP);
-    Serial.printf("WiFi.softAP(%s) .. ", this->ap_ssid.c_str());
+    Serial.printf("%s> WiFi.softAP(%s) .. \n", myname, this->ap_ssid.c_str());
+    delay(100);
+
     if ( ! WiFi.softAP(this->ap_ssid.c_str()) ) {
-      Serial.println("failed");
+      Serial.printf("%s> .. failed\n", myname);
       WiFi.mode(WIFI_OFF);
 
       this->cur_mode = MODE_WIFI_OFF;
       break;
     }
 
-    Serial.println("start");
+    Serial.printf("%s> .. start\n");
     delay(300);
 
     WiFi.softAPConfig(this->ap_ip, this->ap_ip, this->ap_netmask);
@@ -106,6 +114,7 @@ netmgr_mode_t NetMgr::loop() {
 
     NetMgr::async_scan_ssid_start();
 
+    web_svr.enableDelay(false); // Important!!
     web_svr.on("/", NetMgr::handle_top);
     web_svr.on("/select_ssid", NetMgr::handle_select_ssid);
     web_svr.on("/save_ssid", NetMgr::handle_save_ssid);
@@ -144,7 +153,7 @@ netmgr_mode_t NetMgr::loop() {
   } // switch
 
   return this->cur_mode;
-}
+} // NetMgr::loop()
 
 /**
  *

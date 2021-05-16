@@ -52,6 +52,9 @@ void NixieArray::end_all_effect() {
   } // for(c)
 } // NixieArray::end_all_effect()
 
+/**
+ *
+ */
 void NixieArray::set_onoff(unsigned long cur_ms) {
   uint8_t timing = cur_ms % BLIGHTNESS_RESOLUTION;
 
@@ -77,18 +80,23 @@ void NixieArray::set_onoff(unsigned long cur_ms) {
   } // for(t)
 } // NixieArray::set_onoff()
 
+/**
+ *
+ */
 static unsigned long disp_count=0;
 void NixieArray::display(unsigned long cur_ms) {
   uint8_t pin_n = NIXIE_NUM_N * NIXIE_NUM_DIGIT_N;
   uint8_t val[pin_n];
 
   disp_count++;
+  disp_count %= BLIGHTNESS_RESOLUTION;
   
   //--------------------------------------------------------------------------
   this->loop(cur_ms); // ニキシー管 全て
   //--------------------------------------------------------------------------
   //this->set_onoff(cur_ms); // 全エレメントの表示状態更新
   this->set_onoff(disp_count); // 全エレメントの表示状態更新
+  //this->set_onoff(micros());
   //--------------------------------------------------------------------------
   // 数字部の表示処理
   for (int p=0; p < pin_n; p++) {

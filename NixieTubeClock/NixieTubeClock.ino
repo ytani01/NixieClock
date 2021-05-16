@@ -182,19 +182,23 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
 
   // BTN0
   if ( btn->get_name() == "BTN0" ) {
-    if ( btn->get_click_count() >= 3 ) {
+    if ( btn->get_count() >= 3 ) {
       change_mode();
       return;
     }
 
-    if ( btn->get_click_count() >= 2 ) {
+    if ( btn->get_count() >= 2 ) {
+      Serial.printf("btn_loop_hdr> netMgr.cur_mode=0x%02X\n", netMgr.cur_mode);
       wifiActive = false;
       prev_wifiActive = false;
-      if ( netMgr.cur_mode == NetMgr::MODE_AP_LOOP ) {
-        netMgr.cur_mode = NetMgr::MODE_START;
+      if ( netMgr.cur_mode == NetMgr::MODE_AP_LOOP
+           || netMgr.cur_mode == NetMgr::MODE_WIFI_OFF ) {
+        //netMgr.cur_mode = NetMgr::MODE_START;
+        ESP.restart();
       } else {
         netMgr.cur_mode = NetMgr::MODE_AP_INIT;
       }
+      Serial.printf("btn_loop_hdr> netMgr.cur_mode=0x%02X\n", netMgr.cur_mode);
       delay(500);
       return;
     }
@@ -247,9 +251,15 @@ void setup() {
   Serial.printf(" %d --> %d\n", PIN_BTN1, intrPin1);
   Serial.printf(" %d --> %d\n", PIN_BTN2, intrPin2);
 
+
+  // !! Important !!
+  // 
+  // 設定ファイル読込中に 割り込みがかかると落ちることがある
+  /*
   attachInterrupt(intrPin0, btn_intr_hdr, CHANGE);
   attachInterrupt(intrPin1, btn_intr_hdr, CHANGE);
   attachInterrupt(intrPin2, btn_intr_hdr, CHANGE);
+  */
 } // setup()
 
 //=======================================================================
