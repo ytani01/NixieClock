@@ -25,19 +25,9 @@ ModeClock::ModeClock(NixieArray *nxa): ModeBase::ModeBase(nxa,
 /**
  *
  */
-void ModeClock::init(unsigned long start_ms, int init_val[NIXIE_NUM_N]) {
-  ModeBase::init(start_ms, init_val);
-
-  for (int i=0; i < NIXIE_NUM_N; i++) {
-    this->_num[i] = init_val[i];
-    for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
-      if ( this->_num[i] == e ) {
-        NxNumEl(i, e).set_blightness(Nx->blightness);
-      } else {
-        NxNumEl(i, e).set_blightness(0);
-      }
-    } // for(e)
-  } // for(i)
+void ModeClock::init(unsigned long start_ms, DateTime& now,
+                     int init_val[NIXIE_NUM_N]) {
+  ModeBase::init(start_ms, now, init_val);
 }
 
 static DateTime prev_dt = DateTime(2000,1,1,0,0,0);

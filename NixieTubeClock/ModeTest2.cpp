@@ -10,10 +10,11 @@ ModeTest2::ModeTest2(NixieArray *nxa): ModeBase::ModeBase(nxa,
   this->_cur = 0;
 }
 
-void ModeTest2::init(unsigned long start_ms, int init_val[NIXIE_NUM_N]) {
-  ModeBase::init(start_ms, init_val);
-
+void ModeTest2::init(unsigned long start_ms, DateTime& now,
+                     int init_val[NIXIE_NUM_N]) {
   Serial.println("ModeTest2::init>");
+
+  ModeBase::init(start_ms, now, init_val);
 
   this->_cur = 0;
 

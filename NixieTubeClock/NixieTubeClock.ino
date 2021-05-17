@@ -11,7 +11,7 @@
 #include "ModeTest2.h"
 
 static const String MY_NAME = "Nixie Tube Clock";
-int                 initVal[NIXIE_NUM_N] = {0,0, 0,8, 0,0};
+int                 initValVer[NIXIE_NUM_N] = {0,0, 0,8, 0,0};
 
 #define LOOP_DELAY_US   2   // micro sbeconds
 #define DEBOUNCE        300 // msec
@@ -86,13 +86,17 @@ NixieArray nixieArray(PIN_HV5812_CLK,  PIN_HV5812_STOBE,
 //======================================================================
 // Modes
 //----------------------------------------------------------------------
-ModeClock m0 = ModeClock(&nixieArray);
-ModeTest1 m1 = ModeTest1(&nixieArray);
-ModeTest2 m2 = ModeTest2(&nixieArray);
+ModeClock modeClock = ModeClock(&nixieArray);
+ModeTest1 modeTest1 = ModeTest1(&nixieArray);
+ModeTest2 modeTest2 = ModeTest2(&nixieArray);
+ModeSetClock modeSetClock = ModeSetClock(&nixieArray);
 
-ModeBase* Mode[] = {&m0, &m1, &m2};
-
+ModeBase* Mode[] = {&modeClock, &modeSetClock, &modeTest1, &modeTest2};
 const unsigned long MODE_N = sizeof(Mode) / sizeof(&Mode[0]);
+const unsigned int MODE_CLOCK     = 0;
+const unsigned int MODE_SET_CLOCK = 1;
+const unsigned int MODE_TEST1     = 2;
+const unsigned int MODE_TEST2     = 3;
 
 long curMode = 0;
 long prevMode = -1;
@@ -151,12 +155,18 @@ void ntp_adjust() {
 /**
  *
  */
-long change_mode() {
-  nixieArray.end_all_effect();
+long change_mode(unsigned long mode=MODE_N) {
   prevMode = curMode;
-  curMode = (curMode + 1) % MODE_N;
+
+  if (mode < MODE_N) {
+    curMode = mode;
+  } else {
+    curMode = (curMode + 1) % MODE_N;
+  }
   Serial.printf("change_mode> curMode=%d:%s\n",
                 (int)curMode, Mode[curMode]->name().c_str());
+
+  nixieArray.end_all_effect();
   return curMode;
 } // change_mode()
 
@@ -196,6 +206,22 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
       return;
     }
     */
+    if ( btn->is_long_pressed() && ! btn->is_repeated()) {
+      Serial.printf("btn_loop_hdr> %s: long pressed\n", btn->get_name());
+
+      switch ( curMode ) {
+      case MODE_CLOCK:
+        change_mode(MODE_SET_CLOCK);
+        break;
+      case MODE_SET_CLOCK:
+        change_mode(MODE_CLOCK);
+        break;
+      default:
+        change_mode(MODE_CLOCK);
+        break;
+      } // switch(curMode)
+      return;
+    }
 
     if ( btn->get_count() >= 2 ) {
       Serial.printf("btn_loop_hdr> netMgr.cur_mode=0x%02X\n", netMgr.cur_mode);
@@ -338,7 +364,7 @@ void loop() {
   // モード実行
   if (curMode != prevMode) {
     // モード変更時の初期化
-    Mode[curMode]->init(curMsec, initVal);
+    Mode[curMode]->init(curMsec, now, initValVer);
     prevMode = curMode;
   } else {
     Mode[curMode]->loop(curMsec, now);

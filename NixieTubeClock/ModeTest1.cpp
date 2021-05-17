@@ -8,10 +8,11 @@ ModeTest1::ModeTest1(NixieArray *nxa):  ModeBase::ModeBase(nxa,
                                                            ModeTest1::TICK_MS) {
 }
 
-void ModeTest1::init(unsigned long start_ms, int init_val[NIXIE_NUM_N]) {
-  ModeBase::init(start_ms, init_val);
-
+void ModeTest1::init(unsigned long start_ms, DateTime& now,
+                     int init_val[NIXIE_NUM_N]) {
   Serial.println("ModeTest1::init>");
+
+  ModeBase::init(start_ms, now, init_val);
 
   this->_digit = 0;
   this->_prev_digit = 9;

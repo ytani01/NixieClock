@@ -26,14 +26,10 @@ class ModeClock : public ModeBase {
   static const unsigned long CH_MODE_MS_LIMIT = 2000;
 
   ModeClock(NixieArray *nxa);
-  void init(unsigned long start_ms, int init_val[NIXIE_NUM_N]);
+  void init(unsigned long start_ms, DateTime& now, int init_val[NIXIE_NUM_N]);
   void loop(unsigned long cur_ms, DateTime& now);
   void change_mode(unsigned long mode);
   void btn_intr_hdr(unsigned long cur_ms, Button *btn);
   void btn_loop_hdr(unsigned long cur_ms, Button *btn);
-
- private:
-  RTC_DS3231 _rtc;
-  int _num[NIXIE_NUM_N];
 };
 #endif // MODE_CLOCK_H
