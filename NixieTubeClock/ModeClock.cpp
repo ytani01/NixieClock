@@ -20,7 +20,7 @@ extern boolean wifiActive;
 ModeClock::ModeClock(NixieArray *nxa): ModeBase::ModeBase(nxa,
                                                           "Clock",
                                                           ModeClock::TICK_MS) {
-}
+} // ModeClock::ModeClock()
 
 /**
  *
