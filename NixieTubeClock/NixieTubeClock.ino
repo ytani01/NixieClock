@@ -11,6 +11,7 @@
 #include "ModeTest2.h"
 
 static const String MY_NAME = "Nixie Tube Clock";
+int                 initVal[NIXIE_NUM_N] = {0, 0, 0, 7, 0, 2};
 
 #define LOOP_DELAY_US   2   // micro sbeconds
 #define DEBOUNCE        300 // msec
@@ -248,7 +249,7 @@ void setup() {
   randomSeed(sec); // TBD
 
   prevMsec = millis();
-  curMsec = millis();
+  curMsec = prevMsec;
   //---------------------------------------------------------------------
   // 初期状態表示
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -337,7 +338,7 @@ void loop() {
   // モード実行
   if (curMode != prevMode) {
     // モード変更時の初期化
-    Mode[curMode]->init(curMsec);
+    Mode[curMode]->init(curMsec, initVal);
     prevMode = curMode;
   } else {
     Mode[curMode]->loop(curMsec, now);

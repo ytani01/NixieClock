@@ -43,14 +43,16 @@ boolean ModeBase::tick(unsigned long cur_ms) {
   return true;
 } // ModeBase::tick()
 
-void ModeBase::init(unsigned long start_ms) {
+void ModeBase::init(unsigned long start_ms, int init_val[NIXIE_NUM_N]) {
+  Serial.printf("ModeBase::init> [ ");
+
   this->_start_ms = start_ms;
   (void)this->tick(start_ms);
   
-  String msg = "ModeBase::init(): ";
-  msg += "_start_ms=";
-  msg += String(this->_start_ms);
-  Serial.println(msg);
+  for (int i = 0; i < NIXIE_NUM_N; i++) {
+    Serial.printf("%d ", init_val[i]);
+  } // for(i)
+  Serial.println();
 }
 
 void ModeBase::loop(unsigned long cur_ms, DateTime& now) {

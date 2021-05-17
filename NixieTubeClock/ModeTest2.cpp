@@ -10,8 +10,8 @@ ModeTest2::ModeTest2(NixieArray *nxa): ModeBase::ModeBase(nxa,
   this->_cur = 0;
 }
 
-void ModeTest2::init(unsigned long start_ms) {
-  ModeBase::init(start_ms);
+void ModeTest2::init(unsigned long start_ms, int init_val[NIXIE_NUM_N]) {
+  ModeBase::init(start_ms, init_val);
 
   Serial.println("ModeTest2::init>");
 
@@ -19,7 +19,7 @@ void ModeTest2::init(unsigned long start_ms) {
 
   for (int i=0; i < NIXIE_NUM_N; i++) {
     Serial.println("i=" + String(i));
-    this->_digit[i] = i;
+    this->_digit[i] = init_val[i];
     for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
       if ( e == this->_digit[i] ) {
         this->_nxa->num[i].randomOnOff_start(start_ms, 50, i);

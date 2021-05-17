@@ -8,8 +8,8 @@ ModeTest1::ModeTest1(NixieArray *nxa):  ModeBase::ModeBase(nxa,
                                                            ModeTest1::TICK_MS) {
 }
 
-void ModeTest1::init(unsigned long start_ms) {
-  ModeBase::init(start_ms);
+void ModeTest1::init(unsigned long start_ms, int init_val[NIXIE_NUM_N]) {
+  ModeBase::init(start_ms, init_val);
 
   Serial.println("ModeTest1::init>");
 

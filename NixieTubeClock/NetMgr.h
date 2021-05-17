@@ -37,6 +37,8 @@ class NetMgr {
   static const netmgr_mode_t MODE_WIFI_OFF      = 0xf1;
 
   static String myName;
+  static unsigned int ssidN;
+  static SSIDent ssidEnt[SSID_N_MAX];
 
   boolean net_is_available = false;;
   netmgr_mode_t cur_mode   = MODE_START;
@@ -59,6 +61,8 @@ class NetMgr {
 
  private:
   unsigned int _loop_count = 0;
+
+  static WebServer web_svr;
 
   static unsigned int scan_ssid(SSIDent ssid_ent[]);
   static void         async_scan_ssid_start();

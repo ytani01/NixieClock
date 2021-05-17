@@ -13,7 +13,7 @@ class ModeTest1 : public ModeBase {
   static const unsigned long SHUFFLE_COUNT = 60;
   
   ModeTest1(NixieArray *nxa);
-  void init(unsigned long start_ms);
+  void init(unsigned long start_ms, int init_val[NIXIE_NUM_N]);
   void loop(unsigned long cur_ms, DateTime& now);
   void btn_intr_hdr(unsigned long cur_ms, Button *btn);
   void btn_loop_hdr(unsigned long cur_ms, Button *btn);

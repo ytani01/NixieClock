@@ -4,13 +4,16 @@
 #include "NetMgr.h"
 
 /**
+ * Initialize static variables
+ */
+String NetMgr::myName = "NetMgr";
+unsigned int NetMgr::ssidN = 0;
+SSIDent NetMgr::ssidEnt[NetMgr::SSID_N_MAX];
+WebServer NetMgr::web_svr(WEBSVR_PORT);
+
+/**
  *
  */
-static WebServer web_svr(NetMgr::WEBSVR_PORT);
-String NetMgr::myName = "NetMgr";
-static SSIDent ssidEnt[NetMgr::SSID_N_MAX];
-static unsigned int ssidN;
-
 NetMgr::NetMgr() {
   this->ap_ip      = IPAddress(this->ap_ip_int[0],
                                this->ap_ip_int[1],
@@ -320,51 +323,50 @@ void NetMgr::handle_select_ssid() {
   ssid = conf_data.ssid;
   ssid_pw = conf_data.ssid_pw;
   
-  //ssidN = NetMgr::scan_ssid(ssidEnt);
-  ssidN = NetMgr::async_scan_ssid_wait(ssidEnt);
-  Serial.println("ssidN=" + String(ssidN));
-  if (ssidN == 0) {
+  NetMgr::ssidN = NetMgr::async_scan_ssid_wait(NetMgr::ssidEnt);
+  Serial.println("NetMgr::ssidN=" + String(NetMgr::ssidN));
+  if (NetMgr::ssidN == 0) {
     Serial.println("NetMgr::handle_select_ssid> rescan SSID");
     NetMgr::async_scan_ssid_start();
-    ssidN = NetMgr::async_scan_ssid_wait(ssidEnt);
+    NetMgr::ssidN = NetMgr::async_scan_ssid_wait(NetMgr::ssidEnt);
   }
-    
 
-  for (int i=0; i < ssidN; i++) {
-    Serial.print(ssidEnt[i].ssid());
+  for (int i=0; i < NetMgr::ssidN; i++) {
+    Serial.print(NetMgr::ssidEnt[i].ssid());
     Serial.print(" ");
-    Serial.print(String(ssidEnt[i].dbm()));
+    Serial.print(String(NetMgr::ssidEnt[i].dbm()));
     Serial.print(" ");
-    Serial.print(ssidEnt[i].encType());
+    Serial.print(NetMgr::ssidEnt[i].encType());
     Serial.println();
   } // for(i)
 
   String html = NetMgr::html_header("Please change settings and save");
+
   html += "<form action='/save_ssid' method='GET'>";
   html += "<div class='ssid'>";
   html += "SSID ";
   html += "<select name='ssid' id='ssid' style='font-size:large;'>";
 
-  for(int i=0; i < ssidN; i++){
-    html += "<option value=" + ssidEnt[i].ssid();
-    if ( ssidEnt[i].ssid() == ssid ) {
+  for(int i=0; i < NetMgr::ssidN; i++){
+    html += "<option value=" + NetMgr::ssidEnt[i].ssid();
+    if ( NetMgr::ssidEnt[i].ssid() == ssid ) {
       html += " selected";
     }
     html += ">";
-    html += ssidEnt[i].ssid();
+    html += NetMgr::ssidEnt[i].ssid();
     /*
     html += " (";
-    html += String(ssidEnt[i].dbm());
+    html += String(NetMgr::ssidEnt[i].dbm());
     html += ", ";
-    html += ssidEnt[i].encType();
+    html += NetMgr::ssidEnt[i].encType();
     html += ")";
     */
     html += "</option>\n";
   } // for(i)
 
   html += "<option value="">(clear)</option>\n";
-
   html += "</select><br />\n";
+
   html += "Password ";
   html += "<span style='font-size: xx-large'>";
   html += "<input type='password'";
@@ -374,11 +376,14 @@ void NetMgr::handle_select_ssid() {
   html += "</span>";
   html += "</div>\n";
   html += "<hr />\n";
+
   html += "<input type='submit' value='Save' />\n";
   html += "<a href='/scan_ssid'>Rescan</a>\n";
   html += "<a href='/'>Cancel</a>\n";
+
   html += "</form>";
   html += NetMgr::html_footer();
+
   web_svr.send(200, "text/html", html);
 } // NetMgr::handle_select_ssid()
 
