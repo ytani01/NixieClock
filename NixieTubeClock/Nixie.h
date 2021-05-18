@@ -45,4 +45,7 @@
 #define NxCol(i)     Nx->colon[i]
 #define NxColEl(i,j) NxCol(i).element[j]
 
+//typedef unsigned long mode_t;
+typedef unsigned long stat_t;
+
 #endif // NIXIE_H

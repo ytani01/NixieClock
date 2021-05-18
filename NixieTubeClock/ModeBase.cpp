@@ -43,6 +43,9 @@ boolean ModeBase::tick(unsigned long cur_ms) {
   return true;
 } // ModeBase::tick()
 
+/**
+ *
+ */
 void ModeBase::init(unsigned long start_ms, DateTime& now,
                     int init_val[NIXIE_NUM_N]) {
   this->_start_ms = start_ms;
@@ -61,14 +64,18 @@ void ModeBase::init(unsigned long start_ms, DateTime& now,
     } // for(e)
   } // for(i)
   Serial.println("]");
-}
+} // ModeBase::init()
 
-void ModeBase::loop(unsigned long cur_ms, DateTime& now) {
+/**
+ *
+ */
+stat_t ModeBase::loop(unsigned long cur_ms, DateTime& now) {
   if ( ! this->tick(cur_ms) ) {
-    return;
+    return STAT_SKIP;
   }
-  Serial.println("ModeBase::loop()");
-}
+  // Serial.println("ModeBase::loop()");
+  return this->stat;
+} // ModeBase::loop()
 
 void ModeBase::btn_intr_hdr(unsigned long cur_ms, Button *btn) {
   Serial.println("ModeBase::btn_intr_hdr()");

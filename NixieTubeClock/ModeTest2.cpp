@@ -3,13 +3,19 @@
  */
 #include "ModeTest2.h"
 
+/**
+ *
+ */
 ModeTest2::ModeTest2(NixieArray *nxa): ModeBase::ModeBase(nxa,
                                                           "ModeTest2",
                                                           ModeTest2::TICK_MS) {
   this->_digit = new int[NIXIE_NUM_N];
   this->_cur = 0;
-}
+} // ModeTest2::ModeTest2()
 
+/**
+ *
+ */
 void ModeTest2::init(unsigned long start_ms, DateTime& now,
                      int init_val[NIXIE_NUM_N]) {
   Serial.println("ModeTest2::init>");
@@ -30,12 +36,15 @@ void ModeTest2::init(unsigned long start_ms, DateTime& now,
     } // for(e)
   } // for(i)
   this->_nxa->num[this->_cur].end_effect();
-  this->_nxa->num[this->_cur].blink_start(start_ms, 200, NIXIE_NUM_DIGIT_N);
-}
+  this->_nxa->num[this->_cur].blink_start(start_ms, 200);
+} // ModeTest2::init()
 
-void ModeTest2::loop(unsigned long cur_ms, DateTime& now) {
-  if ( ! this->tick(cur_ms) ) {
-    return;
+/**
+ *
+ */
+stat_t ModeTest2::loop(unsigned long cur_ms, DateTime& now) {
+  if ( ModeBase::loop(cur_ms, now) == STAT_SKIP ) {
+    return STAT_SKIP;
   }
 
   String msg = "_digit=[ ";
@@ -48,16 +57,23 @@ void ModeTest2::loop(unsigned long cur_ms, DateTime& now) {
   } // for(i)
   msg += "]";
   Serial.println(msg);
+
+  return STAT_DONE;
 } // ModeTest2::loop()
 
+/**
+ *
+ */
 void ModeTest2::btn_intr_hdr(unsigned long cur_ms, Button *btn) {
   Serial.println("ModeTest2::btn_intr_hdr(" + btn->get_name() + ")");
 
 } // ModeTest2::btn_intr_hdr()
 
+/**
+ *
+ */
 void ModeTest2::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   Serial.println("ModeTest2::btn_loop_hdr(" + btn->get_name() + ")");
-
 
   if ( btn->get_name() == "BTN1" ) {
     count_t click_count = btn->get_click_count();
@@ -70,7 +86,7 @@ void ModeTest2::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
         this->_nxa->num[i].end_effect();
       }
       this->_cur = (this->_cur + 1) % NIXIE_NUM_N;
-      this->_nxa->num[this->_cur].blink_start(cur_ms, 200, this->_cur);
+      this->_nxa->num[this->_cur].blink_start(cur_ms, 200);
     }
   }
 } // ModeTest2::btn_loop_hdr()

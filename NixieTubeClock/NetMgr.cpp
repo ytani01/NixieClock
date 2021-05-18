@@ -28,7 +28,7 @@ NetMgr::NetMgr() {
 /**
  *
  */
-netmgr_mode_t NetMgr::loop() {
+mode_t NetMgr::loop() {
   String     myname = "NetMgr::loop";
   ConfigData conf_data;
   String     ssid, ssid_pw;

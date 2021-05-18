@@ -7,30 +7,33 @@
 
 class ModeSetClock : public ModeBase {
  public:
-  static const unsigned long MODE_NULL   = 0x00;
+  static const mode_t MODE_NULL   = 0x00;
 
-  static const unsigned long MODE_DATE   = 0x10;
-  static const unsigned long MODE_YEAR   = 0x11;
-  static const unsigned long MODE_MONTH  = 0x12;
-  static const unsigned long MODE_DAY    = 0x13;
+  static const mode_t MODE_DATE   = 0x10;
+  static const mode_t MODE_YEAR   = 0x11;
+  static const mode_t MODE_MONTH  = 0x12;
+  static const mode_t MODE_DAY    = 0x13;
 
-  static const unsigned long MODE_TIME   = 0x20;
-  static const unsigned long MODE_HOUR   = 0x21;
-  static const unsigned long MODE_MINUTE = 0x22;
+  static const mode_t MODE_TIME   = 0x20;
+  static const mode_t MODE_HOUR   = 0x21;
+  static const mode_t MODE_MINUTE = 0x22;
 
-  static const unsigned long TICK_MS = 10;        // ms
-  static const unsigned long BLINK_TICK_MS = 500; // ms
+  static const mode_t TICK_MS = 10;        // ms
+  static const mode_t BLINK_TICK_MS = 200; // ms
 
   ModeSetClock(NixieArray *nxa);
   void init(unsigned long start_ms, DateTime& now, int init_val[NIXIE_NUM_N]);
-  void loop(unsigned long cur_ms, DateTime& now);
+  stat_t loop(unsigned long cur_ms, DateTime& now);
   void btn_intr_hdr(unsigned long cur_ms, Button *btn);
   void btn_loop_hdr(unsigned long cur_ms, Button *btn);
 
-  unsigned long change_mode(unsigned long mode);
+  mode_t change_mode(mode_t mode);
+  void count_up(int n, boolean repeat);
 
  private:
-  unsigned long _mode;
+  mode_t _mode;
+  int    _date_num[NIXIE_NUM_N + 1];
+  int    _time_num[NIXIE_NUM_N + 1];
   
 }; // class ModeSetClock
 #endif // MODE_SET_CLOCK_H

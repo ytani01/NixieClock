@@ -92,12 +92,9 @@ void NixieTube::shuffle_start(unsigned long start_ms,
 } // NixieTube::shuffle_start()
 
 void NixieTube::blink_start(unsigned long start_ms,
-                            unsigned long tick_ms,
-                            int el_i) {
-  Serial.println("blink_start> el_i=" + String(el_i));
+                            unsigned long tick_ms) {
   this->_ef = this->init_effect(EFFECT_BLINK);
-  this->_ef->start(start_ms, tick_ms, el_i);
-  Serial.println("blink_start> done");
+  this->_ef->start(start_ms, tick_ms);
 } // NixieTube::blink_start()
 
 void NixieTube::randomOnOff_start(unsigned long start_ms,

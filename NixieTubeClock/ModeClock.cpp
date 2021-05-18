@@ -35,14 +35,12 @@ static DateTime prev_dt = DateTime(2000,1,1,0,0,0);
 /**
  *
  */
-void ModeClock::loop(unsigned long cur_ms, DateTime& now) {
+stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
   char disp_str[6 + 1];
   int  prev_num[NIXIE_NUM_N];
 
-  if ( cur_ms != 0 ) {
-    if ( ! this->tick(cur_ms) ) {
-      return;
-    }
+  if ( ModeBase::loop(cur_ms, now) == STAT_SKIP ) {
+    return STAT_SKIP;
   }
 
   if ( wifiActive ) {
@@ -98,6 +96,8 @@ void ModeClock::loop(unsigned long cur_ms, DateTime& now) {
     }
   } // for(COLON)
   prev_dt = DateTime(now);
+
+  return STAT_DONE;
 } // ModeClock::loop()
 
 void ModeClock::change_mode(unsigned long mode=ModeClock::MODE_NULL) {

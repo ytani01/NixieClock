@@ -68,7 +68,7 @@ boolean prev_wifiActive = false;
 // NTP
 //----------------------------------------------------------------------
 const String        ntpSvr[]    = {"ntp.nict.jp", "time.google.com", ""};
-const unsigned long ntpInterval = 1000 * 30; // msec
+const unsigned long ntpInterval = 1000 * 3600; // msec
 unsigned long       ntpLast     = 0;
 boolean             ntpActive   = false;
 
@@ -304,7 +304,7 @@ void setup() {
  *
  */
 void loop() {
-  netmgr_mode_t netmgr_mode;
+  mode_t   netmgr_mode;
   DateTime now = Rtc.now();
 
   prevMsec = curMsec;
@@ -367,7 +367,10 @@ void loop() {
     Mode[curMode]->init(curMsec, now, initValVer);
     prevMode = curMode;
   } else {
-    Mode[curMode]->loop(curMsec, now);
+    stat_t stat = Mode[curMode]->loop(curMsec, now);
+    if ( Mode[curMode]->name() == "SetClock" && stat == ModeBase::STAT_MODE_END ) {
+      change_mode(MODE_CLOCK);
+    }
   }
 
   //---------------------------------------------------------------------

@@ -12,8 +12,6 @@
 #include "SSIDent.h"
 #include "ConfigData.h"
 
-typedef unsigned int netmgr_mode_t;
-
 /**
  *
  */
@@ -27,21 +25,21 @@ class NetMgr {
   static const int DNS_PORT    = 53;
   static const int WEBSVR_PORT = 80;
 
-  static const netmgr_mode_t MODE_NULL          = 0x00;
-  static const netmgr_mode_t MODE_START         = 0x01;
-  static const netmgr_mode_t MODE_TRY_WIFI      = 0x02;
-  static const netmgr_mode_t MODE_AP_INIT       = 0x10;
-  static const netmgr_mode_t MODE_AP_LOOP       = 0x11;
-  static const netmgr_mode_t MODE_SCANNING_SSID = 0x20;
-  static const netmgr_mode_t MODE_WIFI_ON       = 0xf0;
-  static const netmgr_mode_t MODE_WIFI_OFF      = 0xf1;
+  static const mode_t MODE_NULL          = 0x00;
+  static const mode_t MODE_START         = 0x01;
+  static const mode_t MODE_TRY_WIFI      = 0x02;
+  static const mode_t MODE_AP_INIT       = 0x10;
+  static const mode_t MODE_AP_LOOP       = 0x11;
+  static const mode_t MODE_SCANNING_SSID = 0x20;
+  static const mode_t MODE_WIFI_ON       = 0xf0;
+  static const mode_t MODE_WIFI_OFF      = 0xf1;
 
   static String myName;
   static unsigned int ssidN;
   static SSIDent ssidEnt[SSID_N_MAX];
 
   boolean net_is_available = false;;
-  netmgr_mode_t cur_mode   = MODE_START;
+  mode_t cur_mode   = MODE_START;
 
   String    ntp_svr[3]  = { "ntp.nict.jp", "time.google.com", "" };
 
@@ -57,7 +55,7 @@ class NetMgr {
   DNSServer dns_svr;
 
   NetMgr();
-  netmgr_mode_t loop();
+  mode_t loop();
 
  private:
   unsigned int _loop_count = 0;

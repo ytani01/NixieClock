@@ -132,7 +132,7 @@ class EffectShuffle : public Effect {
 class EffectBlink : public Effect {
  public:
   EffectBlink(NixieElement *el, unsigned long el_n);
-  void start(unsigned long start_ms, unsigned long tick_ms, int el_i);
+  void start(unsigned long start_ms, unsigned long tick_ms);
   void loop(unsigned long cur_ms);
   void end();
 

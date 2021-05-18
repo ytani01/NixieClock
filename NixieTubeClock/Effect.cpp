@@ -258,18 +258,18 @@ EffectBlink::EffectBlink(NixieElement *el,
 } // EffectBlink::EffectBlink()
 
 void EffectBlink::start(unsigned long start_ms,
-                        unsigned long tick_ms,
-                        int el_i) {
-  Serial.println("EffectBlink::start> el_i=" + String(el_i));
+                        unsigned long tick_ms) {
   Effect::start(start_ms, tick_ms);
 
   this->_onoff = true;
 
-  Serial.println("EffectBlink::start> el_n=" + String(this->_el_n));
   for (int i=0; i < this->_el_n; i++) {
     this->_blightness[i] = this->_el[i].get_blightness();
+    if ( this->_blightness[i] > 0 ) {
+      Serial.printf("EffectBlink::start> [%d]->blightness=%d\n",
+                    i, this->_blightness[i]);
+    }
   } // for(i)
-  Serial.println("EffectBlink::start> done");
 } // EffectBlink::start()
 
 void EffectBlink::loop(unsigned long cur_ms) {

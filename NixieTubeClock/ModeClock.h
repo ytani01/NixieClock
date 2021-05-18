@@ -27,7 +27,7 @@ class ModeClock : public ModeBase {
 
   ModeClock(NixieArray *nxa);
   void init(unsigned long start_ms, DateTime& now, int init_val[NIXIE_NUM_N]);
-  void loop(unsigned long cur_ms, DateTime& now);
+  stat_t loop(unsigned long cur_ms, DateTime& now);
   void change_mode(unsigned long mode);
   void btn_intr_hdr(unsigned long cur_ms, Button *btn);
   void btn_loop_hdr(unsigned long cur_ms, Button *btn);

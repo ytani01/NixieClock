@@ -44,7 +44,7 @@ class Button {
 
   static const unsigned long	DEBOUNCE        	=   10;
   static const unsigned long	LONG_PRESS_MSEC 	= 1000;
-  static const unsigned long	REPEAT_MSEC     	=  500;
+  static const unsigned long	REPEAT_MSEC     	=  300;
   static const unsigned long	CLICK_MSEC		=  500;
 
   static const button_event_t	EVENT_NONE		= 0x00;

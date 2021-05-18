@@ -46,7 +46,7 @@ class NixieTube {
                    int el_in, int el_out);
   void shuffle_start(unsigned long start_ms, unsigned long tick, int n,
                      int el_i);
-  void blink_start(unsigned long start_ms, unsigned long ms, int el_i);
+  void blink_start(unsigned long start_ms, unsigned long ms);
   void randomOnOff_start(unsigned long start_ms, unsigned long ms, int el_i);
 
  private:
