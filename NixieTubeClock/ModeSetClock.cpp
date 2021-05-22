@@ -162,9 +162,6 @@ void ModeSetClock::count_up(int n=1, boolean repeat=false) {
   num += n;
   Serial.printf("ModeSetClock::count_up> num=%d\n", num);
 
-  int num0 = num / 10 % 10;
-  int num1 = num % 10;
-
   switch (this->_mode) {
   case MODE_YEAR:
     if ( num > 30 ) {

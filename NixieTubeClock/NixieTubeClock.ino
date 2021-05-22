@@ -207,7 +207,8 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
     }
     */
     if ( btn->is_long_pressed() && ! btn->is_repeated()) {
-      Serial.printf("btn_loop_hdr> %s: long pressed\n", btn->get_name());
+      Serial.printf("btn_loop_hdr> %s: long pressed\n",
+                    btn->get_name().c_str());
 
       switch ( curMode ) {
       case MODE_CLOCK:
