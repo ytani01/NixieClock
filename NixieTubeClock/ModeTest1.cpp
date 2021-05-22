@@ -79,6 +79,8 @@ stat_t ModeTest1::loop(unsigned long cur_ms, DateTime& now) {
   // -------------------------------------------------------------------------
   this->_prev_digit = this->_digit;
   this->_digit = (this->_digit + 1) % 10;
+
+  return STAT_DONE;
 } // ModeTest1::loop()
 
 void ModeTest1::btn_intr_hdr(unsigned long cur_ms, Button *btn) {

@@ -53,7 +53,7 @@ void ModeBase::init(unsigned long start_ms, DateTime& now,
   
   Serial.printf("ModeBase::init> init_val=[ ");
   for (int i = 0; i < NIXIE_NUM_N; i++) {
-    Serial.printf("%d ", i, init_val[i]);
+    Serial.printf("%d ", init_val[i]);
     this->_num[i] = init_val[i];
     for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
       if ( this->_num[i] == e ) {

@@ -11,7 +11,7 @@
 #include "ModeTest2.h"
 
 static const String MY_NAME = "Nixie Tube Clock";
-int                 initValVer[NIXIE_NUM_N] = {0,0, 0,8, 0,1};
+int                 initValVer[NIXIE_NUM_N] = {0,0, 0,8, 0,2};
 
 #define LOOP_DELAY_US   2   // micro sbeconds
 #define DEBOUNCE        300 // msec
@@ -207,7 +207,8 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
     }
     */
     if ( btn->is_long_pressed() && ! btn->is_repeated()) {
-      Serial.printf("btn_loop_hdr> %s: long pressed\n", btn->get_name());
+      Serial.printf("btn_loop_hdr> %s: long pressed\n",
+                    btn->get_name().c_str());
 
       switch ( curMode ) {
       case MODE_CLOCK:
