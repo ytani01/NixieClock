@@ -18,7 +18,7 @@
 class NetMgr {
  public:
   static const unsigned int WIFI_TRY_INTERVAL  = 500; // ms
-  static const unsigned int WIFI_TRY_COUNT_MAX = 10;
+  static const unsigned int WIFI_TRY_COUNT_MAX = 15;
 
   static const unsigned int SSID_N_MAX = 30;
 

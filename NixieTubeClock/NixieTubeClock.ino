@@ -11,7 +11,7 @@
 #include "ModeTest2.h"
 
 static const String MY_NAME = "Nixie Tube Clock";
-int                 initValVer[NIXIE_NUM_N] = {0,0, 0,8, 0,2};
+int                 initValVer[NIXIE_NUM_N] = {0,0, 0,8, 0,3};
 
 #define LOOP_DELAY_US   2   // micro sbeconds
 #define DEBOUNCE        300 // msec
@@ -68,7 +68,7 @@ boolean prev_wifiActive = false;
 // NTP
 //----------------------------------------------------------------------
 const String        ntpSvr[]    = {"ntp.nict.jp", "time.google.com", ""};
-const unsigned long ntpInterval = 1000 * 3600; // msec
+const unsigned long ntpInterval = 60 * 60 * 1000; // msec
 unsigned long       ntpLast     = 0;
 boolean             ntpActive   = false;
 
@@ -174,6 +174,14 @@ long change_mode(unsigned long mode=MODE_N) {
  *
  */
 void btn_intr_hdr() {
+  static unsigned long prev_ms = 0;
+  unsigned long        cur_ms = millis();
+
+  if ( cur_ms - prev_ms < DEBOUNCE ) {
+    return;
+  }
+  prev_ms = cur_ms;
+
   for (int b=0; b < BTN_N; b++) {
     if ( Btn[b]->get() ) {
       Serial.print("btn_intr_hdr> ");
@@ -190,22 +198,25 @@ void btn_intr_hdr() {
 void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   static unsigned long prev_msec = 0;
 
+  /*
   if ( cur_ms - prev_msec < DEBOUNCE ) {
     return;
   }
   prev_msec = cur_ms;
+  */
 
   Serial.print("btn_loop_hdr> ");
   btn->print();
 
-  // BTN0
   if ( btn->get_name() == "BTN0" ) {
-    /*
-    if ( btn->get_count() >= 3 ) {
+    if ( btn->get_click_count() >= 3 ) {
       change_mode();
+      if ( curMode == MODE_SET_CLOCK ) {
+        change_mode();
+      }
       return;
     }
-    */
+
     if ( btn->is_long_pressed() && ! btn->is_repeated()) {
       Serial.printf("btn_loop_hdr> %s: long pressed\n",
                     btn->get_name().c_str());
@@ -224,7 +235,7 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
       return;
     }
 
-    if ( btn->get_count() >= 2 ) {
+    if ( btn->get_click_count() == 2 ) {
       Serial.printf("btn_loop_hdr> netMgr.cur_mode=0x%02X\n", netMgr.cur_mode);
       wifiActive = false;
       prev_wifiActive = false;
@@ -240,6 +251,8 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
       delay(500);
       return;
     }
+
+    return;
   }
 
   Mode[curMode]->btn_loop_hdr(cur_ms, btn);
@@ -293,11 +306,9 @@ void setup() {
   // !! Important !!
   // 
   // 設定ファイル読込中に 割り込みがかかると落ちることがある
-  /*
   attachInterrupt(intrPin0, btn_intr_hdr, CHANGE);
   attachInterrupt(intrPin1, btn_intr_hdr, CHANGE);
   attachInterrupt(intrPin2, btn_intr_hdr, CHANGE);
-  */
 } // setup()
 
 //=======================================================================

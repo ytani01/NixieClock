@@ -131,20 +131,30 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   boolean      flag = false;
   unsigned int bl = Nx->blightness;
   
+  if ( btn->get_name() == "BTN0" ) {
+    return;
+  }
+
+  int n = btn->get_click_count();
+  if ( n == 0 && btn->is_repeated() ) {
+    n = 1;
+  }
+
+  if ( n == 0 ) {
+    return;
+  }
+
   if ( btn->get_name() == "BTN1" ) {
-    if ( btn->get_count() > 0 ) {
-      this->change_mode();
-    }
+    this->change_mode();
     return;
   }
 
   if ( btn->get_name() == "BTN2" ) {
-    if ( btn->get_count() > 0 || btn->is_repeated() ) {
+    for (int i=0; i < n; i++) {
       bl /= 2;
-    }
-    
-    if (bl < 1 || bl > BLIGHTNESS_RESOLUTION) {
-      bl = BLIGHTNESS_RESOLUTION;
+      if (bl < 1 || bl > BLIGHTNESS_RESOLUTION) {
+        bl = BLIGHTNESS_RESOLUTION;
+      }
     }
     flag = true;
   }
