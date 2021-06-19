@@ -158,6 +158,23 @@ RTC(Real Time Clock)が、バッテリーでバックアップされているの
 * Arduino IDE 1.8.15(Windows store 1.8.49.0) on Windows 10
   - ボード・ライブラリ: ESP32 1.0.6
   - RTCライブラリ: RTClib by Adafruit 1.13.0
+  
+### ボードマネージャーの設定
+
+[ファイル]-[環境設定]-[追加のボードマネージャのURL]
+```
+https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+```
+
+
+### ボードの設定
+
+ボード | ESP32 Dev Module
+Upload Speed | 921600
+CPU Frequency | 240Mhz(WiFi/BT)
+Flash Frequency | 80MHz
+Flash Size | 4MB(32Mb)
+Partition Scheme | Default 4MB with spiffs(1.2MB APP/1.5MB SPIFFS)
 
 
 ## A. References
@@ -165,3 +182,5 @@ RTC(Real Time Clock)が、バッテリーでバックアップされているの
 * [github: arduino-esp32](https://github.com/espressif/arduino-esp32/)
 
 * [github: EspExceptionDecoder(スタックトレース表示)](https://github.com/me-no-dev/EspExceptionDecoder/releases/)
+  [注意] Microsoft Store の Arduino IDE はダメ
+  
