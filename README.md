@@ -169,12 +169,14 @@ https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32
 
 ### ボードの設定
 
-ボード | ESP32 Dev Module
-Upload Speed | 921600
-CPU Frequency | 240Mhz(WiFi/BT)
-Flash Frequency | 80MHz
-Flash Size | 4MB(32Mb)
-Partition Scheme | Default 4MB with spiffs(1.2MB APP/1.5MB SPIFFS)
+| | |
+|--|--|
+| ボード | ESP32 Dev Module |
+| Upload Speed | 921600 |
+| CPU Frequency | 240Mhz(WiFi/BT) |
+| Flash Frequency | 80MHz |
+| Flash Size | 4MB(32Mb) |
+| Partition Scheme | Default 4MB with spiffs(1.2MB APP/1.5MB SPIFFS) |
 
 
 ## A. References
