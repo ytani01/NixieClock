@@ -221,6 +221,13 @@ void ModeSetClock::btn_intr_hdr(unsigned long cur_ms, Button *btn) {
 void ModeSetClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   mode_t mode;
   
+  if ( btn->get_name() == "BTN0" ) {
+    if ( btn->is_long_pressed() && ! btn->is_repeated() ) {
+      this->stat = ModeBase::STAT_BACK_MODE;
+      return;
+    }
+  }
+
   int n = btn->get_click_count();
   if ( btn->is_repeated() ) {
     n = 1;
@@ -245,7 +252,7 @@ void ModeSetClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
 
         rtc.adjust(now);
                                 
-        this->stat = STAT_MODE_END;
+        this->stat = STAT_BACK_MODE;
       }
     } // for(i)
     return;

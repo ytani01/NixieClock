@@ -185,4 +185,4 @@ https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32
 
 * [github: EspExceptionDecoder(スタックトレース表示)](https://github.com/me-no-dev/EspExceptionDecoder/releases/)
   [注意] Microsoft Store の Arduino IDE はダメ
-  
+

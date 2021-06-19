@@ -7,6 +7,7 @@
 #include "ModeBase.h"
 #include "ModeClock.h"
 #include "ModeSetClock.h"
+#include "ModeScore1.h"
 #include "ModeTest1.h"
 #include "ModeTest2.h"
 
@@ -90,13 +91,15 @@ ModeClock modeClock = ModeClock(&nixieArray);
 ModeTest1 modeTest1 = ModeTest1(&nixieArray);
 ModeTest2 modeTest2 = ModeTest2(&nixieArray);
 ModeSetClock modeSetClock = ModeSetClock(&nixieArray);
+ModeScore1 modeScore1 = ModeScore1(&nixieArray);
 
-ModeBase* Mode[] = {&modeClock, &modeSetClock, &modeTest1, &modeTest2};
+ModeBase* Mode[] = {&modeClock, &modeSetClock, &modeScore1, &modeTest1, &modeTest2};
 const unsigned long MODE_N = sizeof(Mode) / sizeof(&Mode[0]);
 const unsigned int MODE_CLOCK     = 0;
 const unsigned int MODE_SET_CLOCK = 1;
-const unsigned int MODE_TEST1     = 2;
-const unsigned int MODE_TEST2     = 3;
+const unsigned int MODE_SCORE1    = 2;
+const unsigned int MODE_TEST1     = 3;
+const unsigned int MODE_TEST2     = 4;
 
 long curMode = 0;
 long prevMode = -1;
@@ -155,23 +158,26 @@ void ntp_adjust() {
 /**
  *
  */
-long change_mode(unsigned long mode=MODE_N) {
+unsigned long change_mode(unsigned long mode=MODE_N) {
+  // Serial.printf("change_mode> mode=%d/%d\n", (int)mode, MODE_N);
   prevMode = curMode;
-
   if (mode < MODE_N) {
     curMode = mode;
-  } else {
+  } else if (mode == MODE_N) {
     curMode = (curMode + 1) % MODE_N;
+  } else {
+    curMode = (curMode + MODE_N - 1) % MODE_N;
   }
-  Serial.printf("change_mode> curMode=%d:%s\n",
-                (int)curMode, Mode[curMode]->name().c_str());
+  //Serial.printf("change_mode> curMode=%d:%s\n",
+  //                (int)curMode, Mode[curMode]->name().c_str());
 
   nixieArray.end_all_effect();
   return curMode;
 } // change_mode()
 
 /**
- *
+ * RTC読込中に 割り込みがかかると落ちることがある
+ * 設定ファイル読込中に 割り込みがかかると落ちることがある
  */
 void btn_intr_hdr() {
   static unsigned long prev_ms = 0;
@@ -217,24 +223,6 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
       return;
     }
 
-    if ( btn->is_long_pressed() && ! btn->is_repeated()) {
-      Serial.printf("btn_loop_hdr> %s: long pressed\n",
-                    btn->get_name().c_str());
-
-      switch ( curMode ) {
-      case MODE_CLOCK:
-        change_mode(MODE_SET_CLOCK);
-        break;
-      case MODE_SET_CLOCK:
-        change_mode(MODE_CLOCK);
-        break;
-      default:
-        change_mode(MODE_CLOCK);
-        break;
-      } // switch(curMode)
-      return;
-    }
-
     if ( btn->get_click_count() == 2 ) {
       Serial.printf("btn_loop_hdr> netMgr.cur_mode=0x%02X\n", netMgr.cur_mode);
       wifiActive = false;
@@ -243,6 +231,9 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
       if ( netMgr.cur_mode == NetMgr::MODE_AP_LOOP
            || netMgr.cur_mode == NetMgr::MODE_WIFI_OFF ) {
         //netMgr.cur_mode = NetMgr::MODE_START;
+        Serial.println("btn_loop_hdr> Reboot");
+        Serial.println("==========");
+        Serial.println();
         ESP.restart();
       } else {
         netMgr.cur_mode = NetMgr::MODE_AP_INIT;
@@ -251,8 +242,6 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
       delay(500);
       return;
     }
-
-    return;
   }
 
   Mode[curMode]->btn_loop_hdr(cur_ms, btn);
@@ -379,10 +368,23 @@ void loop() {
     Mode[curMode]->init(curMsec, now, initValVer);
     prevMode = curMode;
   } else {
+    // 各モードの loop() 実行
     stat_t stat = Mode[curMode]->loop(curMsec, now);
-    if ( Mode[curMode]->name() == "SetClock" && stat == ModeBase::STAT_MODE_END ) {
-      change_mode(MODE_CLOCK);
-    }
+    switch (stat) {
+    case ModeBase::STAT_BACK_MODE:
+      Serial.printf("loop> stat=0x%X, curMode=%d, prevMode=%d\n",
+                    stat, curMode, prevMode);
+      change_mode(MODE_N + 1);
+      break;
+
+    case ModeBase::STAT_NEXT_MODE:
+      Serial.printf("loop> stat=0x%X\n", stat);
+      change_mode();
+      break;
+
+    default:
+      break;
+    } // switch(stat)
   }
 
   //---------------------------------------------------------------------

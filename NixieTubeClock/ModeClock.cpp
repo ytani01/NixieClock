@@ -28,6 +28,7 @@ ModeClock::ModeClock(NixieArray *nxa): ModeBase::ModeBase(nxa,
 void ModeClock::init(unsigned long start_ms, DateTime& now,
                      int init_val[NIXIE_NUM_N]) {
   ModeBase::init(start_ms, now, init_val);
+  Serial.printf("ModeClock::init> stat=0x%X\n", this->stat);
 }
 
 static DateTime prev_dt = DateTime(2000,1,1,0,0,0);
@@ -41,6 +42,11 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
 
   if ( ModeBase::loop(cur_ms, now) == STAT_SKIP ) {
     return STAT_SKIP;
+  }
+
+  if ( this->stat != STAT_NONE && this->stat != STAT_DONE ) {
+    Serial.printf("ModeClock::loop> stat=0x%X\n", this->stat);
+    return this->stat;
   }
 
   if ( wifiActive ) {
@@ -97,7 +103,8 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
   } // for(COLON)
   prev_dt = DateTime(now);
 
-  return STAT_DONE;
+  this->stat = STAT_DONE;
+  return this->stat;
 } // ModeClock::loop()
 
 void ModeClock::change_mode(unsigned long mode=ModeClock::MODE_NULL) {
@@ -132,7 +139,11 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   unsigned int bl = Nx->blightness;
   
   if ( btn->get_name() == "BTN0" ) {
-    return;
+    if ( btn->is_long_pressed() && ! btn->is_repeated() ) {
+      this->stat = ModeBase::STAT_NEXT_MODE;
+      Serial.printf("ModeClock::btn_loop_hdr> stat=0x%X\n", this->stat);
+      return;
+    }
   }
 
   int n = btn->get_click_count();

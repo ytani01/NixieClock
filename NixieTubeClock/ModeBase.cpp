@@ -64,6 +64,9 @@ void ModeBase::init(unsigned long start_ms, DateTime& now,
     } // for(e)
   } // for(i)
   Serial.println("]");
+
+  this->stat = STAT_NONE;
+  Serial.printf("ModeBase::init> stat=0x%X\n", (int)this->stat);
 } // ModeBase::init()
 
 /**

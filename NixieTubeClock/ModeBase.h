@@ -12,10 +12,11 @@ class ModeBase {
   static const unsigned long TICK_MS = 5000; // ms
   static const unsigned long EFFECT_TICK_MS = 200; // ms
 
-  static const stat_t STAT_NONE     = 0x00;
-  static const stat_t STAT_SKIP     = 0x01;
-  static const stat_t STAT_DONE     = 0x02;
-  static const stat_t STAT_MODE_END = 0xFF;
+  static const stat_t STAT_NONE      = 0x00;  // 
+  static const stat_t STAT_SKIP      = 0x01;  // loop()実行をskip
+  static const stat_t STAT_DONE      = 0x02;  // ??
+  static const stat_t STAT_BACK_MODE = 0x10;  // モード終了(前のモードへ)
+  static const stat_t STAT_NEXT_MODE = 0x11;  // モード終了(次のモードへ)
 
   stat_t stat = STAT_NONE;
 
