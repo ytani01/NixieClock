@@ -10,7 +10,7 @@
 #include <DNSServer.h>
 
 #include "SSIDent.h"
-#include "ConfigData.h"
+#include "ConfWifi.h"
 
 /**
  *

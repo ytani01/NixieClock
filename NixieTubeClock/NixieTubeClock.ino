@@ -179,7 +179,7 @@ unsigned long change_mode(unsigned long mode=MODE_N) {
  * RTC読込中に 割り込みがかかると落ちることがある
  * 設定ファイル読込中に 割り込みがかかると落ちることがある
  */
-void btn_intr_hdr() {
+void IRAM_ATTR btn_intr_hdr() {
   static unsigned long prev_ms = 0;
   unsigned long        cur_ms = millis();
 
@@ -247,6 +247,24 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   Mode[curMode]->btn_loop_hdr(cur_ms, btn);
 } // btn_loop_hdr()
 
+/**
+ *
+ */
+void enableIntr() {
+  attachInterrupt(intrPin0, btn_intr_hdr, CHANGE);
+  attachInterrupt(intrPin1, btn_intr_hdr, CHANGE);
+  attachInterrupt(intrPin2, btn_intr_hdr, CHANGE);
+}
+
+/**
+ *
+ */
+void disableIntr() {
+  detachInterrupt(intrPin0);
+  detachInterrupt(intrPin1);
+  detachInterrupt(intrPin2);
+}
+
 //=======================================================================
 /**
  *
@@ -295,9 +313,7 @@ void setup() {
   // !! Important !!
   // 
   // 設定ファイル読込中に 割り込みがかかると落ちることがある
-  attachInterrupt(intrPin0, btn_intr_hdr, CHANGE);
-  attachInterrupt(intrPin1, btn_intr_hdr, CHANGE);
-  attachInterrupt(intrPin2, btn_intr_hdr, CHANGE);
+  enableIntr();
 } // setup()
 
 //=======================================================================
@@ -306,7 +322,10 @@ void setup() {
  */
 void loop() {
   mode_t   netmgr_mode;
+
+  disableIntr();
   DateTime now = Rtc.now();
+  enableIntr();
 
   prevMsec = curMsec;
   curMsec = millis();

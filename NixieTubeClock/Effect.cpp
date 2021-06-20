@@ -265,10 +265,12 @@ void EffectBlink::start(unsigned long start_ms,
 
   for (int i=0; i < this->_el_n; i++) {
     this->_blightness[i] = this->_el[i].get_blightness();
+#if 0
     if ( this->_blightness[i] > 0 ) {
       Serial.printf("EffectBlink::start> [%d]->blightness=%d\n",
                     i, this->_blightness[i]);
     }
+#endif
   } // for(i)
 } // EffectBlink::start()
 

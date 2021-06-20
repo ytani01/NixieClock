@@ -143,7 +143,7 @@ void ModeScore1::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   NxNumEl(n1, this->_score[this->_cur] / 10).set_blightness(0);
   NxNumEl(n2, this->_score[this->_cur] % 10).set_blightness(0);
 
-  if ( btn->get_name() == "BTN2" ) {
+  if ( btn->get_name() == "BTN1" ) {
     this->_score[this->_cur] += n;
     if ( this->_score[this->_cur] > 99 ) {
       this->_score[this->_cur] = 99;
@@ -153,7 +153,7 @@ void ModeScore1::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
 
   }
 
-  if ( btn->get_name() == "BTN1" ) {
+  if ( btn->get_name() == "BTN2" ) {
     this->_score[this->_cur] -= n;
     if ( this->_score[this->_cur] < 0 ) {
       this->_score[this->_cur] = 0;

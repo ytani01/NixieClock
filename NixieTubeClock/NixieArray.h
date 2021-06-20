@@ -39,8 +39,6 @@ class NixieArray {
 
   void end_all_effect();
   
-  void set_bl_max(unsigned int bl);
-
   void set_onoff(unsigned long cur_ms); // 表示状態更新
   void display(unsigned long cur_ms);
 

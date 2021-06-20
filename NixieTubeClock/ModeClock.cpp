@@ -14,6 +14,8 @@ static unsigned long cFadeTick = C_FADE_TICK0;
 
 extern boolean wifiActive;
 
+static DateTime prev_dt = DateTime(2000,1,1,0,0,0);
+
 /**
  *
  */
@@ -28,10 +30,10 @@ ModeClock::ModeClock(NixieArray *nxa): ModeBase::ModeBase(nxa,
 void ModeClock::init(unsigned long start_ms, DateTime& now,
                      int init_val[NIXIE_NUM_N]) {
   ModeBase::init(start_ms, now, init_val);
-  Serial.printf("ModeClock::init> stat=0x%X\n", this->stat);
+  this->mode_start_ms = millis();
+  Serial.printf("ModeClock::init> mode_start_ms=%ld, stat=0x%X\n",
+                this->mode_start_ms, this->stat);
 }
-
-static DateTime prev_dt = DateTime(2000,1,1,0,0,0);
 
 /**
  *
@@ -63,6 +65,12 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
     sprintf(disp_str, "%02d%02d%02d", now.day(), now.hour(), now.minute());
     break;
   case ModeClock::MODE_YMD:
+    if ( cur_ms - this->mode_start_ms > DISP_DATE_MS ) {
+      this->change_mode(MODE_HMS);
+
+      this->stat = STAT_DONE;
+      return this->stat;
+    }
     sprintf(disp_str, "%02d%02d%02d",
             now.year() % 100, now.month(), now.day());
     break;
@@ -108,14 +116,15 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
 } // ModeClock::loop()
 
 void ModeClock::change_mode(unsigned long mode=ModeClock::MODE_NULL) {
-  Serial.printf("change_mode(%d)> ", (int)this->mode);
+  Serial.printf("ModeClock::change_mode(%ld)> ", this->mode);
 
   if ( mode != MODE_NULL ) {
     this->mode = mode;
   } else {
     switch ( this->mode ) {
     case MODE_HMS:
-      this->mode = MODE_DHM;
+      // this->mode = MODE_DHM;
+      this->mode = MODE_YMD;
       break;
     case MODE_DHM:
       this->mode = MODE_YMD;
@@ -128,7 +137,8 @@ void ModeClock::change_mode(unsigned long mode=ModeClock::MODE_NULL) {
       break;
     } // switch(mode)
   }
-  Serial.printf("%d\n", (int)this->mode);
+  this->mode_start_ms = millis();
+  Serial.printf("mode=%ld, mode_start_ms=%ld\n", this->mode, this->mode_start_ms);
 }
 
 void ModeClock::btn_intr_hdr(unsigned long cur_ms, Button *btn) {

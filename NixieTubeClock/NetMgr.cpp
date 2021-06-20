@@ -30,7 +30,7 @@ NetMgr::NetMgr() {
  */
 mode_t NetMgr::loop() {
   String     myname = "NetMgr::loop";
-  ConfigData conf_data;
+  ConfWifi conf_data;
   String     ssid, ssid_pw;
   
   this->_loop_count++;
@@ -288,9 +288,9 @@ unsigned int NetMgr::scan_ssid(SSIDent ssid_ent[]) {
  *
  */
 void NetMgr::handle_top() {
-  String     myname = "NetMgr::handle_top";
-  ConfigData conf_data;
-  String     ssid, ssid_pw;
+  String   myname = "NetMgr::handle_top";
+  ConfWifi conf_data;
+  String   ssid, ssid_pw;
 
   conf_data.load();
   ssid = conf_data.ssid;
@@ -315,8 +315,8 @@ void NetMgr::handle_top() {
 } // NetMgr::handle_top()
 
 void NetMgr::handle_select_ssid() {
-  ConfigData conf_data;
-  String     ssid, ssid_pw;
+  ConfWifi conf_data;
+  String   ssid, ssid_pw;
   
 
   conf_data.load();
@@ -388,9 +388,9 @@ void NetMgr::handle_select_ssid() {
 } // NetMgr::handle_select_ssid()
 
 void NetMgr::handle_save_ssid(){
-  ConfigData conf_data;
-  String     ssid       = web_svr.arg("ssid");
-  String     ssid_pw    = web_svr.arg("passwd");
+  ConfWifi conf_data;
+  String   ssid       = web_svr.arg("ssid");
+  String   ssid_pw    = web_svr.arg("passwd");
   
   Serial.printf("save_ssid> |%s|%s|\n", ssid.c_str(), ssid_pw.c_str());
 

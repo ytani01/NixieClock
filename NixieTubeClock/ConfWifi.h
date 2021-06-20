@@ -1,8 +1,8 @@
 /**
  * (c) 2021 Yoichi Tanibayashi
  */
-#ifndef CONFIG_DATA_H
-#define CONFIG_DATA_H
+#ifndef CONF_WIFI_H
+#define CONF_WIFI_H
 
 #include "SPIFFS.h"
 
@@ -11,22 +11,19 @@ static const char CONFIG_FILE[] = "/config.txt";
 /**
  *
  */
-class ConfigData {
+class ConfWifi {
  public:
 
   String ssid = "";
   String ssid_pw = "";
   String ntp_svr[3];
 
-  ConfigData();
+  ConfWifi();
 
   int load(const char* config_file = CONFIG_FILE);
   int save(const char* config_file = CONFIG_FILE);
 
   void print();
-  
- private:
-  
 };
 
-#endif // CONFIG_DATA_H
+#endif // CONF_WIFI_H
