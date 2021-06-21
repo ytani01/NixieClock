@@ -1,11 +1,12 @@
 /**
  * (c) 2021 Yoichi Tanibayashi
  */
-#ifndef MODE_SCORE1_H
-#define MODE_SCORE1_H
+#ifndef MODE_COUNT_H
+#define MODE_COUNT_H
 #include "ModeBase.h"
+#include "CountData.h"
 
-class ModeScore1 : public ModeBase {
+class ModeCount : public ModeBase {
  public:
   static const unsigned long TICK_MS = 100; // ms
   static const unsigned long BLINK_TICK_MS = 200; // ms
@@ -13,12 +14,16 @@ class ModeScore1 : public ModeBase {
   static const mode_t MODE_NONE   = 0x00;
   static const mode_t MODE_MODIFY = 0x01;
 
-  static const int NUM_N = 3;
+  static const int COUNT_N = 3;
+
+  CountData data;
   
-  ModeScore1(NixieArray *nxa);
+  ModeCount(NixieArray *nxa);
+
   void init(unsigned long start_ms, DateTime& now,
             int init_val[NIXIE_NUM_N]);
   stat_t loop(unsigned long cur_ms, DateTime& now);
+
   void btn_intr_hdr(unsigned long cur_ms, Button *btn);
   void btn_loop_hdr(unsigned long cur_ms, Button *btn);
 
@@ -26,7 +31,6 @@ class ModeScore1 : public ModeBase {
 
  private:
   mode_t _mode;
-  int _score[NUM_N];
   int _cur;
 };
-#endif // MODE_SCORE1_H
+#endif // MODE_COUNT_H

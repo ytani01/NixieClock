@@ -6,7 +6,7 @@
 
 #include "SPIFFS.h"
 
-static const char CONFIG_FILE[] = "/config.txt";
+static const char WIFI_FILE[] = "/wifi.txt";
 
 /**
  *
@@ -20,8 +20,10 @@ class ConfWifi {
 
   ConfWifi();
 
-  int load(const char* config_file = CONFIG_FILE);
-  int save(const char* config_file = CONFIG_FILE);
+  int load(const char* config_file = WIFI_FILE);
+  int save(const char* config_file = WIFI_FILE);
+
+  String read_line(File file);
 
   void print();
 };

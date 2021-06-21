@@ -3,14 +3,14 @@
  */
 #include "ModeClock.h"
 
-static const unsigned int C_FADE_OFF = 0;
-static const unsigned int C_FADE_IN  = 1;
-static const unsigned int C_FADE_OUT = 2;
-int colon_fade_mode[NIXIE_COLON_N] = {C_FADE_OFF, C_FADE_OFF};
+static const unsigned int CL_FADE_OFF = 0;
+static const unsigned int CL_FADE_IN  = 1;
+static const unsigned int CL_FADE_OUT = 2;
+int colon_fade_mode[NIXIE_COLON_N] = {CL_FADE_OFF, CL_FADE_OFF};
 
-static const unsigned long C_FADE_TICK0 = 20;
-static const unsigned long C_FADE_TICK1 = 120;
-static unsigned long cFadeTick = C_FADE_TICK0;
+static const unsigned long CL_FADE_TICK0 = 20;
+static const unsigned long CL_FADE_TICK1 = 120;
+static unsigned long cFadeTick = CL_FADE_TICK0;
 
 extern boolean wifiActive;
 
@@ -52,9 +52,9 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
   }
 
   if ( wifiActive ) {
-    cFadeTick = C_FADE_TICK0;
+    cFadeTick = CL_FADE_TICK0;
   } else {
-    cFadeTick = C_FADE_TICK1;
+    cFadeTick = CL_FADE_TICK1;
   }
 
   switch ( this->mode ) {
@@ -94,7 +94,7 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
       if ( wifiActive ) {
         NxCol(i).fadeout_start(cur_ms, cFadeTick,
                                          NIXIE_COLON_DOT_DOWN);
-        colon_fade_mode[i] = C_FADE_OUT;
+        colon_fade_mode[i] = CL_FADE_OUT;
         continue;
       }
     }
@@ -104,9 +104,9 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
     }
 
     // effect is inactive
-    if(colon_fade_mode[i] == C_FADE_OUT) {
+    if(colon_fade_mode[i] == CL_FADE_OUT) {
       NxCol(i).fadein_start(cur_ms, cFadeTick, NIXIE_COLON_DOT_DOWN);
-      colon_fade_mode[i] = C_FADE_IN;
+      colon_fade_mode[i] = CL_FADE_IN;
     }
   } // for(COLON)
   prev_dt = DateTime(now);
@@ -156,17 +156,17 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
     }
   }
 
+  if ( btn->get_name() == "BTN1" && btn->get_click_count() >= 1 ) {
+    this->change_mode();
+    return;
+  }
+
   int n = btn->get_click_count();
   if ( n == 0 && btn->is_repeated() ) {
     n = 1;
   }
 
   if ( n == 0 ) {
-    return;
-  }
-
-  if ( btn->get_name() == "BTN1" ) {
-    this->change_mode();
     return;
   }
 

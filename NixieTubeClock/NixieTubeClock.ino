@@ -7,7 +7,7 @@
 #include "ModeBase.h"
 #include "ModeClock.h"
 #include "ModeSetClock.h"
-#include "ModeScore1.h"
+#include "ModeCount.h"
 #include "ModeTest1.h"
 #include "ModeTest2.h"
 
@@ -91,13 +91,13 @@ ModeClock modeClock = ModeClock(&nixieArray);
 ModeTest1 modeTest1 = ModeTest1(&nixieArray);
 ModeTest2 modeTest2 = ModeTest2(&nixieArray);
 ModeSetClock modeSetClock = ModeSetClock(&nixieArray);
-ModeScore1 modeScore1 = ModeScore1(&nixieArray);
+ModeCount modeCount = ModeCount(&nixieArray);
 
-ModeBase* Mode[] = {&modeClock, &modeSetClock, &modeScore1, &modeTest1, &modeTest2};
+ModeBase* Mode[] = {&modeClock, &modeSetClock, &modeCount, &modeTest1, &modeTest2};
 const unsigned long MODE_N = sizeof(Mode) / sizeof(&Mode[0]);
 const unsigned int MODE_CLOCK     = 0;
 const unsigned int MODE_SET_CLOCK = 1;
-const unsigned int MODE_SCORE1    = 2;
+const unsigned int MODE_COUNT     = 2;
 const unsigned int MODE_TEST1     = 3;
 const unsigned int MODE_TEST2     = 4;
 
@@ -136,6 +136,7 @@ void ntp_adjust() {
     return;
   }
   
+  disableIntr();
   getLocalTime(&time_info); // NTP
   DateTime now = DateTime(time_info.tm_year + 1900,
                           time_info.tm_mon + 1,
@@ -144,6 +145,7 @@ void ntp_adjust() {
                           time_info.tm_min,
                           time_info.tm_sec);
   Rtc.adjust(now);
+  enableIntr();
 
   Serial.printf("ntp_adjust> %04d/%02d/%02d(%s) %02d:%02d:%02d\n",
                 time_info.tm_year + 1900,
@@ -223,7 +225,7 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
       return;
     }
 
-    if ( btn->get_click_count() == 2 ) {
+    if ( btn->get_click_count() == 2 && curMode == MODE_CLOCK ) {
       Serial.printf("btn_loop_hdr> netMgr.cur_mode=0x%02X\n", netMgr.cur_mode);
       wifiActive = false;
       prev_wifiActive = false;

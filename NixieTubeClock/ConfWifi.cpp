@@ -3,6 +3,9 @@
  */
 #include "ConfWifi.h"
 
+extern void enableIntr();
+extern void disableIntr();
+
 /**
  *
  */
@@ -12,7 +15,7 @@ ConfWifi::ConfWifi() {
 /**
  *
  */
-String read_line(File file) {
+String ConfWifi::read_line(File file) {
   String line = file.readStringUntil('\n');
   line.trim();
   return line;
@@ -24,8 +27,11 @@ String read_line(File file) {
 int ConfWifi::load(const char* config_file) {
   const char* myname = "ConfWifi::load";
 
+  disableIntr();
+
   if(!SPIFFS.begin(true)) {
     Serial.printf("%s> ERROR: SPIFFS mout failed: %s", myname, config_file);
+    enableIntr();
     return -1;
   }
 
@@ -34,16 +40,18 @@ int ConfWifi::load(const char* config_file) {
     Serial.printf("%s> %s: open failed\n", myname, config_file);
     this->ssid = "";
     this->ssid_pw = "";
+    enableIntr();
     return -1;
   }
 
-  this->ssid = read_line(file);
+  this->ssid = this->read_line(file);
   Serial.printf("%s> SSID: %s\n", myname, this->ssid.c_str());
   
-  this->ssid_pw = read_line(file);
+  this->ssid_pw = this->read_line(file);
   Serial.printf("%s> SSID PW: %s\n", myname, this->ssid_pw.c_str());
 
   file.close();
+  enableIntr();
   return 0;
 } // ConfWifi::load
 
@@ -59,15 +67,19 @@ int ConfWifi::save(const char* config_file) {
   Serial.printf("%s> SSID=%s\n", myname, ssid.c_str());
   Serial.printf("%s> SSID PW=%s\n", myname, ssid_pw.c_str());
 
+  disableIntr();
+
   File file = SPIFFS.open(config_file, "w");
   if (!file) {
     Serial.printf("%s> ERROR open failed: %s\n", myname, config_file);
+    enableIntr();
     return -1;
   }
   
   file.println(this->ssid);
   file.println(this->ssid_pw);
   file.close();
+  enableIntr();
 
   Serial.printf("%s> wrote: %s\n", myname, config_file);
   delay(100);
