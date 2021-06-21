@@ -9,7 +9,7 @@
 class ModeCount : public ModeBase {
  public:
   static const unsigned long TICK_MS = 100; // ms
-  static const unsigned long BLINK_TICK_MS = 200; // ms
+  static const unsigned long BLINK_TICK_MS = 300; // ms
 
   static const mode_t MODE_NONE   = 0x00;
   static const mode_t MODE_MODIFY = 0x01;
