@@ -12,7 +12,7 @@
 #include "ModeTest2.h"
 
 static const String MY_NAME = "Nixie Tube Clock";
-int                 initValVer[NIXIE_NUM_N] = {0,0, 0,8, 0,4};
+int                 initValVer[NIXIE_NUM_N] = {0,0, 0,8, 0,5};
 
 #define LOOP_DELAY_US   2   // micro sbeconds
 #define DEBOUNCE        300 // msec
