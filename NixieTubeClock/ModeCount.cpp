@@ -3,6 +3,8 @@
  */
 #include "ModeCount.h"
 
+extern const char COUNT_FILE[];
+
 /**
  *
  */
@@ -22,12 +24,12 @@ void ModeCount::init(unsigned long start_ms, DateTime& now,
                      int init_val[NIXIE_NUM_N]) {
   Serial.println("ModeCount::init>");
 
-  init_val[0] = this->data.count[0] / 10;
-  init_val[1] = this->data.count[0] % 10;
-  init_val[2] = this->data.count[1] / 10;
-  init_val[3] = this->data.count[1] % 10;
-  init_val[4] = this->data.count[2] / 10;
-  init_val[5] = this->data.count[2] % 10;
+  this->data.load();
+
+  for (int i=0; i < 3; i++) {
+    init_val[i * 2] =     this->data.count[i] / 10;
+    init_val[i * 2 + 1] = this->data.count[i] % 10;
+  }
   
   ModeBase::init(start_ms, now, init_val);
 
@@ -38,6 +40,7 @@ void ModeCount::init(unsigned long start_ms, DateTime& now,
  *
  */
 stat_t ModeCount::loop(unsigned long cur_ms, DateTime& now) {
+  const char* myname = "ModeCount::loop";
   char disp_str[NIXIE_NUM_N + 1];
   int  prev_num[NIXIE_NUM_N];
 
@@ -45,16 +48,23 @@ stat_t ModeCount::loop(unsigned long cur_ms, DateTime& now) {
     return STAT_SKIP;
   }
 
-  /*
-  this->get_disp_str(disp_str);
+  if ( this->_mode == MODE_MODIFY ) {
+    if ( cur_ms - this->_modify_ms > this->MODIFY_TIMEOUT ) {
+      Serial.printf("%s> MODIFY_TIMEOUT\n", myname);
 
-  for (int i=0; i < NIXIE_NUM_N; i++) {
-    prev_num[i] = this->_num[i];
-    this->_num[i] = int(disp_str[i] - '0');
-    NxNumEl(i, prev_num[i]).set_blightness(0);
-    NxNumEl(i, this->_num[i]).set_blightness(Nx->blightness);
-  } // for(i)
-  */
+      int n1, n2;
+      switch ( this->_cur ) {
+      case 0: n1 = 0; n2 = 1; break;
+      case 1: n1 = 2; n2 = 3; break;
+      case 2: n1 = 4; n2 = 5; break;
+      } // switch(cur)
+
+      this->_mode = MODE_NONE;
+
+      NxNum(n1).end_effect();
+      NxNum(n2).end_effect();
+    }
+  } // if(MODE_MODIFY)
 
   return STAT_DONE;
 } // ModeCount::loop()
@@ -66,7 +76,7 @@ void ModeCount::get_disp_str(char* disp_str) {
   sprintf(disp_str, "%02d%02d%02d",
           this->data.count[0], this->data.count[1], this->data.count[2]);
   Serial.printf("%s\n", disp_str);
-}
+} // ModeCount::get_disp_str()
 
 /**
  *
@@ -92,6 +102,8 @@ void ModeCount::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
       if ( this->_mode == MODE_NONE ) {
         this->_mode = MODE_MODIFY;
 
+        this->_modify_ms = cur_ms;
+
         NxNum(n1).blink_start(millis(), BLINK_TICK_MS);
         NxNum(n2).blink_start(millis(), BLINK_TICK_MS);
 
@@ -115,6 +127,8 @@ void ModeCount::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
     if ( n == 0 ) {
       return;
     }
+
+    this->_modify_ms = cur_ms;
 
     NxNum(n1).end_effect();
     NxNum(n2).end_effect();
@@ -142,6 +156,12 @@ void ModeCount::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
     n = 1;
   }
   
+  if ( n <= 0 ) {
+    return;
+  }
+
+  this->_modify_ms = cur_ms;
+
   NxNum(n1).end_effect();
   NxNum(n2).end_effect();
 
@@ -156,6 +176,8 @@ void ModeCount::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
     Serial.printf("ModeCount::btn_loop_hdr> score[%d]=%d\n",
                   this->_cur, this->data.count[this->_cur]);
 
+
+    this->data.save(COUNT_FILE);
   }
 
   if ( btn->get_name() == "BTN2" ) {

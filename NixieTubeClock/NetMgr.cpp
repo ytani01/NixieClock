@@ -71,7 +71,7 @@ mode_t NetMgr::loop() {
       break;
     }
 
-    Serial.println(String(this->_loop_count) + " ");
+    Serial.printf("%s> loop_count=%d\n", myname.c_str(), this->_loop_count);
     delay(WIFI_TRY_INTERVAL);
     break;
 

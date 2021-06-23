@@ -33,7 +33,7 @@ void ModeTest1::init(unsigned long start_ms, DateTime& now,
       Serial.println(" d=" + String(d));
       this->_nxa->colon[i].element[d].set_blightness(BLIGHTNESS_RESOLUTION);
     } // for (d)
-    this->_nxa->colon[i].blink_start(start_ms, 500);
+    this->_nxa->colon[i].blink_start(start_ms, BLINK_TICK_MS);
   } // for (i)
 
   Serial.println("ModeTest1::init> done");
@@ -49,8 +49,8 @@ stat_t ModeTest1::loop(unsigned long cur_ms, DateTime& now) {
   // num
   int num = 0;
   this->_nxa->num[num].element[this->_prev_digit].set_blightness(0);
-  //this->_nxa->num[num].element[this->_digit].set_blightness(BLIGHTNESS_RESOLUTION);
-  this->_nxa->num[num].element[this->_digit].set_blightness(1);
+  this->_nxa->num[num].element[this->_digit].set_blightness(BLIGHTNESS_RESOLUTION);
+  //this->_nxa->num[num].element[this->_digit].set_blightness(1);
   
   num = 1;
   this->_nxa->num[num].element[this->_prev_digit].set_blightness(0);
@@ -74,7 +74,7 @@ stat_t ModeTest1::loop(unsigned long cur_ms, DateTime& now) {
   this->_nxa->num[num].end_effect();
   this->_nxa->num[num].element[this->_prev_digit].set_blightness(0);
   this->_nxa->num[num].element[this->_digit].set_blightness(BLIGHTNESS_RESOLUTION);
-  this->_nxa->num[num].blink_start(cur_ms, 100);
+  this->_nxa->num[num].blink_start(cur_ms, BLINK_TICK_MS);
   
   // -------------------------------------------------------------------------
   this->_prev_digit = this->_digit;

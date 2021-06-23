@@ -8,8 +8,10 @@
 
 class ModeCount : public ModeBase {
  public:
-  static const unsigned long TICK_MS = 100; // ms
-  static const unsigned long BLINK_TICK_MS = 300; // ms
+  static const unsigned long MODIFY_TIMEOUT = 5000; // ms
+
+  static const unsigned long TICK_MS        = 100; // ms
+  static const unsigned long BLINK_TICK_MS  = 300; // ms
 
   static const mode_t MODE_NONE   = 0x00;
   static const mode_t MODE_MODIFY = 0x01;
@@ -19,11 +21,8 @@ class ModeCount : public ModeBase {
   CountData data;
   
   ModeCount(NixieArray *nxa);
-
-  void init(unsigned long start_ms, DateTime& now,
-            int init_val[NIXIE_NUM_N]);
+  void init(unsigned long start_ms, DateTime& now, int init_val[NIXIE_NUM_N]);
   stat_t loop(unsigned long cur_ms, DateTime& now);
-
   void btn_intr_hdr(unsigned long cur_ms, Button *btn);
   void btn_loop_hdr(unsigned long cur_ms, Button *btn);
 
@@ -32,5 +31,6 @@ class ModeCount : public ModeBase {
  private:
   mode_t _mode;
   int _cur;
+  unsigned long _modify_ms;
 };
 #endif // MODE_COUNT_H

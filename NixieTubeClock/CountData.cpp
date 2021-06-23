@@ -38,17 +38,15 @@ int CountData::load(const char* config_file) {
   File file = SPIFFS.open(config_file, "r");
   if (!file) {
     Serial.printf("%s> %s: open failed\n", myname, config_file);
-    //this->ssid = "";
-    //this->ssid_pw = "";
+
     enableIntr();
     return -1;
   }
 
-  //this->ssid = read_line(file);
-  //Serial.printf("%s> SSID: %s\n", myname, this->ssid.c_str());
-  
-  //this->ssid_pw = read_line(file);
-  //Serial.printf("%s> SSID PW: %s\n", myname, this->ssid_pw.c_str());
+  for (int i=0; i < COUNT_N; i++) {
+    this->count[i] = this->read_line(file).toInt();
+    Serial.printf("%s> count[%d]=%d\n", myname, i, this->count[i]);
+  } // for(i)
 
   file.close();
   enableIntr();
@@ -61,13 +59,11 @@ int CountData::load(const char* config_file) {
 int CountData::save(const char* config_file) {
   const char* myname = "CountData::save";
 
-  //this->ssid.trim();
-  //this->ssid_pw.trim();
-
-  //Serial.printf("%s> SSID=%s\n", myname, ssid.c_str());
-  //Serial.printf("%s> SSID PW=%s\n", myname, ssid_pw.c_str());
-
   disableIntr();
+
+  for (int i=0; i < COUNT_N; i++) {
+    Serial.printf("%s> data[%d]=%d\n", myname, i, this->count[i]);
+  } // for(i)
 
   File file = SPIFFS.open(config_file, "w");
   if (!file) {
@@ -76,13 +72,15 @@ int CountData::save(const char* config_file) {
     return -1;
   }
   
-  //file.println(this->ssid);
-  //file.println(this->ssid_pw);
+  for (int i=0; i < COUNT_N; i++) {
+    file.printf("%d\n", this->count[i]);
+  } // for(i)
+
   file.close();
   enableIntr();
 
   Serial.printf("%s> wrote: %s\n", myname, config_file);
-  delay(100);
+  delay(1);
   return 0;
 } // CountData::save()
 

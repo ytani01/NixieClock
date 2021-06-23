@@ -145,7 +145,7 @@ void Button::print(boolean interrupt)
   String str = interrupt ? "!" : " ";
   
   str += "Btn[" + this->_name + "] ";
-  str += this->_value ? "H "  : "L ";
+  str += this->_value ? "OFF "  : "ON  ";
   str += String(this->_count) + " ";
   str += String(this->_click_count) + " ";
   str += this->_long_pressed ? "Long " : "---- ";
