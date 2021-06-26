@@ -32,7 +32,7 @@ void ModeClock::init(unsigned long start_ms, DateTime& now,
   ModeBase::init(start_ms, now, init_val);
   this->mode_start_ms = millis();
   Serial.printf("ModeClock::init> mode_start_ms=%ld, stat=0x%X\n",
-                this->mode_start_ms, this->stat);
+                this->mode_start_ms, (int)this->stat);
 }
 
 /**
@@ -47,7 +47,7 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
   }
 
   if ( this->stat != STAT_NONE && this->stat != STAT_DONE ) {
-    Serial.printf("ModeClock::loop> stat=0x%X\n", this->stat);
+    Serial.printf("ModeClock::loop> stat=0x%X\n", (int)this->stat);
     return this->stat;
   }
 
@@ -151,7 +151,7 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   if ( btn->get_name() == "BTN0" ) {
     if ( btn->is_long_pressed() && ! btn->is_repeated() ) {
       this->stat = ModeBase::STAT_NEXT_MODE;
-      Serial.printf("ModeClock::btn_loop_hdr> stat=0x%X\n", this->stat);
+      Serial.printf("ModeClock::btn_loop_hdr> stat=0x%X\n", (int)this->stat);
       return;
     }
   }

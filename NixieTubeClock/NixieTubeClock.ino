@@ -204,19 +204,23 @@ void IRAM_ATTR btn_intr_hdr() {
  *
  */
 void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
-  static unsigned long prev_msec = 0;
-
-  /*
-  if ( cur_ms - prev_msec < DEBOUNCE ) {
-    return;
-  }
-  prev_msec = cur_ms;
-  */
-
   Serial.print("btn_loop_hdr> ");
   btn->print();
 
   if ( btn->get_name() == "BTN0" ) {
+    if ( btn->get_click_count() >= 1 ) {
+      if ( Btn[1]->get_value() == Button::ON ) {
+        if ( curMode == MODE_CLOCK ) {
+          change_mode(MODE_COUNT);
+          return;
+        }
+        if ( curMode == MODE_COUNT ) {
+          change_mode(MODE_CLOCK);
+          return;
+        }
+      }
+    }
+
     if ( btn->get_click_count() >= 3 ) {
       change_mode();
       if ( curMode == MODE_SET_CLOCK ) {
@@ -394,12 +398,12 @@ void loop() {
     switch (stat) {
     case ModeBase::STAT_BACK_MODE:
       Serial.printf("loop> stat=0x%X, curMode=%d, prevMode=%d\n",
-                    stat, curMode, prevMode);
+                    (int)stat, (int)curMode, (int)prevMode);
       change_mode(MODE_N + 1);
       break;
 
     case ModeBase::STAT_NEXT_MODE:
-      Serial.printf("loop> stat=0x%X\n", stat);
+      Serial.printf("loop> stat=0x%X\n", (int)stat);
       change_mode();
       break;
 
