@@ -1,8 +1,9 @@
 #include <FastLED.h>
 
-#define PIN   2
-#define NUMPIXELS 6
-#define BRIGHTNESS 64
+const uint8_t  PIN        = 16;
+const uint16_t NUMPIXELS  = 6;
+const uint8_t  BRIGHTNESS = 50;
+const int      LOOP_DELAY = 2000;
 
 CRGB pixels[NUMPIXELS];
 
@@ -41,6 +42,6 @@ void loop() {
     FastLED.show();
 
     Col_i = (Col_i + 1) % COL_N;
-    delay(50);
+    delay(LOOP_DELAY);
   }
 }
