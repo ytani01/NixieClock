@@ -1,6 +1,6 @@
 #include <FastLED.h>
 
-#define PIN   15
+#define PIN   2
 #define NUMPIXELS 6
 #define BRIGHTNESS 64
 
@@ -29,7 +29,7 @@ void setup() {
 
   digitalWrite(5, HIGH);
 
-  FastLED.addLeds<WS2812B, PIN, RGB>(pixels, NUMPIXELS);
+  FastLED.addLeds<WS2812B, PIN, GRB>(pixels, NUMPIXELS);
   FastLED.setBrightness(BRIGHTNESS);
 }
 
@@ -37,10 +37,10 @@ void loop() {
   for (int i=0; i < NUMPIXELS; i++) {
     Serial.printf("loop> i=%d\n", i);
 
-    CRGB(Col[Col_i][0], Col[Col_i][1], Col[Col_i][2]);
+    pixels[i] = CRGB(Col[Col_i][0], Col[Col_i][1], Col[Col_i][2]);
     FastLED.show();
 
     Col_i = (Col_i + 1) % COL_N;
-    delay(500);
+    delay(50);
   }
 }

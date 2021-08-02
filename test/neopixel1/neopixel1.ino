@@ -42,6 +42,6 @@ void loop() {
     pixels.show();
 
     Col_i = (Col_i + 1) % COL_N;
-    delay(500);
+    delay(50);
   }
 }
