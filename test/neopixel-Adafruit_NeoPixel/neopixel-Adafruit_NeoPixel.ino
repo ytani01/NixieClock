@@ -1,9 +1,10 @@
 #include <Adafruit_NeoPixel.h>
 
-#define PIN   2
-#define NUMPIXELS 6
+const uint8_t PIN_PIXEL  = 16;
+const uint8_t PIXELS_N   = 6;
+const int     LOOP_DELAY = 500;  // ms
 
-Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels(PIXELS_N, PIN_PIXEL, NEO_GRB + NEO_KHZ800);
 
 int Col[][3] =
 {
@@ -30,11 +31,10 @@ void setup() {
   digitalWrite(5, HIGH);
 
   pixels.clear();
-
 }
 
 void loop() {
-  for (int i=0; i < NUMPIXELS; i++) {
+  for (int i=0; i < PIXELS_N; i++) {
     Serial.printf("loop> i=%d\n", i);
     pixels.setPixelColor(i, pixels.Color(Col[Col_i][0],
                                          Col[Col_i][1],
@@ -42,6 +42,6 @@ void loop() {
     pixels.show();
 
     Col_i = (Col_i + 1) % COL_N;
-    delay(50);
+    delay(LOOP_DELAY);
   }
 }

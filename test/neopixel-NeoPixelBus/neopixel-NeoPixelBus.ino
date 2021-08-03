@@ -1,9 +1,9 @@
 #include <NeoPixelBus.h>
 
-const uint16_t PIXEL_N = 6;
-const uint8_t  PIN = 16;
-const uint8_t  BLIGHTNESS = 10;
-const int      LOOP_DELAY = 5000;
+const uint16_t PIXEL_N    = 6;
+const uint8_t  PIN        = 16;
+const uint8_t  BLIGHTNESS = 30;
+const int      LOOP_DELAY = 1000;
 
 //NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> pixels(PIXEL_N, PIN);
 NeoPixelBus<NeoGrbFeature, NeoWs2812xMethod > pixels(PIXEL_N, PIN);
