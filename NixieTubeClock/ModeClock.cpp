@@ -182,6 +182,7 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   
   if (flag) {
     Nx->blightness = bl;
+    Serial.printf("Nx->blightness=%d\n", Nx->blightness);
     for (int i=0; i < NIXIE_NUM_N; i++) {
       NxNumEl(i, this->_num[i]).set_blightness(bl);
     } // for(NUM)

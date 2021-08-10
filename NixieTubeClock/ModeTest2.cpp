@@ -56,7 +56,7 @@ stat_t ModeTest2::loop(unsigned long cur_ms, DateTime& now) {
     }
     NxNumEl(i, this->_digit[i]).set_blightness(0);
 
-    this->_digit[i] = (this->_digit[i] + 10 - 1) % 10;
+    this->_digit[i] = (this->_digit[i] + 10 + 1) % 10;
     NxNumEl(i, this->_digit[i]).set_blightness(BLIGHTNESS_RESOLUTION);
     if ( e_flag ) {
       NxNum(i).blink_start(cur_ms, 200);

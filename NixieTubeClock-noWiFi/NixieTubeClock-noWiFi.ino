@@ -122,41 +122,6 @@ unsigned long loopCount = 0;
 unsigned long curMsec   = 0; // msec
 unsigned long prevMsec  = 0; // msec
 
-//======================================================================
-/**
- *
- */
-void ntp_adjust() {
-  struct tm time_info;
-
-  if (ntpActive) {
-    Serial.printf("ntp_adjust> ntpActive=true\n");
-  } else {
-    Serial.printf("ntp_adjust> ntpActive=false\n");
-    return;
-  }
-  
-  disableIntr();
-  getLocalTime(&time_info); // NTP
-  DateTime now = DateTime(time_info.tm_year + 1900,
-                          time_info.tm_mon + 1,
-                          time_info.tm_mday,
-                          time_info.tm_hour,
-                          time_info.tm_min,
-                          time_info.tm_sec);
-  Rtc.adjust(now);
-  enableIntr();
-
-  Serial.printf("ntp_adjust> %04d/%02d/%02d(%s) %02d:%02d:%02d\n",
-                time_info.tm_year + 1900,
-                time_info.tm_mon + 1,
-                time_info.tm_mday,
-                dayOfWeekStr[time_info.tm_wday].c_str(),
-                time_info.tm_hour,
-                time_info.tm_min,
-                time_info.tm_sec);
-} // ntp_adjust()
-
 /**
  *
  */

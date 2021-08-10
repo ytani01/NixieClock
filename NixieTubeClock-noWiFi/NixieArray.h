@@ -25,7 +25,7 @@
 
 class NixieArray {
  public:
-  static const unsigned int DISP_DELAY_US = 1; // microsec
+  static const unsigned int DISP_DELAY_US = 30; // microsec
           
   unsigned int blightness = 3;
 

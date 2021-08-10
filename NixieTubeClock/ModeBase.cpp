@@ -32,8 +32,11 @@ String ModeBase::name() {
  */
 boolean ModeBase::tick(unsigned long cur_ms) {
   if ( this->_tick_ms == 0 ) {
+    return true;
+    /*
     Serial.println("!? _tick_ms=" + String(this->_tick_ms));
     return false;
+    */
   }
   this->_prev_tick = this->_tick;
   this->_tick = (cur_ms - this->_start_ms) / this->_tick_ms;
