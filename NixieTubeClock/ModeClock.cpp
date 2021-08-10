@@ -75,7 +75,8 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
             now.year() % 100, now.month(), now.day());
     break;
   default:
-    sprintf(disp_str, "%02d%02d%02d", now.hour(), now.minute(), now.second());
+    sprintf(disp_str, "%02d%02d%02d",
+            now.hour(), now.minute(), now.second());
     break;
   } // switch (mode)
   
@@ -83,7 +84,7 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
     prev_num[i] = this->_num[i];
     this->_num[i] = int(disp_str[i] - '0');
     if ( this->_num[i] != prev_num[i] ) {
-      NxNum(i).xfade_start(cur_ms, ModeClock::FADE_TICK_MS,
+      NxNum(i).xfade_start(cur_ms, FADE_TICK_MS,
                            this->_num[i], prev_num[i]);
     }
   } // for(NUM)
@@ -173,7 +174,7 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   if ( btn->get_name() == "BTN2" ) {
     for (int i=0; i < n; i++) {
       bl /= 2;
-      if (bl < 1 || bl > BLIGHTNESS_RESOLUTION) {
+      if (bl < BLIGHTNESS_MIN || bl > BLIGHTNESS_RESOLUTION) {
         bl = BLIGHTNESS_RESOLUTION;
       }
     }

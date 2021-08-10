@@ -25,7 +25,8 @@
 #include <RTClib.h>
 #include <WiFi.h>
 
-#define BLIGHTNESS_RESOLUTION      16  // 明るさの段階数 2^n
+#define BLIGHTNESS_RESOLUTION 16  // 明るさの段階数 2^n
+#define BLIGHTNESS_MIN         3  // 明るさ最小値
 
 #define NIXIE_NUM_N          6  // 数字の桁数
 #define NIXIE_NUM_DIGIT_N   10  // 一桁の数字のパターン数

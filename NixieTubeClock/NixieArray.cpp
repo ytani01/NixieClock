@@ -95,7 +95,7 @@ void IRAM_ATTR NixieArray::display(unsigned long cur_ms) {
   this->loop(cur_ms); // ニキシー管 全て
   //--------------------------------------------------------------------------
   this->set_onoff(disp_count); // 全エレメントの表示状態更新
-  //this->set_onoff(cur_ms); // 全エレメントの表示状態更新
+  //this->set_onoff(cur_ms);
   //this->set_onoff(micros());
   //--------------------------------------------------------------------------
   // 数字部の表示処理
@@ -118,17 +118,11 @@ void IRAM_ATTR NixieArray::display(unsigned long cur_ms) {
     digitalWrite(_pin_data, val[p]);
     delayMicroseconds(NixieArray::DISP_DELAY_US);
     digitalWrite(_pin_clk, HIGH);
-    // delayMicroseconds(NixieArray::DISP_DELAY_US);
-
     digitalWrite(_pin_clk, LOW);
     delayMicroseconds(NixieArray::DISP_DELAY_US);
   }
-  
   digitalWrite(_pin_stobe, HIGH);
-  // delayMicroseconds(NixieArray::DISP_DELAY_US);
-
   digitalWrite(_pin_stobe, LOW);
-  // delayMicroseconds(NixieArray::DISP_DELAY_US);
   //--------------------------------------------------------------------------
   // コロンの表示処理
   for (int c=0; c < NIXIE_COLON_N; c++) {
