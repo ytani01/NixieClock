@@ -1,7 +1,7 @@
 /**
  * (c) 2021 Yoichi Tanibayashi
  *
- *----------------------------------------------------------------------------
+ *------------------------------------------------------------------------
  * [ Data structure ( not a class tree ) ]
  *
  *  NixieArray
@@ -17,7 +17,7 @@
  *       +- NixieElement element[NIXIE_COLON_DOT_N]
  *       |
  *       +- Effect
- *----------------------------------------------------------------------------
+ *-----------------------------------------------------------------------
  */
 #ifndef NIXIE_ARRAY_H
 #define NIXIE_ARRAY_H
@@ -25,7 +25,7 @@
 
 class NixieArray {
  public:
-  static const unsigned int DISP_DELAY_US = 1; // microsec
+  static const unsigned int DISP_DELAY_US = 2; // microsec
           
   unsigned int blightness = 3;
 

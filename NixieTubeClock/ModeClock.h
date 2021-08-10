@@ -15,7 +15,7 @@ class ModeClock : public ModeBase {
   static const unsigned long MODE_DHM  = 0x02;
   static const unsigned long MODE_YMD  = 0x03;
     
-  static const unsigned long DISP_DATE_MS = 5000;  // ms
+  static const unsigned long DISP_DATE_MS = 7000;  // ms
 
   static const unsigned long TICK_MS      = 10;    // ms
   static const unsigned long FADE_TICK_MS = 30;    // ms

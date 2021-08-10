@@ -68,10 +68,12 @@ boolean prev_wifiActive = false;
 //======================================================================
 // NTP
 //----------------------------------------------------------------------
-const String        ntpSvr[]    = {"ntp.nict.jp", "time.google.com", ""};
-const unsigned long ntpInterval = 60 * 60 * 1000; // msec
-unsigned long       ntpLast     = 0;
-boolean             ntpActive   = false;
+const String        NTP_SVR[]    = {"pool.ntp.org",
+                                    "ntp.nict.jp",
+                                    "time.google.com"};
+const unsigned long NTP_INTERVAL = 1 * 60 * 1000; // msec
+unsigned long       ntpLast      = 0;
+boolean             ntpActive    = false;
 
 //======================================================================
 // RTC DS3231
@@ -138,16 +140,7 @@ void ntp_adjust() {
   
   disableIntr();
   getLocalTime(&time_info); // NTP
-  DateTime now = DateTime(time_info.tm_year + 1900,
-                          time_info.tm_mon + 1,
-                          time_info.tm_mday,
-                          time_info.tm_hour,
-                          time_info.tm_min,
-                          time_info.tm_sec);
-  Rtc.adjust(now);
-  enableIntr();
-
-  Serial.printf("ntp_adjust> %04d/%02d/%02d(%s) %02d:%02d:%02d\n",
+  Serial.printf("ntp_adjust> %04d/%02d/%02d(%s) %02d:%02d:%02d",
                 time_info.tm_year + 1900,
                 time_info.tm_mon + 1,
                 time_info.tm_mday,
@@ -155,6 +148,20 @@ void ntp_adjust() {
                 time_info.tm_hour,
                 time_info.tm_min,
                 time_info.tm_sec);
+
+  if ( time_info.tm_year + 1900 > 2000 ) {
+    Serial.println();
+    DateTime now = DateTime(time_info.tm_year + 1900,
+                            time_info.tm_mon + 1,
+                            time_info.tm_mday,
+                            time_info.tm_hour,
+                            time_info.tm_min,
+                            time_info.tm_sec);
+    Rtc.adjust(now);
+  } else {
+    Serial.printf(" .. ignored !\n");
+  }
+  enableIntr();
 } // ntp_adjust()
 
 /**
@@ -285,7 +292,7 @@ void setup() {
   
   Serial.printf("NTP servers:");
   for (int i=0; i < 3; i++) {
-    Serial.printf(" %s", ntpSvr[i].c_str());
+    Serial.printf(" %s", NTP_SVR[i].c_str());
   }
   Serial.println();
 
@@ -347,7 +354,9 @@ void loop() {
     if ( wifiActive != prev_wifiActive ) {
       Serial.println("loop> WiFi ON");
       configTime(9 * 3600L, 0,
-                 ntpSvr[0].c_str(), ntpSvr[1].c_str(), ntpSvr[2].c_str());
+                 NTP_SVR[0].c_str(),
+                 NTP_SVR[1].c_str(),
+                 NTP_SVR[2].c_str());
       ntp_adjust();
     }
   } else if ( netmgr_mode == NetMgr::MODE_WIFI_OFF ) {
@@ -361,7 +370,7 @@ void loop() {
   
   //---------------------------------------------------------------------
   // NTP
-  if ((curMsec - ntpLast) >= ntpInterval) {
+  if ((curMsec - ntpLast) >= NTP_INTERVAL) {
     ntpLast = curMsec;
     ntp_adjust();
   }
