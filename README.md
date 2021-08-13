@@ -106,7 +106,7 @@ NTP(Network Time Protocol)を使って、
 
 7. スマホのWiFi設定を元に戻してください。
 
-![](docs/NetMgr01.png)
+![](docs/NetMgr1.png)
 
 
 ### 2.5 時刻合わせ (手動)
