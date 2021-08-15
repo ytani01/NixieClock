@@ -182,3 +182,5 @@ https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32
   [注意] Microsoft Store の Arduino IDE はNG
 
 * [NeoPixelBus](https://github.com/Makuna/NeoPixelBus)
+
+* [NeoPixel（WS2812B）の制御 その2 (SPI)](https://nuneno.cocolog-nifty.com/blog/2018/05/neopixelws281-1.html)

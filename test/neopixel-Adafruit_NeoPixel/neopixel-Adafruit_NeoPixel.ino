@@ -6,15 +6,16 @@ const int     LOOP_DELAY = 500;  // ms
 
 Adafruit_NeoPixel pixels(PIXELS_N, PIN_PIXEL, NEO_GRB + NEO_KHZ800);
 
-int Col[][3] =
+const int BLIGHTNESS = 30;
+const int Col[][3] =
 {
-  {50,0,0},
-  {0,50,0},
-  {0,0,50},
-  {50,50,0},
-  {0,50,50},
-  {50,0,50},
-  {50,50,50}
+  {BLIGHTNESS,0,0},
+  {0,BLIGHTNESS,0},
+  {0,0,BLIGHTNESS},
+  {BLIGHTNESS,BLIGHTNESS,0},
+  {0,BLIGHTNESS,BLIGHTNESS},
+  {BLIGHTNESS,0,BLIGHTNESS},
+  {BLIGHTNESS,BLIGHTNESS,BLIGHTNESS}
 };
 
 const int COL_N = sizeof(Col) / sizeof(Col[0]);
@@ -35,13 +36,14 @@ void setup() {
 
 void loop() {
   for (int i=0; i < PIXELS_N; i++) {
-    Serial.printf("loop> i=%d\n", i);
-    pixels.setPixelColor(i, pixels.Color(Col[Col_i][0],
-                                         Col[Col_i][1],
-                                         Col[Col_i][2]));
-    pixels.show();
-
-    Col_i = (Col_i + 1) % COL_N;
-    delay(LOOP_DELAY);
+    int cl = (Col_i + i) % COL_N;
+    Serial.printf("loop> cl=%d\n", cl);
+    pixels.setPixelColor(i, pixels.Color(Col[cl][0],
+                                         Col[cl][1],
+                                         Col[cl][2]));
   }
+  pixels.show();
+
+  Col_i++;
+  delay(LOOP_DELAY);
 }

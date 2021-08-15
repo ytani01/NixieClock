@@ -1,14 +1,15 @@
 #include <NeoPixelBus.h>
 
+const uint8_t  PIN_PIXEL  = 16;
+const uint8_t  PIN_PWRLED = 5;
 const uint16_t PIXEL_N    = 6;
-const uint8_t  PIN        = 16;
-const uint8_t  BLIGHTNESS = 30;
-const int      LOOP_DELAY = 1000;
+const int      LOOP_DELAY = 300;
 
-//NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> pixels(PIXEL_N, PIN);
-NeoPixelBus<NeoGrbFeature, NeoWs2812xMethod > pixels(PIXEL_N, PIN);
+//NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> pixels(PIXEL_N, PIN_PIXEL);
+NeoPixelBus<NeoGrbFeature, NeoWs2812xMethod > pixels(PIXEL_N, PIN_PIXEL);
 
-int Col[][3] =
+const int BLIGHTNESS = 15;
+const int Col[][3] =
 {
   {BLIGHTNESS,0,0},
   {0,BLIGHTNESS,0},
@@ -24,84 +25,30 @@ int Col_i = 0;
 
 void setup() {
   Serial.begin(115200);
-  while(!Serial) {
-  }
-  Serial.println("Serial");
   
   Col_i = 0;
 
-  pinMode(5, OUTPUT);
-  digitalWrite(5, HIGH);
+  pinMode(PIN_PWRLED, OUTPUT);
+  digitalWrite(PIN_PWRLED, LOW);
 
-  pinMode(PIN, OUTPUT);
+  pinMode(PIN_PIXEL, OUTPUT);
+
   pixels.Begin();
-  while (! pixels.CanShow()) {
-    Serial.print(".");
-    delay(1);
-  }
-  pixels.Show();
-  Serial.println("Show0");
-
-  Serial.println("AAA");
-
-  pixels.SetPixelColor(0, RgbColor(20));
-  while (! pixels.CanShow()) {
-    Serial.print(".");
-    delay(1);
-  }
-  Serial.println("Show");
-  pixels.Show();
-
-  Serial.println("BBB");
-  delay(10000);
-
-  Serial.println("AAA");
-
-  pixels.SetPixelColor(1, RgbColor(20));
-  while (! pixels.CanShow()) {
-    Serial.print(".");
-    delay(1);
-  }
-  Serial.println("Show");
-  pixels.Show();
-
-  Serial.println("BBB");
-  delay(10000);
-
-  for (int i=0; i < PIXEL_N; i++) {
-    pixels.SetPixelColor(i, RgbColor(20));
-    while (! pixels.CanShow()) {
-      Serial.print(".");
-      delay(1);
-    }
-    Serial.println("Show");
-    pixels.Show();
-    delay(LOOP_DELAY);
-  }
 }
 
 void loop() {
-  /*
+  digitalWrite(PIN_PWRLED, HIGH);
   for (int i=0; i < PIXEL_N; i++) {
-    Serial.printf("loop> i=%d\n", i);
-    pixels.SetPixelColor(i, RgbColor(Col[Col_i][0],
-                                     Col[Col_i][1],
-                                     Col[Col_i][2]));
-    pixels.Show();
-
-    Col_i = (Col_i + 1) % COL_N;
-    delay(LOOP_DELAY);
+    int cl = (Col_i + i) % COL_N;
+    Serial.printf("loop> cl=%d\n", cl);
+    pixels.SetPixelColor(i, RgbColor(Col[cl][0],
+                                     Col[cl][1],
+                                     Col[cl][2]));
   }
-  */
-  while (! pixels.CanShow()) {
-    Serial.print('.');
-    delay(1);
-  }
-  RgbColor c = pixels.GetPixelColor(0);
-  uint8_t b = c.CalculateBrightness();
-
-  Serial.printf("b=%d\n", b);
-
   pixels.Show();
+
+  Col_i = (Col_i + 1) % COL_N;
+
+  digitalWrite(PIN_PWRLED, LOW);
   delay(LOOP_DELAY);
 }
