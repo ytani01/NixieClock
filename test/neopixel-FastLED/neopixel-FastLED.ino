@@ -2,11 +2,11 @@
 
 const uint8_t  PIN_PIXEL  = 16;
 const uint8_t  PIN_PWRLED = 5;
-const uint16_t NUMPIXELS  = 6;
-const uint8_t  BLIGHTNESS = 60;
-const int      LOOP_DELAY = 300;
+const uint16_t PIXELS_N  = 6 + 7;
+const uint8_t  BLIGHTNESS = 30;
+const int      LOOP_DELAY = 1000;
 
-CRGB pixels[NUMPIXELS];
+CRGB pixels[PIXELS_N];
 
 int Col[][3] =
 {
@@ -30,19 +30,16 @@ void setup() {
   pinMode(PIN_PWRLED, OUTPUT);
   digitalWrite(PIN_PWRLED, LOW);
 
-  FastLED.addLeds<WS2812B, PIN_PIXEL, GRB>(pixels, NUMPIXELS);
+  FastLED.addLeds<WS2812B, PIN_PIXEL, GRB>(pixels, PIXELS_N);
   FastLED.setBrightness(BLIGHTNESS);
 }
 
 void loop() {
-  for (int i=0; i < NUMPIXELS; i++) {
+  for (int i=0; i < PIXELS_N; i++) {
     int cl = (Col_i + i) % COL_N;
     Serial.printf("loop> cl=%d\n", cl);
 
-    //portDISABLE_INTERRUPTS();
     pixels[i] = CRGB(Col[cl][0], Col[cl][1], Col[cl][2]);
-    //portENABLE_INTERRUPTS();
-
   }
   FastLED.show();
 

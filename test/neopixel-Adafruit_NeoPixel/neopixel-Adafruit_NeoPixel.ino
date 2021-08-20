@@ -1,12 +1,13 @@
 #include <Adafruit_NeoPixel.h>
 
-const uint8_t PIN_PIXEL  = 16;
-const uint8_t PIXELS_N   = 6;
-const int     LOOP_DELAY = 500;  // ms
+const uint8_t PIN_PIXEL       = 16;
+const uint8_t PIN_ONBOARD_LED = 5;
+const uint8_t PIXELS_N        = 6 + 7;
+const int     LOOP_DELAY      = 1000;  // ms
+const int     BLIGHTNESS      = 10; // 0-255
 
 Adafruit_NeoPixel pixels(PIXELS_N, PIN_PIXEL, NEO_GRB + NEO_KHZ800);
 
-const int BLIGHTNESS = 30;
 const int Col[][3] =
 {
   {BLIGHTNESS,0,0},
@@ -26,24 +27,28 @@ void setup() {
 
   Col_i = 0;
 
-  pinMode(5, OUTPUT);
-
   pixels.begin();
-  digitalWrite(5, HIGH);
-
   pixels.clear();
+
+  pinMode(PIN_ONBOARD_LED, OUTPUT);
+  digitalWrite(PIN_ONBOARD_LED, HIGH);
 }
 
 void loop() {
+  digitalWrite(PIN_ONBOARD_LED, LOW);
+  Serial.printf("loop> cl=[ ");
   for (int i=0; i < PIXELS_N; i++) {
     int cl = (Col_i + i) % COL_N;
-    Serial.printf("loop> cl=%d\n", cl);
+    Serial.printf("%d ", cl);
     pixels.setPixelColor(i, pixels.Color(Col[cl][0],
                                          Col[cl][1],
                                          Col[cl][2]));
   }
   pixels.show();
+  Serial.printf("]\n");
 
-  Col_i++;
+  Col_i = (Col_i + 1) % COL_N;
+
+  digitalWrite(PIN_ONBOARD_LED, HIGH);
   delay(LOOP_DELAY);
 }
