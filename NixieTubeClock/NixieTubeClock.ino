@@ -10,11 +10,12 @@
 #include "ModeCount.h"
 #include "ModeTest1.h"
 #include "ModeTest2.h"
+#include <Adafruit_NeoPixel.h>
 
 static const String MY_NAME = "Nixie Tube Clock";
 int                 initValVer[NIXIE_NUM_N] = {0,0, 0,8, 0,7};
 
-#define LOOP_DELAY_US   2   // micro sbeconds
+#define LOOP_DELAY_US   0   // micro sbeconds
 #define DEBOUNCE        300 // msec
 
 String dayOfWeekStr[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
@@ -35,6 +36,8 @@ String dayOfWeekStr[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 #define PIN_BTN0           33
 #define PIN_BTN1           34
 #define PIN_BTN2           35
+
+#define PIN_PIXEL          27
 
 uint8_t pinsIn[] = {PIN_BTN0, PIN_BTN1, PIN_BTN2};
 
@@ -105,6 +108,22 @@ const unsigned int MODE_TEST2     = 4;
 
 long curMode = 0;
 long prevMode = -1;
+
+//======================================================================
+// NeoPixel
+//----------------------------------------------------------------------
+const uint8_t PIXEL_N  = 6;
+const int     PIXEL_BL = 255;
+const int     PixelCol[][3] =
+  {
+   {0, 0, 0},
+   {PIXEL_BL, 0       , 0       },
+   {0       , PIXEL_BL, 0       },
+   {PIXEL_BL, 0       , PIXEL_BL},
+   {0       , 0       , PIXEL_BL}
+  };
+   
+Adafruit_NeoPixel Pixels(PIXEL_N, PIN_PIXEL, NEO_GRB + NEO_KHZ800);
 
 //======================================================================
 // Buttons
@@ -181,6 +200,7 @@ unsigned long change_mode(unsigned long mode=MODE_N) {
   //                (int)curMode, Mode[curMode]->name().c_str());
 
   nixieArray.end_all_effect();
+
   return curMode;
 } // change_mode()
 
@@ -297,6 +317,12 @@ void setup() {
   Serial.println();
 
   //---------------------------------------------------------------------
+  // NeoPixel
+  //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  Pixels.begin();
+  Pixels.clear();
+
+  //---------------------------------------------------------------------
   // グローバルオブジェクト・変数の初期化
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   NetMgr::myName = MY_NAME;
@@ -401,6 +427,12 @@ void loop() {
     // モード変更時の初期化
     Mode[curMode]->init(curMsec, now, initValVer);
     prevMode = curMode;
+    for (int i=0; i < PIXEL_N; i++) {
+      Pixels.setPixelColor(i, Pixels.Color(PixelCol[curMode][0],
+                                           PixelCol[curMode][1],
+                                           PixelCol[curMode][2]));
+    }
+    Pixels.show();
   } else {
     // 各モードの loop() 実行
     stat_t stat = Mode[curMode]->loop(curMsec, now);

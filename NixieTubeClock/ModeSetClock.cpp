@@ -140,7 +140,7 @@ stat_t ModeSetClock::loop(unsigned long cur_ms, DateTime& now) {
  *
  */
 void ModeSetClock::count_up(int n=1, boolean repeat=false) {
-  int num;
+  int num = 0;
 
   switch (this->_mode) {
   case MODE_YEAR:
