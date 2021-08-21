@@ -1,10 +1,12 @@
 #include <Adafruit_NeoPixel.h>
 
-const uint8_t PIN_PIXEL       = 16;
 const uint8_t PIN_ONBOARD_LED = 5;
+
+const uint8_t PIN_PIXEL       = 16;
 const uint8_t PIXELS_N        = 6 + 7;
-const int     LOOP_DELAY      = 1000;  // ms
 const int     BLIGHTNESS      = 10; // 0-255
+
+const int     LOOP_DELAY      = 1000;  // ms
 
 Adafruit_NeoPixel pixels(PIXELS_N, PIN_PIXEL, NEO_GRB + NEO_KHZ800);
 
