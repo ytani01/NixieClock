@@ -24,8 +24,8 @@ static const int         PixelCol[][3] =
   {
    {0, 0,        0},
    {0, 0,        0},
-   {0, PIXEL_BL, 0},
-   {0, PIXEL_BL, 0}
+   {0, 0, PIXEL_BL},
+   {0, 0, PIXEL_BL}
   };
 
 /**

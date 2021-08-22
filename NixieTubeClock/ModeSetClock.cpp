@@ -250,6 +250,7 @@ void ModeSetClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
         DateTime now = DateTime(year, month, day, hour, minute, 0);
         RTC_DS3231 rtc;
 
+        rtc.begin();
         rtc.adjust(now);
                                 
         this->stat = STAT_BACK_MODE;
