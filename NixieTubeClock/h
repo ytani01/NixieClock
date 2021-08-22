@@ -1,4 +1,0 @@
-NixieTubeClock.ino:// NTP
-NixieTubeClock.ino:  getLocalTime(&time_info); // NTP
-NixieTubeClock.ino:  Serial.printf("NTP servers:");
-NixieTubeClock.ino:  // NTP

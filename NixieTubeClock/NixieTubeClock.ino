@@ -114,7 +114,7 @@ long prevMode = -1;
 //----------------------------------------------------------------------
 const uint8_t PIXEL_N  = 6;
 const int     PIXEL_BL = 255;
-const int     PixelCol[][3] =
+static const int     PixelCol[][3] =
   {
    {0, 0, 0},
    {PIXEL_BL, 0       , 0       },

@@ -115,13 +115,16 @@ void IRAM_ATTR NixieArray::display(unsigned long cur_ms) {
 
   digitalWrite(_pin_clk, LOW);
   for (int p=(pin_n - 1); p >=0; p--) {
+    delayMicroseconds(NixieArray::DISP_DELAY_US);
     digitalWrite(_pin_data, val[p]);
     delayMicroseconds(NixieArray::DISP_DELAY_US);
     digitalWrite(_pin_clk, HIGH);
+    //delayMicroseconds(NixieArray::DISP_DELAY_US);
     digitalWrite(_pin_clk, LOW);
-    delayMicroseconds(NixieArray::DISP_DELAY_US);
   }
+  //delayMicroseconds(NixieArray::DISP_DELAY_US);
   digitalWrite(_pin_stobe, HIGH);
+  //delayMicroseconds(NixieArray::DISP_DELAY_US);
   digitalWrite(_pin_stobe, LOW);
   //--------------------------------------------------------------------
   // コロンの表示処理

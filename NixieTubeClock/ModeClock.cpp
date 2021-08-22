@@ -16,6 +16,18 @@ extern boolean wifiActive;
 
 static DateTime prev_dt = DateTime(2000,1,1,0,0,0);
 
+#include <Adafruit_NeoPixel.h>
+extern Adafruit_NeoPixel Pixels;
+static const uint8_t     PIXEL_N = 6;
+static const int         PIXEL_BL = 255;
+static const int         PixelCol[][3] =
+  {
+   {0, 0,        0},
+   {0, 0,        0},
+   {0, PIXEL_BL, 0},
+   {0, PIXEL_BL, 0}
+  };
+
 /**
  *
  */
@@ -41,6 +53,7 @@ void ModeClock::init(unsigned long start_ms, DateTime& now,
 stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
   char disp_str[6 + 1];
   int  prev_num[NIXIE_NUM_N];
+  unsigned long prev_mode = MODE_NULL;
 
   if ( ModeBase::loop(cur_ms, now) == STAT_SKIP ) {
     return STAT_SKIP;
@@ -57,6 +70,16 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
     cFadeTick = CL_FADE_TICK1;
   }
 
+  if ( this->mode != prev_mode ) {
+    for (int i=0; i < PIXEL_N; i++) {
+      Pixels.setPixelColor(i, Pixels.Color(PixelCol[this->mode][0],
+                                           PixelCol[this->mode][1],
+                                           PixelCol[this->mode][2]));
+    }
+    Pixels.show();
+    prev_mode = this->mode;
+  }
+  
   switch ( this->mode ) {
   case ModeClock::MODE_HMS:
     sprintf(disp_str, "%02d%02d%02d", now.hour(), now.minute(), now.second());
