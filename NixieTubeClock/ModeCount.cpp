@@ -41,8 +41,6 @@ void ModeCount::init(unsigned long start_ms, DateTime& now,
  */
 stat_t ModeCount::loop(unsigned long cur_ms, DateTime& now) {
   const char* myname = "ModeCount::loop";
-  char disp_str[NIXIE_NUM_N + 1];
-  int  prev_num[NIXIE_NUM_N];
 
   if ( ModeBase::loop(cur_ms, now) == STAT_SKIP ) {
     return STAT_SKIP;
@@ -52,7 +50,7 @@ stat_t ModeCount::loop(unsigned long cur_ms, DateTime& now) {
     if ( cur_ms - this->_modify_ms > this->MODIFY_TIMEOUT ) {
       Serial.printf("%s> MODIFY_TIMEOUT\n", myname);
 
-      int n1, n2;
+      int n1 = 0, n2 = 1;
       switch ( this->_cur ) {
       case 0: n1 = 0; n2 = 1; break;
       case 1: n1 = 2; n2 = 3; break;
@@ -90,7 +88,7 @@ void ModeCount::btn_intr_hdr(unsigned long cur_ms, Button *btn) {
 void ModeCount::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   int n = btn->get_click_count();
 
-  int n1, n2;
+  int n1 = 0, n2 = 1;
   switch ( this->_cur ) {
   case 0: n1 = 0; n2 = 1; break;
   case 1: n1 = 2; n2 = 3; break;

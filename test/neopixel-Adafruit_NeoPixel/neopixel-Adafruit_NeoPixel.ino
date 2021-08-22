@@ -3,10 +3,10 @@
 const uint8_t PIN_ONBOARD_LED = 5;
 
 const uint8_t PIN_PIXEL       = 27;
-const uint8_t PIXELS_N        = 6;
-const int     BLIGHTNESS      = 255; // 0-255
+const uint8_t PIXELS_N        = 100;
+const int     BLIGHTNESS      = 30; // 0-255
 
-const int     LOOP_DELAY      = 1000;  // ms
+const int     LOOP_DELAY      = 200;  // ms
 
 Adafruit_NeoPixel pixels(PIXELS_N, PIN_PIXEL, NEO_GRB + NEO_KHZ800);
 

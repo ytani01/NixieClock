@@ -23,7 +23,7 @@ static const int         PIXEL_BL = 255;
 static const int         PixelCol[][3] =
   {
    {0, 0,        0},
-   {0, 0,        0},
+   {PIXEL_BL, PIXEL_BL, PIXEL_BL},
    {0, 0, PIXEL_BL},
    {0, 0, PIXEL_BL}
   };
