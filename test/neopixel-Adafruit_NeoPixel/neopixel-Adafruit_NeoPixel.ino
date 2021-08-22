@@ -4,7 +4,7 @@ const uint8_t PIN_ONBOARD_LED = 5;
 
 const uint8_t PIN_PIXEL       = 27;
 const uint8_t PIXELS_N        = 100;
-const int     BLIGHTNESS      = 30; // 0-255
+const int     BLIGHTNESS      = 128; // 0-255
 
 const int     LOOP_DELAY      = 200;  // ms
 
