@@ -150,8 +150,8 @@ RTC(Real Time Clock)が、バッテリーでバックアップされているの
 
 * Arduino IDE 1.8.15(Windows store 1.8.49.0) on Windows 10
   - ボード・ライブラリ: ESP32 1.0.6
-  - RTCライブラリ: RTClib by Adafruit 1.13.0
-  - NeoPixelライブラリ: [NeoPixelBus](https://github.com/Makuna/NeoPixelBus)
+  - RTCライブラリ: RTClib by Adafruit 1.14.1
+  - NeoPixelライブラリ: Adafruit NeoPixel 1.8.5
   
 ### 9.1 ボードマネージャーの設定
 
