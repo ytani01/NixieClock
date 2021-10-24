@@ -13,7 +13,17 @@
 #include <Adafruit_NeoPixel.h>
 
 static const String MY_NAME = "Nixie Tube Clock";
-int                 initValVer[NIXIE_NUM_N] = {0,0, 0,8, 0,9};
+/**
+ *  Version X.Y.Z
+ *  {v0,v1, v2,v3, v4,v5}
+ *
+ *   X = v0 * 10 + v1
+ *   Y = v2
+ *   Z = v3
+ *   v4: 0 (always)
+ *   v5: 0 (always)
+ */
+int                 initValVer[NIXIE_NUM_N] = {0,0,8,9,0,0};
 
 #define LOOP_DELAY_US   1   // micro sbeconds
 #define DEBOUNCE        300 // msec

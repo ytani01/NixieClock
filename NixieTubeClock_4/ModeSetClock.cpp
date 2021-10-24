@@ -41,6 +41,10 @@ mode_t ModeSetClock::change_mode(mode_t mode=ModeSetClock::MODE_NULL) {
 
   int i_1, i_2;
   switch (this->_mode) {
+  case MODE_YEAR:
+    i_1 = 2;
+    i_2 = 3;
+
   case MODE_MONTH:
   case MODE_HOUR:
     i_1 = 0;
@@ -137,6 +141,8 @@ stat_t ModeSetClock::loop(unsigned long cur_ms, DateTime& now) {
 void ModeSetClock::count_up(int n=1, boolean repeat=false) {
   int num = 0;
 
+  Serial.printf("ModeSetClock::count_up> this->_mode=0x02X\n", this->_mode);
+
   switch (this->_mode) {
   case MODE_MONTH:
   case MODE_HOUR:
@@ -232,9 +238,10 @@ void ModeSetClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
       mode = this->change_mode();
 
       if ( mode == MODE_NULL ) {
-        int year = this->_date_num[0] * 10 + this->_date_num[1] + 2000;
-        int month = this->_date_num[2] * 10 + this->_date_num[3];
-        int day = this->_date_num[4] * 10 + this->_date_num[5];
+        //int year = this->_date_num[0] * 10 + this->_date_num[1] + 2000;
+        int year = 2022;
+        int month = this->_date_num[0] * 10 + this->_date_num[1];
+        int day = this->_date_num[2] * 10 + this->_date_num[3];
         int hour = this->_time_num[0] * 10 + this->_time_num[1];
         int minute = this->_time_num[2] * 10 + this->_time_num[3];
 
