@@ -6,7 +6,7 @@
 static const unsigned int CL_FADE_OFF = 0;
 static const unsigned int CL_FADE_IN  = 1;
 static const unsigned int CL_FADE_OUT = 2;
-int colon_fade_mode[NIXIE_COLON_N] = {CL_FADE_OFF};
+int colon_fade_mode[NIXIE_COLON_N] = {CL_FADE_OFF, CL_FADE_OFF};
 
 static const unsigned long CL_FADE_TICK0 = 20;
 static const unsigned long CL_FADE_TICK1 = 120;
@@ -84,7 +84,7 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
   case ModeClock::MODE_HMS:
     sprintf(disp_str, "%02d%02d%02d", now.hour(), now.minute(), now.second());
     break;
-  case MODE_DHM:
+  case ModeClock::MODE_DHM:
     sprintf(disp_str, "%02d%02d%02d", now.day(), now.hour(), now.minute());
     break;
   case ModeClock::MODE_YMD:
@@ -97,12 +97,22 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
     sprintf(disp_str, "%02d%02d%02d",
             now.year() % 100, now.month(), now.day());
     break;
+  case ModeClock::MODE_MDH:
+    if ( cur_ms - this->mode_start_ms > DISP_DATE_MS ) {
+      this->change_mode(MODE_HMS);
+
+      this->stat = STAT_DONE;
+      return this->stat;
+    }
+    sprintf(disp_str, "%02d%02d%02d",
+            now.month(), now.day(), now.hour());
+    break;
   default:
     sprintf(disp_str, "%02d%02d%02d",
             now.hour(), now.minute(), now.second());
     break;
   } // switch (mode)
-  
+
   for (int i=0; i < NIXIE_NUM_N; i++) {
     prev_num[i] = this->_num[i];
     this->_num[i] = int(disp_str[i] - '0');
@@ -117,7 +127,7 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
       NxColEl(i, NIXIE_COLON_DOT_DOWN).set_blightness(Nx->blightness);
       if ( wifiActive ) {
         NxCol(i).fadeout_start(cur_ms, cFadeTick,
-                                         NIXIE_COLON_DOT_DOWN);
+                               NIXIE_COLON_DOT_DOWN);
         colon_fade_mode[i] = CL_FADE_OUT;
         continue;
       }
@@ -147,8 +157,7 @@ void ModeClock::change_mode(unsigned long mode=ModeClock::MODE_NULL) {
   } else {
     switch ( this->mode ) {
     case MODE_HMS:
-      // this->mode = MODE_DHM;
-      this->mode = MODE_YMD;
+      this->mode = MODE_MDH;
       break;
     case MODE_DHM:
       this->mode = MODE_YMD;

@@ -41,23 +41,18 @@ mode_t ModeSetClock::change_mode(mode_t mode=ModeSetClock::MODE_NULL) {
 
   int i_1, i_2;
   switch (this->_mode) {
-  case MODE_YEAR:
+  case MODE_MONTH:
   case MODE_HOUR:
     i_1 = 0;
     i_2 = 1;
     break;
     
-  case MODE_MONTH:
+  case MODE_DAY:
   case MODE_MINUTE:
     i_1 = 2;
     i_2 = 3;
     break;
     
-  case MODE_DAY:
-    i_1 = 4;
-    i_2 = 5;
-    break;
-
   default:
     i_1 = 4;
     i_2 = 5;
@@ -102,7 +97,7 @@ void ModeSetClock::init(unsigned long start_ms, DateTime& now,
   
   // initialize _date_num[]
   sprintf(disp_str, "%02d%02d%02d",
-          now.year() % 100, now.month(), now.day());
+          now.month(), now.day(), 0);
   Serial.printf("ModeSetClock::init> disp_str='%s'\n", disp_str);
   for (int i=0; i < NIXIE_NUM_N; i++) {
     this->_date_num[i] = (int)(disp_str[i] - '0');
@@ -121,7 +116,7 @@ void ModeSetClock::init(unsigned long start_ms, DateTime& now,
     NxColEl(i, NIXIE_COLON_DOT_DOWN).set_blightness(0);
   } // for(i)
   
-  (void)change_mode(ModeSetClock::MODE_YEAR);
+  (void)change_mode(ModeSetClock::MODE_MONTH);
 
   this->stat = STAT_DONE;
 } // ModeSetClock::init()
@@ -143,18 +138,14 @@ void ModeSetClock::count_up(int n=1, boolean repeat=false) {
   int num = 0;
 
   switch (this->_mode) {
-  case MODE_YEAR:
+  case MODE_MONTH:
   case MODE_HOUR:
     num = this->_num[0] * 10 + this->_num[1];
     break;
 
-  case MODE_MONTH:
+  case MODE_DAY:
   case MODE_MINUTE:
     num = this->_num[2] * 10 + this->_num[3];
-    break;
-
-  case MODE_DAY:
-    num = this->_num[4] * 10 + this->_num[5];
     break;
   } // switch(mode)
 
@@ -175,16 +166,16 @@ void ModeSetClock::count_up(int n=1, boolean repeat=false) {
     if ( num > 12 ) {
       num = 1;
     }
-    this->_date_num[2] = num / 10 % 10;
-    this->_date_num[3] = num % 10;
+    this->_date_num[0] = num / 10 % 10;
+    this->_date_num[1] = num % 10;
     break;
     
   case MODE_DAY:
     if ( num > 31 ) {
       num = 1;
     }
-    this->_date_num[4] = num / 10 % 10;
-    this->_date_num[5] = num % 10;
+    this->_date_num[2] = num / 10 % 10;
+    this->_date_num[3] = num % 10;
     break;
     
   case MODE_HOUR:

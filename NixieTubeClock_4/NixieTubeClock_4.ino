@@ -43,6 +43,8 @@ uint8_t pinsIn[] = {PIN_BTN0, PIN_BTN1, PIN_BTN2};
 
 uint8_t nixiePins[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N] =
   {
+   { 9,  0,  1,  2,  3,  4,  5,  6,  7,  8},
+   {19, 10, 11, 12, 13, 14, 15, 16, 17, 18},
    {29, 20, 21, 22, 23, 24, 25, 26, 27, 28},
    {39, 30, 31, 32, 33, 34, 35, 36, 37, 38},
    {49, 40, 41, 42, 43, 44, 45, 46, 47, 48},
@@ -51,7 +53,7 @@ uint8_t nixiePins[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N] =
 
 uint8_t colonPins[NIXIE_COLON_N][NIXIE_COLON_DOT_N] =
   {
-   //   {PIN_COLON_R_TOP},
+   {PIN_COLON_R_TOP},
    {PIN_COLON_L_TOP}
   };
 
