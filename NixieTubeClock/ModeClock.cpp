@@ -1,5 +1,5 @@
 /**
- * (c) 2021 Yoichi Tanibayashi
+ * Copyright (c) 2021 Yoichi Tanibayashi
  */
 #include "ModeClock.h"
 
@@ -64,12 +64,6 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
     return this->stat;
   }
 
-  if ( wifiActive ) {
-    cFadeTick = CL_FADE_TICK0;
-  } else {
-    cFadeTick = CL_FADE_TICK1;
-  }
-
   if ( this->mode != prev_mode ) {
     for (int i=0; i < PIXEL_N; i++) {
       Pixels.setPixelColor(i, Pixels.Color(PixelCol[this->mode][0],
@@ -115,9 +109,9 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
   for (int i=0; i < NIXIE_COLON_N; i++) {
     if ( prev_dt.second() != now.second() ) {
       NxColEl(i, NIXIE_COLON_DOT_DOWN).set_blightness(Nx->blightness);
-      if ( wifiActive ) {
+      if ( this->mode != ModeClock::MODE_YMD || wifiActive ) {
         NxCol(i).fadeout_start(cur_ms, cFadeTick,
-                                         NIXIE_COLON_DOT_DOWN);
+                               NIXIE_COLON_DOT_DOWN);
         colon_fade_mode[i] = CL_FADE_OUT;
         continue;
       }

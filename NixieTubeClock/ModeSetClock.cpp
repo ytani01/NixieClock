@@ -142,6 +142,8 @@ stat_t ModeSetClock::loop(unsigned long cur_ms, DateTime& now) {
 void ModeSetClock::count_up(int n=1, boolean repeat=false) {
   int num = 0;
 
+  Serial.printf("ModeSetClock::count_up> this->_mode=0x%02X\n", this->_mode);
+
   switch (this->_mode) {
   case MODE_YEAR:
   case MODE_HOUR:
