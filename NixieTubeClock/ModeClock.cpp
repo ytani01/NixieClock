@@ -27,6 +27,8 @@ static const int         PixelCol[][3] =
    {0, 0, PIXEL_BL},
    {0, 0, PIXEL_BL}
   };
+static boolean pixel_on = false;
+static boolean prev_pixel_on = pixel_on;
 
 /**
  *
@@ -64,15 +66,33 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
     return this->stat;
   }
 
-  if ( this->mode != prev_mode ) {
-    for (int i=0; i < PIXEL_N; i++) {
-      Pixels.setPixelColor(i, Pixels.Color(PixelCol[this->mode][0],
-                                           PixelCol[this->mode][1],
-                                           PixelCol[this->mode][2]));
-    }
+  if ( pixel_on != prev_pixel_on ) {
+    Serial.printf("ModeClock::loop> pixel_on=%d\n", pixel_on);
+    prev_pixel_on = pixel_on;
+
+    if ( pixel_on ) {
+      for (int i=0; i < PIXEL_N; i++) {
+        Pixels.setPixelColor(i, Pixels.Color(PixelCol[this->mode][0],
+                                             PixelCol[this->mode][1],
+                                             PixelCol[this->mode][2]));
+      } // for(i)
+    } else {
+      Pixels.clear();
+    } // if(pixel_on)
     Pixels.show();
-    prev_mode = this->mode;
-  }
+  } // if
+  
+  if ( pixel_on ) {
+    if ( this->mode != prev_mode ) {
+      for (int i=0; i < PIXEL_N; i++) {
+        Pixels.setPixelColor(i, Pixels.Color(PixelCol[this->mode][0],
+                                             PixelCol[this->mode][1],
+                                             PixelCol[this->mode][2]));
+      } // for(i)
+      Pixels.show();
+      prev_mode = this->mode;
+    } // if
+  } //if
   
   switch ( this->mode ) {
   case ModeClock::MODE_HMS:
@@ -166,7 +186,9 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   boolean      flag = false;
   unsigned int bl = Nx->blightness;
   
+  // BTN0 or BTN1 or BTN2
   if ( btn->get_name() == "BTN0" ) {
+    // BTN0
     if ( btn->is_long_pressed() && ! btn->is_repeated() ) {
       this->stat = ModeBase::STAT_NEXT_MODE;
       Serial.printf("ModeClock::btn_loop_hdr> stat=0x%X\n", (int)this->stat);
@@ -174,39 +196,42 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
     }
   }
 
-  if ( btn->get_name() == "BTN1" && btn->get_click_count() >= 1 ) {
-    this->change_mode();
-    return;
-  }
-
-  int n = btn->get_click_count();
-  if ( n == 0 && btn->is_repeated() ) {
-    n = 1;
-  }
-
-  if ( n == 0 ) {
-    return;
-  }
-
-  if ( btn->get_name() == "BTN2" ) {
-    for (int i=0; i < n; i++) {
-      bl /= 2;
-      if (bl < BLIGHTNESS_MIN || bl > BLIGHTNESS_RESOLUTION) {
-        bl = BLIGHTNESS_RESOLUTION;
-      }
+  // BTN1 or BTN2
+  if ( btn->get_name() == "BTN1") {
+    // BTN1
+    if ( btn->get_click_count() >= 1 ) {
+      this->change_mode();
     }
-    flag = true;
+    return;
+  }
+
+  // BTN2
+  if ( btn->get_click_count() == 0 ) {
+    return;
   }
   
-  if (flag) {
+  if ( btn->get_click_count() == 1 ) {
+    bl /= 2;
+    if (bl < BLIGHTNESS_MIN || bl > BLIGHTNESS_RESOLUTION) {
+      bl = BLIGHTNESS_RESOLUTION;
+    }
+  
     Nx->blightness = bl;
-    Serial.printf("Nx->blightness=%d\n", Nx->blightness);
+    Serial.printf("ModeClock::btn_loop_hdr> Nx->blightness=%d\n",
+                  Nx->blightness);
     for (int i=0; i < NIXIE_NUM_N; i++) {
       NxNumEl(i, this->_num[i]).set_blightness(bl);
     } // for(NUM)
-
+  
     for (int i=0; i < NIXIE_COLON_N; i++) {
       NxColEl(i, NIXIE_COLON_DOT_DOWN).set_blightness(bl);
     } // for(COLON)
-  }
+
+    return;
+  } // if
+
+  // BTN2 and click_count > 1
+  pixel_on = !pixel_on;
+  Serial.printf("ModeClock::btn_loop_hdr> pixel_on=%d\n", pixel_on);
+  
 } // ModeClock::btn_loop_hdr()
