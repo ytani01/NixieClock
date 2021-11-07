@@ -114,14 +114,8 @@ long prevMode = -1;
 //----------------------------------------------------------------------
 const uint8_t PIXEL_N  = 6;
 const int     PIXEL_BL = 255;
-static const int     PixelCol[][3] =
-  {
-   {0, 0, 0},
-   {PIXEL_BL, 0       , 0       },
-   {0       , PIXEL_BL, 0       },
-   {PIXEL_BL, 0       , PIXEL_BL},
-   {0       , 0       , PIXEL_BL}
-  };
+static const unsigned long PixelCol[] =
+  {0x000000, 0xff0000, 0x00ff00, 0xff00ff, 0x0000ff};
    
 Adafruit_NeoPixel Pixels(PIXEL_N, PIN_PIXEL, NEO_GRB + NEO_KHZ800);
 
@@ -430,9 +424,7 @@ void loop() {
     Mode[curMode]->init(curMsec, now, initValVer);
     prevMode = curMode;
     for (int i=0; i < PIXEL_N; i++) {
-      Pixels.setPixelColor(i, Pixels.Color(PixelCol[curMode][0],
-                                           PixelCol[curMode][1],
-                                           PixelCol[curMode][2]));
+      Pixels.setPixelColor(i, PixelCol[curMode]);
     }
     Pixels.show();
   } else {

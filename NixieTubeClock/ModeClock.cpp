@@ -20,13 +20,8 @@ static DateTime prev_dt = DateTime(2000,1,1,0,0,0);
 extern Adafruit_NeoPixel Pixels;
 static const uint8_t     PIXEL_N = 6;
 static const int         PIXEL_BL = 255;
-static const int         PixelCol[][3] =
-  {
-   {0, 0,        0},
-   {PIXEL_BL, PIXEL_BL, PIXEL_BL},
-   {0, 0, PIXEL_BL},
-   {0, 0, PIXEL_BL}
-  };
+static const unsigned long PixelCol[] =
+  {0x000000, 0xffffff, 0x0000ff, 0x0000ff};
 static boolean pixel_on = false;
 static boolean prev_pixel_on = pixel_on;
 
@@ -72,9 +67,7 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
 
     if ( pixel_on ) {
       for (int i=0; i < PIXEL_N; i++) {
-        Pixels.setPixelColor(i, Pixels.Color(PixelCol[this->mode][0],
-                                             PixelCol[this->mode][1],
-                                             PixelCol[this->mode][2]));
+        Pixels.setPixelColor(i, PixelCol[this->mode]);
       } // for(i)
     } else {
       Pixels.clear();
@@ -85,9 +78,7 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
   if ( pixel_on ) {
     if ( this->mode != prev_mode ) {
       for (int i=0; i < PIXEL_N; i++) {
-        Pixels.setPixelColor(i, Pixels.Color(PixelCol[this->mode][0],
-                                             PixelCol[this->mode][1],
-                                             PixelCol[this->mode][2]));
+        Pixels.setPixelColor(i, PixelCol[this->mode]);
       } // for(i)
       Pixels.show();
       prev_mode = this->mode;
@@ -194,6 +185,7 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
       Serial.printf("ModeClock::btn_loop_hdr> stat=0x%X\n", (int)this->stat);
       return;
     }
+    return;
   }
 
   // BTN1 or BTN2
