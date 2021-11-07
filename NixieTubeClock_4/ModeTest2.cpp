@@ -28,9 +28,9 @@ void ModeTest2::init(unsigned long start_ms, DateTime& now,
     this->_digit[i] = i;
     for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
       if ( e == this->_digit[i] ) {
-        NxNumEl(i,e).set_blightness(BLIGHTNESS_RESOLUTION);
+        NxNumEl(i,e).set_brightness(BRIGHTNESS_RESOLUTION);
       } else {
-        NxNumEl(i,e).set_blightness(0);
+        NxNumEl(i,e).set_brightness(0);
       }
     } // for(e)
   } // for(i)
@@ -54,10 +54,10 @@ stat_t ModeTest2::loop(unsigned long cur_ms, DateTime& now) {
       NxNum(i).end_effect();
       e_flag = true;
     }
-    NxNumEl(i, this->_digit[i]).set_blightness(0);
+    NxNumEl(i, this->_digit[i]).set_brightness(0);
 
     this->_digit[i] = (this->_digit[i] + 10 + 1) % 10;
-    NxNumEl(i, this->_digit[i]).set_blightness(BLIGHTNESS_RESOLUTION);
+    NxNumEl(i, this->_digit[i]).set_brightness(BRIGHTNESS_RESOLUTION);
     if ( e_flag ) {
       NxNum(i).blink_start(cur_ms, 200);
     }

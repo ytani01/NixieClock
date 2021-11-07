@@ -60,9 +60,9 @@ void ModeBase::init(unsigned long start_ms, DateTime& now,
     this->_num[i] = init_val[i];
     for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
       if ( this->_num[i] == e ) {
-        NxNumEl(i, e).set_blightness(Nx->blightness);
+        NxNumEl(i, e).set_brightness(Nx->brightness);
       } else {
-        NxNumEl(i, e).set_blightness(0);
+        NxNumEl(i, e).set_brightness(0);
       }
     } // for(e)
   } // for(i)

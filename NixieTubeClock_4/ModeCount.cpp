@@ -163,8 +163,8 @@ void ModeCount::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   NxNum(n1).end_effect();
   NxNum(n2).end_effect();
 
-  NxNumEl(n1, this->data.count[this->_cur] / 10).set_blightness(0);
-  NxNumEl(n2, this->data.count[this->_cur] % 10).set_blightness(0);
+  NxNumEl(n1, this->data.count[this->_cur] / 10).set_brightness(0);
+  NxNumEl(n2, this->data.count[this->_cur] % 10).set_brightness(0);
 
   if ( btn->get_name() == "BTN1" ) {
     this->data.count[this->_cur] += n;
@@ -187,8 +187,8 @@ void ModeCount::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
                   this->_cur, this->data.count[this->_cur]);
   }
 
-  NxNumEl(n1, this->data.count[this->_cur] / 10).set_blightness(Nx->blightness);
-  NxNumEl(n2, this->data.count[this->_cur] % 10).set_blightness(Nx->blightness);
+  NxNumEl(n1, this->data.count[this->_cur] / 10).set_brightness(Nx->brightness);
+  NxNumEl(n2, this->data.count[this->_cur] % 10).set_brightness(Nx->brightness);
 
   NxNum(n1).blink_start(millis(), BLINK_TICK_MS);
   NxNum(n2).blink_start(millis(), BLINK_TICK_MS);

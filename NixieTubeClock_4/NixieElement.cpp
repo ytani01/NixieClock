@@ -6,25 +6,25 @@
 void NixieElement::setup(uint8_t pin) {
   this->set_pin(pin);
 
-  this->set_blightness(0);
+  this->set_brightness(0);
   this->_on = false;
 }
 
-void NixieElement::set_blightness(uint8_t blightness) {
-  this->_blightness = blightness;
+void NixieElement::set_brightness(uint8_t brightness) {
+  this->_brightness = brightness;
 }
-void NixieElement::inc_blightness() {
-  if (this->_blightness < BLIGHTNESS_RESOLUTION) {
-    this->_blightness++;
+void NixieElement::inc_brightness() {
+  if (this->_brightness < BRIGHTNESS_RESOLUTION) {
+    this->_brightness++;
   }
 }
-void NixieElement::dec_blightness() {
-  if (this->_blightness > 0) {
-    this->_blightness--;
+void NixieElement::dec_brightness() {
+  if (this->_brightness > 0) {
+    this->_brightness--;
   }
 }
-unsigned int NixieElement::get_blightness() {
-  return this->_blightness;
+unsigned int NixieElement::get_brightness() {
+  return this->_brightness;
 }
 
 void NixieElement::set_pin(uint8_t pin) {

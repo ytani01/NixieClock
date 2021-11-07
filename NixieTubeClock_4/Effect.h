@@ -138,7 +138,7 @@ class EffectBlink : public Effect {
 
  private:
   int      _el_i;
-  uint8_t  _blightness[NIXIE_ELEMENT_N_MAX];
+  uint8_t  _brightness[NIXIE_ELEMENT_N_MAX];
   boolean  _onoff;
 }; // class EffectBlink
 

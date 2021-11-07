@@ -20,9 +20,9 @@ void ModeTest1::init(unsigned long start_ms, DateTime& now,
   for (int i=0; i < NIXIE_NUM_N; i++) {
     for (int d=0; d < NIXIE_NUM_DIGIT_N; d++) {
       if (d == this->_prev_digit) {
-        this->_nxa->num[i].element[d].set_blightness(BLIGHTNESS_RESOLUTION);
+        this->_nxa->num[i].element[d].set_brightness(BRIGHTNESS_RESOLUTION);
       } else {
-        this->_nxa->num[i].element[d].set_blightness(0);
+        this->_nxa->num[i].element[d].set_brightness(0);
       }
     } // for(d)
   } // for(i)
@@ -31,7 +31,7 @@ void ModeTest1::init(unsigned long start_ms, DateTime& now,
     Serial.println("i=" + String(i));
     for (int d=0; d < NIXIE_COLON_DOT_N; d++) {
       Serial.println(" d=" + String(d));
-      this->_nxa->colon[i].element[d].set_blightness(BLIGHTNESS_RESOLUTION);
+      this->_nxa->colon[i].element[d].set_brightness(BRIGHTNESS_RESOLUTION);
     } // for (d)
     this->_nxa->colon[i].blink_start(start_ms, BLINK_TICK_MS);
   } // for (i)
@@ -48,17 +48,17 @@ stat_t ModeTest1::loop(unsigned long cur_ms, DateTime& now) {
   // -------------------------------------------------------------------------
   // num
   int num = 0;
-  this->_nxa->num[num].element[this->_prev_digit].set_blightness(0);
-  this->_nxa->num[num].element[this->_digit].set_blightness(BLIGHTNESS_RESOLUTION);
-  //this->_nxa->num[num].element[this->_digit].set_blightness(1);
+  this->_nxa->num[num].element[this->_prev_digit].set_brightness(0);
+  this->_nxa->num[num].element[this->_digit].set_brightness(BRIGHTNESS_RESOLUTION);
+  //this->_nxa->num[num].element[this->_digit].set_brightness(1);
   
   num = 1;
-  this->_nxa->num[num].element[this->_prev_digit].set_blightness(0);
+  this->_nxa->num[num].element[this->_prev_digit].set_brightness(0);
   this->_nxa->num[num].fadein_start(cur_ms, this->FADE_TICK_MS,
                                     this->_digit);
 
   num = 2;
-  this->_nxa->num[num].element[this->_digit].set_blightness(BLIGHTNESS_RESOLUTION);
+  this->_nxa->num[num].element[this->_digit].set_brightness(BRIGHTNESS_RESOLUTION);
   this->_nxa->num[num].fadeout_start(cur_ms, this->FADE_TICK_MS,
                                      this->_prev_digit);
   
@@ -72,8 +72,8 @@ stat_t ModeTest1::loop(unsigned long cur_ms, DateTime& now) {
 
   num = 5;
   this->_nxa->num[num].end_effect();
-  this->_nxa->num[num].element[this->_prev_digit].set_blightness(0);
-  this->_nxa->num[num].element[this->_digit].set_blightness(BLIGHTNESS_RESOLUTION);
+  this->_nxa->num[num].element[this->_prev_digit].set_brightness(0);
+  this->_nxa->num[num].element[this->_digit].set_brightness(BRIGHTNESS_RESOLUTION);
   this->_nxa->num[num].blink_start(cur_ms, BLINK_TICK_MS);
   
   // -------------------------------------------------------------------------

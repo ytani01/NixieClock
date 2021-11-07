@@ -322,7 +322,7 @@ void setup() {
   // グローバルオブジェクト・変数の初期化
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   NetMgr::myName = MY_NAME;
-  nixieArray.blightness = BLIGHTNESS_RESOLUTION;
+  nixieArray.brightness = BRIGHTNESS_RESOLUTION;
   ntpActive = false;
 
   Serial.println("setup> RTC begin");
@@ -403,7 +403,7 @@ void loop() {
                   now.year(), now.month(), now.day(),
                   dayOfWeekStr[now.dayOfTheWeek()].c_str(),
                   now.hour(), now.minute(), now.second());
-    Serial.printf(", blightness=%d", nixieArray.blightness);
+    Serial.printf(", brightness=%d", nixieArray.brightness);
     Serial.println();
   }
 

@@ -4,7 +4,7 @@
 #include "Effect.h"
 #include "NixieArray.h"
 
-extern NixieArray nixieArray; // XXX nixieArray.blightness をグローバル化?
+extern NixieArray nixieArray; // XXX nixieArray.brightness をグローバル化?
 
 //============================================================================
 // class Effect
@@ -80,9 +80,9 @@ void EffectOnly::start(unsigned long start_ms, unsigned long tick_ms,
 
   for (int i=0; i < this->_el_n; i++) {
     if (i == this->_el_i) {
-      this->_el[this->_el_i].set_blightness(this->_bl);
+      this->_el[this->_el_i].set_brightness(this->_bl);
     } else {
-      this->_el[this->_el_i].set_blightness(0);
+      this->_el[this->_el_i].set_brightness(0);
     }
   } // EffectOnly::start()
 }
@@ -108,7 +108,7 @@ void EffectFadeIn::start(unsigned long start_ms, unsigned long tick_ms,
   Effect::start(start_ms, tick_ms);
 
   this->_el_i = el_i;
-  //this->_el[this->_el_i].set_blightness(0);
+  //this->_el[this->_el_i].set_brightness(0);
 } // EffectFadeIn::start()
 
 void EffectFadeIn::loop(unsigned long cur_ms) {
@@ -117,9 +117,9 @@ void EffectFadeIn::loop(unsigned long cur_ms) {
   }
 
   NixieElement *e = &(this->_el[this->_el_i]); // 重要！ポインタ渡し
-  uint8_t bl = e->get_blightness();
-  if ( bl < nixieArray.blightness ) {
-    e->inc_blightness();
+  uint8_t bl = e->get_brightness();
+  if ( bl < nixieArray.brightness ) {
+    e->inc_brightness();
   } else {
     this->end();
   }
@@ -138,7 +138,7 @@ void EffectFadeOut::start(unsigned long start_ms,
   Effect::start(start_ms, tick_ms);
 
   this->_el_i = el_i;
-  //this->_el[this->_el_i].set_blightness(BLIGHTNESS_RESOLUTION);
+  //this->_el[this->_el_i].set_brightness(BRIGHTNESS_RESOLUTION);
 }
 
 void EffectFadeOut::loop(unsigned long cur_ms) {
@@ -147,9 +147,9 @@ void EffectFadeOut::loop(unsigned long cur_ms) {
   }
 
   NixieElement *e = &(this->_el[this->_el_i]);
-  uint8_t bl = e->get_blightness();
+  uint8_t bl = e->get_brightness();
   if ( bl > 0 ) {
-    e->dec_blightness();
+    e->dec_brightness();
   } else {
     this->end();
   }
@@ -173,9 +173,9 @@ void EffectXFade::start(unsigned long start_ms,
   for (int e = 0; e < this->_el_n; e++) {
     NixieElement *el = &(this->_el[e]);
     if ( e == this->_el_i_out ) {
-      el->set_blightness(nixieArray.blightness);
+      el->set_brightness(nixieArray.brightness);
     } else {
-      el->set_blightness(0);
+      el->set_brightness(0);
     }
   } // for(e)
 } // EffectXFade::start()
@@ -187,16 +187,16 @@ void EffectXFade::loop(unsigned long cur_ms) {
 
   NixieElement *e_in  = &(this->_el[this->_el_i_in]);
   NixieElement *e_out = &(this->_el[this->_el_i_out]);
-  uint8_t bl_in  = e_in->get_blightness();
-  uint8_t bl_out = e_out->get_blightness();
+  uint8_t bl_in  = e_in->get_brightness();
+  uint8_t bl_out = e_out->get_brightness();
   int end_count = 0;
-  if ( bl_in < nixieArray.blightness ) {
-    e_in->inc_blightness();
+  if ( bl_in < nixieArray.brightness ) {
+    e_in->inc_brightness();
   } else {
     end_count++;
   }
   if ( bl_out > 0 ) {
-    e_out->dec_blightness();
+    e_out->dec_brightness();
   } else {
     end_count++;
   }
@@ -221,7 +221,7 @@ void EffectShuffle::start(unsigned long start_ms,
   this->_el_i = el_i;
 
   for (int e=0; e < this->_el_n; e++) {
-    this->_el[e].set_blightness(0);
+    this->_el[e].set_brightness(0);
   }
 } // EffectShuffle::start()
 
@@ -232,7 +232,7 @@ void EffectShuffle::loop(unsigned long cur_ms) {
     return;
   }
 
-  this->_el[el_random].set_blightness(0);
+  this->_el[el_random].set_brightness(0);
 
   if ( this->_tick >= this->_n ) {
     this->end();
@@ -240,13 +240,13 @@ void EffectShuffle::loop(unsigned long cur_ms) {
   }
   
   el_random = random(this->_el_n);
-  this->_el[el_random].set_blightness(BLIGHTNESS_RESOLUTION);
+  this->_el[el_random].set_brightness(BRIGHTNESS_RESOLUTION);
 } // EffectShuffle::loop()
 
 void EffectShuffle::end() {
   Effect::end();
 
-  this->_el[this->_el_i].set_blightness(BLIGHTNESS_RESOLUTION);
+  this->_el[this->_el_i].set_brightness(BRIGHTNESS_RESOLUTION);
 } // EffectShuffle::end()
 
 //============================================================================
@@ -264,11 +264,11 @@ void EffectBlink::start(unsigned long start_ms,
   this->_onoff = true;
 
   for (int i=0; i < this->_el_n; i++) {
-    this->_blightness[i] = this->_el[i].get_blightness();
+    this->_brightness[i] = this->_el[i].get_brightness();
 #if 0
-    if ( this->_blightness[i] > 0 ) {
-      Serial.printf("EffectBlink::start> [%d]->blightness=%d\n",
-                    i, this->_blightness[i]);
+    if ( this->_brightness[i] > 0 ) {
+      Serial.printf("EffectBlink::start> [%d]->brightness=%d\n",
+                    i, this->_brightness[i]);
     }
 #endif
   } // for(i)
@@ -282,7 +282,7 @@ void EffectBlink::loop(unsigned long cur_ms) {
   if ( this->_onoff ) {
     this->_onoff = false;
     for (int i=0; i < this->_el_n; i++) {
-      this->_el[i].set_blightness(0);
+      this->_el[i].set_brightness(0);
     } // for(i)
     return;
   }
@@ -290,7 +290,7 @@ void EffectBlink::loop(unsigned long cur_ms) {
   // this->_onoff == false
   this->_onoff = true;
   for (int i=0; i < this->_el_n; i++) {
-    this->_el[i].set_blightness(this->_blightness[i]);
+    this->_el[i].set_brightness(this->_brightness[i]);
   } // for(i)
 } // EffectBlink::loop()
 
@@ -298,7 +298,7 @@ void EffectBlink::end() {
   Effect::end();
 
   for (int e=0; e < this->_el_n; e++) {
-    this->_el[e].set_blightness(this->_blightness[e]);
+    this->_el[e].set_brightness(this->_brightness[e]);
   } // for(e)
 } // EffectBlink::end()
 
@@ -316,7 +316,7 @@ void EffectRandomOnOff::start(unsigned long start_ms, unsigned long tick_ms,
   Effect::start(start_ms, tick_ms);
 
   this->_el_i = el_i;
-  this->_el[this->_el_i].set_blightness(BLIGHTNESS_RESOLUTION);
+  this->_el[this->_el_i].set_brightness(BRIGHTNESS_RESOLUTION);
 } // EffectRandomOnOff::start()
 
 void EffectRandomOnOff::loop(unsigned long cur_ms) {
@@ -326,14 +326,14 @@ void EffectRandomOnOff::loop(unsigned long cur_ms) {
 
   NixieElement *e = &(this->_el[this->_el_i]); // 重要！ポインタ渡し
   if (random(10) > 5) {
-    e->set_blightness(BLIGHTNESS_RESOLUTION);
+    e->set_brightness(BRIGHTNESS_RESOLUTION);
   } else {
-    e->set_blightness(0);    
+    e->set_brightness(0);    
   }
 } // EffectRandomOnOff::loop()
 
 void EffectRandomOnOff::end() {
   Effect::end();
 
-  this->_el[this->_el_i].set_blightness(BLIGHTNESS_RESOLUTION);
+  this->_el[this->_el_i].set_brightness(BRIGHTNESS_RESOLUTION);
 } // EffectRandomOnOff::end()

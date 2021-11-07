@@ -31,10 +31,10 @@ class NixieElement {
   
   void setup(uint8_t pin);
   
-  void set_blightness(uint8_t blightness);
-  void inc_blightness();
-  void dec_blightness();
-  unsigned int get_blightness();
+  void set_brightness(uint8_t brightness);
+  void inc_brightness();
+  void dec_brightness();
+  unsigned int get_brightness();
 
   
   void set_pin(uint8_t pin);
@@ -46,7 +46,7 @@ class NixieElement {
   
  protected:
   uint8_t _pin = 0;
-  unsigned int _blightness = 8;
+  unsigned int _brightness = 8;
   boolean _on = false;
 
 }; // class NixieElement

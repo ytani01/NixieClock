@@ -27,7 +27,7 @@ class NixieArray {
  public:
   static const unsigned int DISP_DELAY_US = 1; // microsec
           
-  unsigned int blightness = 3;
+  unsigned int brightness = 3;
 
   NixieTube  num[NIXIE_NUM_N];
   NixieTube  colon[NIXIE_COLON_N];

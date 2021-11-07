@@ -119,7 +119,7 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
 
   for (int i=0; i < NIXIE_COLON_N; i++) {
     if ( prev_dt.second() != now.second() ) {
-      NxColEl(i, NIXIE_COLON_DOT_DOWN).set_blightness(Nx->blightness);
+      NxColEl(i, NIXIE_COLON_DOT_DOWN).set_brightness(Nx->brightness);
       if ( this->mode != ModeClock::MODE_YMD || wifiActive ) {
         NxCol(i).fadeout_start(cur_ms, cFadeTick,
                                NIXIE_COLON_DOT_DOWN);
@@ -175,7 +175,7 @@ void ModeClock::btn_intr_hdr(unsigned long cur_ms, Button *btn) {
 
 void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   boolean      flag = false;
-  unsigned int bl = Nx->blightness;
+  unsigned int bl = Nx->brightness;
   
   // BTN0 or BTN1 or BTN2
   if ( btn->get_name() == "BTN0" ) {
@@ -204,19 +204,19 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   
   if ( btn->get_click_count() == 1 ) {
     bl /= 2;
-    if (bl < BLIGHTNESS_MIN || bl > BLIGHTNESS_RESOLUTION) {
-      bl = BLIGHTNESS_RESOLUTION;
+    if (bl < BRIGHTNESS_MIN || bl > BRIGHTNESS_RESOLUTION) {
+      bl = BRIGHTNESS_RESOLUTION;
     }
   
-    Nx->blightness = bl;
-    Serial.printf("ModeClock::btn_loop_hdr> Nx->blightness=%d\n",
-                  Nx->blightness);
+    Nx->brightness = bl;
+    Serial.printf("ModeClock::btn_loop_hdr> Nx->brightness=%d\n",
+                  Nx->brightness);
     for (int i=0; i < NIXIE_NUM_N; i++) {
-      NxNumEl(i, this->_num[i]).set_blightness(bl);
+      NxNumEl(i, this->_num[i]).set_brightness(bl);
     } // for(NUM)
   
     for (int i=0; i < NIXIE_COLON_N; i++) {
-      NxColEl(i, NIXIE_COLON_DOT_DOWN).set_blightness(bl);
+      NxColEl(i, NIXIE_COLON_DOT_DOWN).set_brightness(bl);
     } // for(COLON)
 
     return;

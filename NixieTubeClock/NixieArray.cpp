@@ -56,12 +56,12 @@ void NixieArray::end_all_effect() {
  *
  */
 void NixieArray::set_onoff(unsigned long cur_ms) {
-  uint8_t timing = cur_ms % BLIGHTNESS_RESOLUTION;
+  uint8_t timing = cur_ms % BRIGHTNESS_RESOLUTION;
 
   // 数字部
   for (int t=0; t < NIXIE_NUM_N; t++) {
     for (int e=0; e < this->num[t].element_n; e++) {
-      if (this->num[t].element[e].get_blightness() > timing) {
+      if (this->num[t].element[e].get_brightness() > timing) {
         this->num[t].element[e].on();
       } else {
         this->num[t].element[e].off();
@@ -73,7 +73,7 @@ void NixieArray::set_onoff(unsigned long cur_ms) {
   for (int t=0; t < NIXIE_COLON_N; t++) {
     for (int e=0; e < this->colon[t].element_n; e++) {
       this->colon[t].element[e].off();
-      if (this->colon[t].element[e].get_blightness() > timing) {
+      if (this->colon[t].element[e].get_brightness() > timing) {
         this->colon[t].element[e].on();
       }
     } // for(e)
@@ -89,7 +89,7 @@ void IRAM_ATTR NixieArray::display(unsigned long cur_ms) {
   uint8_t val[pin_n];
 
   disp_count++;
-  disp_count %= BLIGHTNESS_RESOLUTION;
+  disp_count %= BRIGHTNESS_RESOLUTION;
   
   //---------------------------------------------------------------------
   this->loop(cur_ms); // ニキシー管 全て

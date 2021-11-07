@@ -76,11 +76,11 @@ mode_t ModeSetClock::change_mode(mode_t mode=ModeSetClock::MODE_NULL) {
 
     for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
       if ( e == this->_num[i] ) {
-        NxNumEl(i, e).set_blightness(Nx->blightness);
+        NxNumEl(i, e).set_brightness(Nx->brightness);
       } else {
-        NxNumEl(i, e).set_blightness(0);
+        NxNumEl(i, e).set_brightness(0);
       }
-      // Serial.printf("[%d,%d]=%d\n", i, e, NxNumEl(i,e).get_blightness());
+      // Serial.printf("[%d,%d]=%d\n", i, e, NxNumEl(i,e).get_brightness());
     } // for(e)
 
     if ( i == i_1 || i == i_2 ) {
@@ -118,7 +118,7 @@ void ModeSetClock::init(unsigned long start_ms, DateTime& now,
 
   ModeBase::init(start_ms, now, this->_date_num);
   for (int i=0; i < NIXIE_COLON_N; i++) {
-    NxColEl(i, NIXIE_COLON_DOT_DOWN).set_blightness(0);
+    NxColEl(i, NIXIE_COLON_DOT_DOWN).set_brightness(0);
   } // for(i)
   
   (void)change_mode(ModeSetClock::MODE_YEAR);
