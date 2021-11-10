@@ -229,8 +229,8 @@ void IRAM_ATTR btn_intr_hdr() {
 
   for (int b=0; b < BTN_N; b++) {
     if ( Btn[b]->get() ) {
-      Serial.print("btn_intr_hdr> ");
-      Btn[b]->print();
+      // Serial.print("btn_intr_hdr> ");
+      // Btn[b]->print();
       
       Mode[curMode]->btn_intr_hdr(curMsec, Btn[b]);
     }
