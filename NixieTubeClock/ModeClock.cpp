@@ -92,9 +92,11 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
   case ModeClock::MODE_HMS:
     sprintf(disp_str, "%02d%02d%02d", now.hour(), now.minute(), now.second());
     break;
+
   case ModeClock::MODE_DHM:
     sprintf(disp_str, "%02d%02d%02d", now.day(), now.hour(), now.minute());
     break;
+
   case ModeClock::MODE_YMD:
     if ( cur_ms - this->mode_start_ms > DISP_DATE_MS ) {
       this->change_mode(MODE_HMS);
@@ -105,6 +107,18 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
     sprintf(disp_str, "%02d%02d%02d",
             now.year() % 100, now.month(), now.day());
     break;
+
+  case ModeClock::MODE_MDH:
+    if ( cur_ms - this->mode_start_ms > DISP_DATE_MS ) {
+      this->change_mode(MODE_HMS);
+
+      this->stat = STAT_DONE;
+      return this->stat;
+    }
+    sprintf(disp_str, "%02d%02d%02d",
+            now.month(), now.day(), now.hour());
+    break;
+
   default:
     sprintf(disp_str, "%02d%02d%02d",
             now.hour(), now.minute(), now.second());

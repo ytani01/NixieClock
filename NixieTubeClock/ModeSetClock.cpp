@@ -41,27 +41,12 @@ mode_t ModeSetClock::change_mode(mode_t mode=ModeSetClock::MODE_NULL) {
 
   int i_1, i_2;
   switch (this->_mode) {
-  case MODE_YEAR:
-  case MODE_HOUR:
-    i_1 = 0;
-    i_2 = 1;
-    break;
-    
-  case MODE_MONTH:
-  case MODE_MINUTE:
-    i_1 = 2;
-    i_2 = 3;
-    break;
-    
-  case MODE_DAY:
-    i_1 = 4;
-    i_2 = 5;
-    break;
-
-  default:
-    i_1 = 4;
-    i_2 = 5;
-    break;
+  case MODE_YEAR:   i_1 = 0; i_2 = 1; break;
+  case MODE_MONTH:  i_1 = 2; i_2 = 3; break;
+  case MODE_DAY:    i_1 = 4; i_2 = 5; break;
+  case MODE_HOUR:   i_1 = 0; i_2 = 1; break;
+  case MODE_MINUTE: i_1 = 2; i_2 = 3; break;
+  default:          i_1 = 4; i_2 = 5; break;
   } // switch(this->_mode)
 
   for (int i=0; i < NIXIE_NUM_N; i++) {
