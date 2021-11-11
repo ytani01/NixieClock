@@ -17,9 +17,9 @@ extern boolean wifiActive;
 static DateTime prev_dt = DateTime(2000,1,1,0,0,0);
 
 #include <Adafruit_NeoPixel.h>
-extern Adafruit_NeoPixel Pixels;
-static const uint8_t     PIXEL_N = 6;
-static const int         PIXEL_BL = 255;
+extern Adafruit_NeoPixel   Pixels;
+static const uint8_t       PIXEL_N = 6;
+static const int           PIXEL_BL = 255;
 static const unsigned long PixelCol[] =
   {0x000000, 0xffffff, 0x0000ff, 0x0000ff};
 static boolean pixel_on = false;
@@ -42,6 +42,8 @@ void ModeClock::init(unsigned long start_ms, DateTime& now,
   this->mode_start_ms = millis();
   Serial.printf("ModeClock::init> mode_start_ms=%ld, stat=0x%X\n",
                 this->mode_start_ms, (int)this->stat);
+
+  Nx->brightness = this->brightness;
 }
 
 /**
@@ -50,7 +52,7 @@ void ModeClock::init(unsigned long start_ms, DateTime& now,
 stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
   char disp_str[6 + 1];
   int  prev_num[NIXIE_NUM_N];
-  unsigned long prev_mode = MODE_NULL;
+  static unsigned long prev_mode = MODE_NULL;
 
   if ( ModeBase::loop(cur_ms, now) == STAT_SKIP ) {
     return STAT_SKIP;
@@ -71,8 +73,9 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
       } // for(i)
     } else {
       Pixels.clear();
-    } // if(pixel_on)
+    } // if (pixel_on)
     Pixels.show();
+    prev_mode = this->mode;
   } // if
   
   if ( pixel_on ) {
@@ -89,7 +92,7 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
   case ModeClock::MODE_HMS:
     sprintf(disp_str, "%02d%02d%02d", now.hour(), now.minute(), now.second());
     break;
-  case MODE_DHM:
+  case ModeClock::MODE_DHM:
     sprintf(disp_str, "%02d%02d%02d", now.day(), now.hour(), now.minute());
     break;
   case ModeClock::MODE_YMD:
@@ -107,7 +110,7 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
             now.hour(), now.minute(), now.second());
     break;
   } // switch (mode)
-  
+
   for (int i=0; i < NIXIE_NUM_N; i++) {
     prev_num[i] = this->_num[i];
     this->_num[i] = int(disp_str[i] - '0');
@@ -152,7 +155,6 @@ void ModeClock::change_mode(unsigned long mode=ModeClock::MODE_NULL) {
   } else {
     switch ( this->mode ) {
     case MODE_HMS:
-      // this->mode = MODE_DHM;
       this->mode = MODE_YMD;
       break;
     case MODE_DHM:
@@ -189,7 +191,7 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   }
 
   // BTN1 or BTN2
-  if ( btn->get_name() == "BTN1") {
+  if ( btn->get_name() == "BTN1" ) {
     // BTN1
     if ( btn->get_click_count() >= 1 ) {
       this->change_mode();
@@ -209,6 +211,7 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
     }
   
     Nx->brightness = bl;
+    this->brightness = bl;
     Serial.printf("ModeClock::btn_loop_hdr> Nx->brightness=%d\n",
                   Nx->brightness);
     for (int i=0; i < NIXIE_NUM_N; i++) {

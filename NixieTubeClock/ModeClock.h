@@ -14,6 +14,7 @@ class ModeClock : public ModeBase {
   static const unsigned long MODE_HMS  = 0x01;
   static const unsigned long MODE_DHM  = 0x02;
   static const unsigned long MODE_YMD  = 0x03;
+  static const unsigned long MODE_MDH  = 0x04;
 
   static const unsigned long DISP_DATE_MS = 7000;  // ms
 
@@ -23,6 +24,7 @@ class ModeClock : public ModeBase {
   unsigned long mode = MODE_HMS;
   unsigned long mode_start_ms = 0;
   static const unsigned long CH_MODE_MS_LIMIT = 2000;
+  unsigned int  brightness = BRIGHTNESS_RESOLUTION;
 
   ModeClock(NixieArray *nxa);
   void init(unsigned long start_ms, DateTime& now, int init_val[NIXIE_NUM_N]);

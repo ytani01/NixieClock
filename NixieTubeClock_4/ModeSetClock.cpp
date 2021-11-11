@@ -120,6 +120,8 @@ void ModeSetClock::init(unsigned long start_ms, DateTime& now,
     NxColEl(i, NIXIE_COLON_DOT_DOWN).set_brightness(0);
   } // for(i)
   
+  Nx->brightness = BRIGHTNESS_RESOLUTION;
+
   (void)change_mode(ModeSetClock::MODE_MONTH);
 
   this->stat = STAT_DONE;
@@ -238,7 +240,6 @@ void ModeSetClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
       mode = this->change_mode();
 
       if ( mode == MODE_NULL ) {
-        //int year = this->_date_num[0] * 10 + this->_date_num[1] + 2000;
         int year = 2022;
         int month = this->_date_num[0] * 10 + this->_date_num[1];
         int day = this->_date_num[2] * 10 + this->_date_num[3];

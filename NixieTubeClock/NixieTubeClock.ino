@@ -1,5 +1,5 @@
 /**
- * Copyright(c) 2021 Yoichi Tanibayashi
+ * Copyright (c) 2021 Yoichi Tanibayashi
  */
 #include "Nixie.h"
 #include "Button.h"
@@ -13,6 +13,15 @@
 #include <Adafruit_NeoPixel.h>
 
 static const String MY_NAME = "Nixie Tube Clock";
+/**
+ * Version X.Y.Z
+ * {v0,v1, v2,v3, v4,v5}
+ *
+ * X = v0 * 10 + v1
+ * Y = v2
+ * Z = v3
+ * v4, v5: 0 (always)
+ */
 int                 initValVer[NIXIE_NUM_N] = {0,0, 9,1, 0,0};
 
 #define LOOP_DELAY_US   1   // micro sbeconds
@@ -213,10 +222,8 @@ void IRAM_ATTR btn_intr_hdr() {
 
   for (int b=0; b < BTN_N; b++) {
     if ( Btn[b]->get() ) {
-      /*
-      Serial.print("btn_intr_hdr> ");
-      Btn[b]->print();
-      */
+      // Serial.print("btn_intr_hdr> ");
+      // Btn[b]->print();
       
       Mode[curMode]->btn_intr_hdr(curMsec, Btn[b]);
     }

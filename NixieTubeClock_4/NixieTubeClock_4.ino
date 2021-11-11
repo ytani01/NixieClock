@@ -1,5 +1,5 @@
 /**
- * (c) 2021 Yoichi Tanibayashi
+ * Copyright (c) 2021 Yoichi Tanibayashi
  */
 #include "Nixie.h"
 #include "Button.h"
@@ -14,16 +14,15 @@
 
 static const String MY_NAME = "Nixie Tube Clock";
 /**
- *  Version X.Y.Z
- *  {v0,v1, v2,v3, v4,v5}
+ * Version X.Y.Z
+ * {v0,v1, v2,v3, v4,v5}
  *
- *   X = v0 * 10 + v1
- *   Y = v2
- *   Z = v3
- *   v4: 0 (always)
- *   v5: 0 (always)
+ * X = v0 * 10 + v1
+ * Y = v2
+ * Z = v3
+ * v4, v5: 0 (always)
  */
-int                 initValVer[NIXIE_NUM_N] = {0,0,9,1,0,0};
+int                 initValVer[NIXIE_NUM_N] = {0,0, 9,1, 0,0};
 
 #define LOOP_DELAY_US   1   // micro sbeconds
 #define DEBOUNCE        300 // msec
@@ -124,14 +123,8 @@ long prevMode = -1;
 //----------------------------------------------------------------------
 const uint8_t PIXEL_N  = 6;
 const int     PIXEL_BL = 255;
-static const int     PixelCol[][3] =
-  {
-   {0, 0, 0},
-   {PIXEL_BL, 0       , 0       },
-   {0       , PIXEL_BL, 0       },
-   {PIXEL_BL, 0       , PIXEL_BL},
-   {0       , 0       , PIXEL_BL}
-  };
+static const unsigned long PixelCol[] =
+  {0x000000, 0xff0000, 0x00ff00, 0xff00ff, 0x0000ff};
    
 Adafruit_NeoPixel Pixels(PIXEL_N, PIN_PIXEL, NEO_GRB + NEO_KHZ800);
 
@@ -438,9 +431,7 @@ void loop() {
     Mode[curMode]->init(curMsec, now, initValVer);
     prevMode = curMode;
     for (int i=0; i < PIXEL_N; i++) {
-      Pixels.setPixelColor(i, Pixels.Color(PixelCol[curMode][0],
-                                           PixelCol[curMode][1],
-                                           PixelCol[curMode][2]));
+      Pixels.setPixelColor(i, PixelCol[curMode]);
     }
     Pixels.show();
   } else {
