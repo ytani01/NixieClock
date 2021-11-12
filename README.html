@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>README.html</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+
+</head>
+
+<body>
+
+<h1>NixiClock</h1>
+
+<p><img src="docs/clock-6a.webp" alt="" title="" />
+<img src="docs/clock-4a.webp" alt="" title="" /></p>
+
+<p>現在入手困難な、本物のニキシー管を使った時計です。</p>
+
+<p>レトロな外観ではありますが、
+WiFi経由でインターネット上の時刻サーバーから、
+正確な時刻を取得して、
+常に正確な時刻を刻みます。</p>
+
+<ul>
+<li><p>WiFi経由で、自動的に時刻合わせ</p>
+
+<p>インターネット上の時刻サーバー(NTPサーバー)から
+正確な時刻を取得するので、時刻合わせが不要です。</p>
+
+<p>WiFi設定は、スマホで行います。</p>
+
+<p>(WiFi環境がない場合は、マニュアルで時刻設定することもできます。)</p></li>
+<li><p>明るさの調節</p>
+
+<p>暗い部屋で眩しいときは、明るさを調整できます。</p></li>
+<li><p>日付表示 可能</p></li>
+</ul>
+
+<h2>1. コロン表示の意味</h2>
+
+<ul>
+<li><p>【日付表示のとき点滅】WiFi接続 OK</p>
+
+<p>インターネット経由で、自動的に時刻合わせが行われています。</p>
+
+<p>[ボタン0] ダブルクリックで、<code>WiFi設定モード</code>にすることで、
+自動的な時刻合わせを停止することもできます
+(インターネット通信を停止します)。</p></li>
+<li><p>【日付表示のとき点灯】WiFi接続 なし (WiFi設定モード)</p>
+
+<p>スマホを使って、本時計の WiFiを設定するか、
+マニュアル操作で時刻を設定してください。</p>
+
+<p>設定した時刻は、電源を切っても保存されます。</p>
+
+<p>WiFi設定ができているのに、電波の状態などで接続が切れた場合は、
+[ボタン0] ダブルクリックすると、時計が再起動し、WiFi接続を試みます。</p></li>
+</ul>
+
+<h2>2. 操作法</h2>
+
+<h2>2.1. ボタン概要</h2>
+
+<p>時計表示のとき
+```
+   +---------- [ボタン0] ダブルクリック: WiFi設定、長押し: 手動時刻合わせ
+   |  +------- [ボタン1] 日付表示
+   |  |  +---- [ボタン2] 明るさ変更、ダブルクリック:バクライトON/OFF
+   |  |  |
+ --v--v--v--
+|  o  o  o  |</p>
+
+<hr />
+
+<p>```</p>
+
+<p>手動で時刻を合わせるとき
+```
+   +---------- [ボタン0] 長押し: 時刻合わせキャンセル
+   |  +------- [ボタン1] 年 -> 月 -> 日 -> 時 -> 分 -> [確定]
+   |  |  +---- [ボタン2] カウントアップ
+   |  |  |
+ --v--v--v--
+|  o  o  o  |</p>
+
+<hr />
+
+<p>```</p>
+
+<h2>2.2 日付表示 [ボタン1]</h2>
+
+<p>[ボタン1]を押すと、「年:月:日」を表示します。</p>
+
+<p>数秒後に、時刻表示に戻ります。</p>
+
+<h2>2.3 明るさ変更 [ボタン2]</h2>
+
+<p>明るさを変更(サイクリック)</p>
+
+<h3>2.4 時刻合わせ (WiFi環境がある場合)</h3>
+
+<p>WiFi経由でインターネットに接続すれば、
+NTP(Network Time Protocol)を使って、
+インターネットから正確な時刻を取得して、
+自動的に時刻合わせを行います。</p>
+
+<p>設定したWiFiアクセスポイントの情報は、電源を切っても保存されるので、
+毎回設定する必要はありません。</p>
+
+<ol>
+<li><p>[ボタン0] を ダブルクリックしてください。</p></li>
+<li><p>アクセスポイント・モードになり、コロンが点灯します。</p></li>
+<li><p>スマホのWiFi設定で、「NIXIE<em>CLOCK</em>XXXXXXXX」に接続してください。</p></li>
+<li><p>接続すると、ブラウザが自動起動されます。</p></li>
+<li><p>SSIDを設定し、保存してください。</p></li>
+<li><p>[OK]で、時計が再起動再起動します。</p></li>
+<li><p>スマホのWiFi設定を元に戻してください。</p></li>
+</ol>
+
+<p><img src="docs/NetMgr1.png" alt="" title="" /></p>
+
+<h3>2.5 時刻合わせ (手動)</h3>
+
+<p>RTC(Real Time Clock)が、バッテリーでバックアップされているので、
+電源を入れ直しても、時刻合わせをし直す必要はありません。</p>
+
+<ol>
+<li><p>[ボタン0] を 長押しして、時刻設定モードに移行</p>
+
+<p>年:月:日 の表示になり、年(下二桁)が点滅します。</p></li>
+<li><p>以下</p>
+
+<p>年 -> 月 -> 日 -> 時 -> [確定]</p>
+
+<p>の順番で設定します。
+(秒は、常に「00」)</p></li>
+<li><p>[ボタン2] で 点滅している数値がカウントアップ</p></li>
+<li><p>[ボタン1] で 数値が確定</p>
+
+<p>次に進みます。</p></li>
+<li><p>「分」を確定すると、
+時刻が設定され、
+時計表示に戻ります。</p></li>
+<li><p>設定を中断したい場合は、
+[ボタン0] を長押ししてください。</p>
+
+<p>(元の時刻に戻ります)</p></li>
+</ol>
+
+<p>(WiFi経由でインターネットに接続している場合は、
+この手順で時刻を変更しても、
+定期的にインターネットから時刻を取得して補正されます。)</p>
+
+<h2>9. 開発環境</h2>
+
+<ul>
+<li>Arduino IDE 1.8.15(Windows store 1.8.49.0) on Windows 10
+<ul>
+<li>ボード・ライブラリ: ESP32 1.0.6</li>
+<li>RTCライブラリ: RTClib by Adafruit 1.14.1</li>
+<li>NeoPixelライブラリ: Adafruit NeoPixel 1.8.5</li>
+</ul></li>
+</ul>
+
+<h3>9.1 ボードマネージャーの設定</h3>
+
+<p>[ファイル]-[環境設定]-[追加のボードマネージャのURL]
+<code>
+https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+</code></p>
+
+<h3>9.2 ボードの設定</h3>
+
+<p>| | |
+|--|--|
+| ボード | ESP32 Dev Module |
+| Upload Speed | 921600 |
+| CPU Frequency | 240Mhz(WiFi/BT) |
+| Flash Frequency | 80MHz |
+| Flash Size | 4MB(32Mb) |
+| Partition Scheme | Default 4MB with spiffs(1.2MB APP/1.5MB SPIFFS) |</p>
+
+<h2>A. References</h2>
+
+<ul>
+<li><p><a href="https://github.com/espressif/arduino-esp32/">github: arduino-esp32</a></p></li>
+<li><p><a href="https://github.com/me-no-dev/EspExceptionDecoder/releases/">github: EspExceptionDecoder(スタックトレース表示)</a>
+[注意] Microsoft Store の Arduino IDE はNG</p></li>
+<li><p><a href="https://github.com/Makuna/NeoPixelBus">NeoPixelBus</a></p></li>
+<li><p><a href="https://nuneno.cocolog-nifty.com/blog/2018/05/neopixelws281-1.html">NeoPixel（WS2812B）の制御 その2 (SPI)</a></p></li>
+</ul>
+
+</body>
+</html>

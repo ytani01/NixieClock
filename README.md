@@ -1,6 +1,7 @@
 # NixiClock
 
-![](docs/clock1.jpg)
+![](docs/clock-6a.webp)
+![](docs/clock-4a.webp)
 
 現在入手困難な、本物のニキシー管を使った時計です。
 
