@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 Yoichi Tanibayashi
+ * Copyright (c) 2023 Yoichi Tanibayashi
  */
 #include "Nixie.h"
 #include "Button.h"
@@ -263,12 +263,15 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
     }
 
     if ( btn->get_click_count() == 2 && curMode == MODE_CLOCK ) {
+      // WiFi ON/OFF
       Serial.printf("btn_loop_hdr> netMgr.cur_mode=0x%02X\n", netMgr.cur_mode);
+
       wifiActive = false;
       prev_wifiActive = false;
       ntpActive = false;
-      if ( netMgr.cur_mode == NetMgr::MODE_AP_LOOP
-           || netMgr.cur_mode == NetMgr::MODE_WIFI_OFF ) {
+
+      if ( netMgr.cur_mode == NetMgr::MODE_AP_LOOP ||
+           netMgr.cur_mode == NetMgr::MODE_WIFI_OFF ) {
         //netMgr.cur_mode = NetMgr::MODE_START;
         Serial.println("btn_loop_hdr> Reboot");
         Serial.println("==========");
@@ -317,8 +320,8 @@ void setup() {
   }
   
   Serial.printf("NTP servers:");
-  for (int i=0; i < 3; i++) {
-    Serial.printf(" %s", NTP_SVR[i].c_str());
+  for (int i=0; i < sizeof(NTP_SVR) / sizeof(String); i++) {
+    Serial.printf("  %s", NTP_SVR[i].c_str());
   }
   Serial.println();
 
@@ -410,7 +413,8 @@ void loop() {
 
   //---------------------------------------------------------------------
   if (loopCount % 3000 == 0) {
-    Serial.printf("loop> now=%04d/%02d/%02d(%s) %02d:%02d:%02d",
+    Serial.printf("loop> ");
+    Serial.printf("now=%04d/%02d/%02d(%s) %02d:%02d:%02d",
                   now.year(), now.month(), now.day(),
                   dayOfWeekStr[now.dayOfTheWeek()].c_str(),
                   now.hour(), now.minute(), now.second());
@@ -432,8 +436,10 @@ void loop() {
   // モード実行
   if (curMode != prevMode) {
     // モード変更時の初期化
-    Mode[curMode]->init(curMsec, now, initValVer);
+    Mode[curMode]->init(curMsec, now, initValVer); // バージョン表示
+
     prevMode = curMode;
+
     for (int i=0; i < PIXEL_N; i++) {
       Pixels.setPixelColor(i, PixelCol[curMode]);
     }

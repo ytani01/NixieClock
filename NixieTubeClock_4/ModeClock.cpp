@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 Yoichi Tanibayashi
+ * Copyright (c) 2023 Yoichi Tanibayashi
  */
 #include "ModeClock.h"
 
@@ -143,7 +143,8 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
     if ( prev_dt.second() != now.second() ) {
       NxColEl(i, NIXIE_COLON_DOT_DOWN).set_brightness(Nx->brightness);
 
-      if ( this->mode != ModeClock::MODE_MDH || wifiActive ) {
+      //if ( this->mode != ModeClock::MODE_MDH || wifiActive ) {
+      if ( wifiActive ) {
         NxCol(i).fadeout_start(cur_ms, cFadeTick,
                                NIXIE_COLON_DOT_DOWN);
         colon_fade_mode[i] = CL_FADE_OUT;
