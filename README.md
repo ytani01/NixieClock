@@ -52,7 +52,7 @@ WiFi経由でインターネット上の時刻サーバーから、
 
 時計表示のとき
 ```
-   +---------- [ボタン0] ダブルクリック: WiFi設定、長押し: 手動時刻合わせ
+   +---------- [ボタン0] 日付表示 ダブルクリック: WiFi設定、長押し: 手動時刻合わせ
    |  +------- [ボタン1] 日付表示
    |  |  +---- [ボタン2] 明るさ変更、ダブルクリック:バクライトON/OFF
    |  |  |
@@ -153,8 +153,8 @@ RTC(Real Time Clock)が、バッテリーでバックアップされているの
 
 * Arduino IDE 1.8.15(Windows store 1.8.49.0) on Windows 10
   - ボード・ライブラリ: ESP32 1.0.6
-  - RTCライブラリ: RTClib by Adafruit 1.14.1
-  - NeoPixelライブラリ: Adafruit NeoPixel 1.8.5
+  - RTCライブラリ: RTClib by Adafruit 2.1.0
+  - NeoPixelライブラリ: Adafruit NeoPixel 1.11.0
   
 ### 9.1 ボードマネージャーの設定
 

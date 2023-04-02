@@ -88,6 +88,7 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
     } // if
   } //if
   
+  // disp_str に各桁の数字を格納
   switch ( this->mode ) {
   case ModeClock::MODE_HMS:
     sprintf(disp_str, "%02d%02d%02d", now.hour(), now.minute(), now.second());
@@ -104,6 +105,7 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
       this->stat = STAT_DONE;
       return this->stat;
     }
+
     sprintf(disp_str, "%02d%02d%02d",
             now.year() % 100, now.month(), now.day());
     break;
@@ -125,8 +127,10 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
     break;
   } // switch (mode)
 
+  // disp_str の内容をニキシー管に反映
   for (int i=0; i < NIXIE_NUM_N; i++) {
     prev_num[i] = this->_num[i];
+
     this->_num[i] = int(disp_str[i] - '0');
     if ( this->_num[i] != prev_num[i] ) {
       NxNum(i).xfade_start(cur_ms, FADE_TICK_MS,
@@ -134,9 +138,11 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
     }
   } // for(NUM)
 
+  // コロンの表示
   for (int i=0; i < NIXIE_COLON_N; i++) {
     if ( prev_dt.second() != now.second() ) {
       NxColEl(i, NIXIE_COLON_DOT_DOWN).set_brightness(Nx->brightness);
+
       if ( this->mode != ModeClock::MODE_MDH || wifiActive ) {
         NxCol(i).fadeout_start(cur_ms, cFadeTick,
                                NIXIE_COLON_DOT_DOWN);
@@ -155,6 +161,7 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
       colon_fade_mode[i] = CL_FADE_IN;
     }
   } // for(COLON)
+
   prev_dt = DateTime(now);
 
   this->stat = STAT_DONE;
@@ -200,6 +207,10 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
       this->stat = ModeBase::STAT_NEXT_MODE;
       Serial.printf("ModeClock::btn_loop_hdr> stat=0x%X\n", (int)this->stat);
       return;
+    }
+
+    if ( btn->get_click_count() >= 1 ) {
+      this->change_mode();
     }
     return;
   }

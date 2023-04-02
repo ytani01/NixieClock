@@ -238,6 +238,7 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   btn->print();
 
   if ( btn->get_name() == "BTN0" ) {
+    /*
     if ( btn->get_click_count() >= 1 ) {
       if ( Btn[1]->get_value() == Button::ON ) {
         if ( curMode == MODE_CLOCK ) {
@@ -250,8 +251,10 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
         }
       }
     }
+    */
 
     if ( btn->get_click_count() >= 3 ) {
+      // モード変更
       change_mode();
       if ( curMode == MODE_SET_CLOCK ) {
         change_mode();
@@ -337,12 +340,14 @@ void setup() {
   unsigned long sec = Rtc.now().second();
   randomSeed(sec); // TBD
 
-  prevMsec = millis();
-  curMsec = prevMsec;
+  curMsec = millis();
+  prevMsec = curMsec;
+
   //---------------------------------------------------------------------
   // 初期状態表示
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   nixieArray.display(curMsec);
+
   //---------------------------------------------------------------------
   // 割り込み初期化
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -350,7 +355,6 @@ void setup() {
   Serial.printf(" %d --> %d\n", PIN_BTN0, intrPin0);
   Serial.printf(" %d --> %d\n", PIN_BTN1, intrPin1);
   Serial.printf(" %d --> %d\n", PIN_BTN2, intrPin2);
-
 
   // !! Important !!
   // 
