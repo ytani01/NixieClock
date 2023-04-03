@@ -41,7 +41,7 @@ class NetMgr {
   boolean net_is_available = false;;
   mode_t cur_mode   = MODE_START;
 
-  String    ap_ssid_hdr = "NIXIE_CLOCK_";
+  String    ap_ssid_hdr = "NIXIECLOCK_";
   String    ap_ssid     = ap_ssid_hdr;
   String    ap_ssid_pw  = "xxxxxxxx"; // unused
 
