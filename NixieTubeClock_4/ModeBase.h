@@ -20,6 +20,8 @@ class ModeBase {
 
   stat_t stat = STAT_NONE;
 
+  unsigned int  brightness = BRIGHTNESS_RESOLUTION;
+
   ModeBase(NixieArray *nxa, String name, unsigned long tick_ms);
 
   String name();
