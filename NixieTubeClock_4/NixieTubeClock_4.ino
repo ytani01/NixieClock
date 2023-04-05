@@ -335,7 +335,7 @@ void setup() {
   // グローバルオブジェクト・変数の初期化
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   NetMgr::myName = MY_NAME;
-  nixieArray.brightness = BRIGHTNESS_RESOLUTION;
+  nixieArray.brightness = BRIGHTNESS_MAX;
   ntpActive = false;
 
   Serial.println("setup> RTC begin");

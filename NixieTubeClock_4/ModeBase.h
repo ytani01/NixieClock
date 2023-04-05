@@ -20,7 +20,7 @@ class ModeBase {
 
   stat_t stat = STAT_NONE;
 
-  unsigned int  brightness = BRIGHTNESS_RESOLUTION;
+  unsigned int  brightness = BRIGHTNESS_MAX;
 
   ModeBase(NixieArray *nxa, String name, unsigned long tick_ms);
 

@@ -27,7 +27,7 @@
 
 #define BRIGHTNESS_RESOLUTION 16  // 明るさの段階数 2^n
 #define BRIGHTNESS_MAX         8
-#define BRIGHTNESS_MIN         2
+#define BRIGHTNESS_MIN         1
 
 #define NIXIE_NUM_N          6  // 数字の桁数
 #define NIXIE_NUM_DIGIT_N   10  // 一桁の数字のパターン数

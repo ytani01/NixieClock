@@ -106,7 +106,7 @@ void ModeSetClock::init(unsigned long start_ms, DateTime& now,
     NxColEl(i, NIXIE_COLON_DOT_DOWN).set_brightness(0);
   } // for(i)
   
-  Nx->brightness = BRIGHTNESS_RESOLUTION;
+  Nx->brightness = BRIGHTNESS_MAX;
 
   (void)change_mode(ModeSetClock::MODE_MONTH);
 

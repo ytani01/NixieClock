@@ -14,6 +14,8 @@ static unsigned long cFadeTick = CL_FADE_TICK0;
 
 extern boolean wifiActive;
 
+extern Button* Btn[];
+
 static DateTime prev_dt = DateTime(2000,1,1,0,0,0);
 
 #include <Adafruit_NeoPixel.h>
@@ -211,7 +213,7 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
     }
 
     if ( btn->get_click_count() >= 1 ) {
-      this->change_mode();
+      this->change_mode(); // 日付/時刻 切り替え
     }
     return;
   }
@@ -219,9 +221,6 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   // BTN1 or BTN2
   if ( btn->get_name() == "BTN1" ) {
     // BTN1
-    if ( btn->get_click_count() >= 1 ) {
-      this->change_mode();
-    }
     return;
   }
 
@@ -231,15 +230,21 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   }
   
   if ( btn->get_click_count() == 1 ) {
-    bl /= 2;
-    if (bl < BRIGHTNESS_MIN || bl > BRIGHTNESS_RESOLUTION) {
-      bl = BRIGHTNESS_RESOLUTION;
+    if ( Btn[1]->get_value() == Button::ON ) {
+        // ハードの最高輝度に設定
+        bl = BRIGHTNESS_RESOLUTION;
+    } else {
+      bl /= 2;
+      if (bl < BRIGHTNESS_MIN || bl > BRIGHTNESS_MAX) {
+        bl = BRIGHTNESS_MAX;
+      }
     }
   
     Nx->brightness = bl;
     this->brightness = bl;
     Serial.printf("ModeClock::btn_loop_hdr> Nx->brightness=%d\n",
                   Nx->brightness);
+
     for (int i=0; i < NIXIE_NUM_N; i++) {
       NxNumEl(i, this->_num[i]).set_brightness(bl);
     } // for(NUM)
@@ -249,7 +254,7 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
     } // for(COLON)
 
     return;
-  } // if
+  } // if ( btn->get_click() == 1)
 
   // BTN2 and click_count > 1
   pixel_on = !pixel_on;
