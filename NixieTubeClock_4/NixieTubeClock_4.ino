@@ -1,12 +1,14 @@
 /**
  * Copyright (c) 2023 Yoichi Tanibayashi
  */
+#include "common.h"
 #include "Nixie.h"
 #include "Button.h"
 #include "NetMgr.h"
 #include "ModeBase.h"
 #include "ModeClock.h"
 #include "ModeSetClock.h"
+#include "ModeHeal.h"
 #include "ModeCount.h"
 #include "ModeTest1.h"
 #include "ModeTest2.h"
@@ -102,18 +104,23 @@ NixieArray nixieArray(PIN_HV5812_CLK,  PIN_HV5812_STOBE,
 // Modes
 //----------------------------------------------------------------------
 ModeClock modeClock = ModeClock(&nixieArray);
-ModeTest1 modeTest1 = ModeTest1(&nixieArray);
-ModeTest2 modeTest2 = ModeTest2(&nixieArray);
 ModeSetClock modeSetClock = ModeSetClock(&nixieArray);
+ModeHeal modeHeal = ModeHeal(&nixieArray);
+
 ModeCount modeCount = ModeCount(&nixieArray);
 
-ModeBase* Mode[] = {&modeClock, &modeSetClock, &modeCount, &modeTest1, &modeTest2};
+ModeTest1 modeTest1 = ModeTest1(&nixieArray);
+ModeTest2 modeTest2 = ModeTest2(&nixieArray);
+
+ModeBase* Mode[] = {&modeClock, &modeSetClock, &modeHeal,
+                    &modeCount, &modeTest1, &modeTest2};
 const unsigned long MODE_N = sizeof(Mode) / sizeof(&Mode[0]);
 const unsigned int MODE_CLOCK     = 0;
 const unsigned int MODE_SET_CLOCK = 1;
-const unsigned int MODE_COUNT     = 2;
-const unsigned int MODE_TEST1     = 3;
-const unsigned int MODE_TEST2     = 4;
+const unsigned int MODE_HEAL      = 2;
+const unsigned int MODE_COUNT     = 3;
+const unsigned int MODE_TEST1     = 4;
+const unsigned int MODE_TEST2     = 5;
 
 long curMode = 0;
 long prevMode = -1;
@@ -153,26 +160,20 @@ unsigned long prevMsec  = 0; // msec
 void ntp_adjust() {
   struct tm time_info;
 
-  if (ntpActive) {
-    Serial.printf("ntp_adjust> ntpActive=true\n");
-  } else {
-    Serial.printf("ntp_adjust> ntpActive=false\n");
+  log_i("ntpActive=%d", ntpActive);
+
+  if (! ntpActive) {
     return;
   }
   
   disableIntr();
   getLocalTime(&time_info); // NTP
-  Serial.printf("ntp_adjust> %04d/%02d/%02d(%s) %02d:%02d:%02d",
-                time_info.tm_year + 1900,
-                time_info.tm_mon + 1,
-                time_info.tm_mday,
-                dayOfWeekStr[time_info.tm_wday].c_str(),
-                time_info.tm_hour,
-                time_info.tm_min,
-                time_info.tm_sec);
+  log_i("%04d/%02d/%02d(%s) %02d:%02d:%02d",
+        time_info.tm_year + 1900, time_info.tm_mon + 1, time_info.tm_mday,
+        dayOfWeekStr[time_info.tm_wday].c_str(),
+        time_info.tm_hour, time_info.tm_min, time_info.tm_sec);
 
   if ( time_info.tm_year + 1900 > 2000 ) {
-    Serial.println();
     DateTime now = DateTime(time_info.tm_year + 1900,
                             time_info.tm_mon + 1,
                             time_info.tm_mday,
@@ -181,7 +182,7 @@ void ntp_adjust() {
                             time_info.tm_sec);
     Rtc.adjust(now);
   } else {
-    Serial.printf(" .. ignored !\n");
+    log_i(" .. ignored !");
   }
   enableIntr();
 } // ntp_adjust()
@@ -190,7 +191,6 @@ void ntp_adjust() {
  *
  */
 unsigned long change_mode(unsigned long mode=MODE_N) {
-  // Serial.printf("change_mode> mode=%d/%d\n", (int)mode, MODE_N);
   prevMode = curMode;
   if (mode < MODE_N) {
     curMode = mode;
@@ -199,8 +199,6 @@ unsigned long change_mode(unsigned long mode=MODE_N) {
   } else {
     curMode = (curMode + MODE_N - 1) % MODE_N;
   }
-  //Serial.printf("change_mode> curMode=%d:%s\n",
-  //                (int)curMode, Mode[curMode]->name().c_str());
 
   nixieArray.end_all_effect();
 
@@ -222,9 +220,6 @@ void IRAM_ATTR btn_intr_hdr() {
 
   for (int b=0; b < BTN_N; b++) {
     if ( Btn[b]->get() ) {
-      // Serial.print("btn_intr_hdr> ");
-      // Btn[b]->print();
-      
       Mode[curMode]->btn_intr_hdr(curMsec, Btn[b]);
     }
   } // for(b)
@@ -234,57 +229,31 @@ void IRAM_ATTR btn_intr_hdr() {
  *
  */
 void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
-  Serial.print("btn_loop_hdr> ");
+  String btn_name = btn->get_name();
+  
+  log_i("%s", btn_name.c_str());
   btn->print();
 
-  if ( btn->get_name() == "BTN0" ) {
-    /*
-    if ( btn->get_click_count() >= 1 ) {
-      if ( Btn[1]->get_value() == Button::ON ) {
-        if ( curMode == MODE_CLOCK ) {
-          change_mode(MODE_COUNT);
-          return;
-        }
-        if ( curMode == MODE_COUNT ) {
-          change_mode(MODE_CLOCK);
-          return;
-        }
-      }
-    }
-    */
+  if ( btn_name == "BTN0" ) {
 
     if ( btn->get_click_count() >= 3 ) {
       // モード変更
       change_mode();
-      if ( curMode == MODE_SET_CLOCK ) {
+      while ( curMode == MODE_SET_CLOCK || curMode == MODE_HEAL ) {
         change_mode();
       }
       return;
     }
 
-    if ( btn->get_click_count() == 2 && curMode == MODE_CLOCK ) {
-      // WiFi ON/OFF
-      Serial.printf("btn_loop_hdr> netMgr.cur_mode=0x%02X\n", netMgr.cur_mode);
+  } // if ( "BTN0" )
 
-      wifiActive = false;
-      prev_wifiActive = false;
-      ntpActive = false;
-
-      if ( netMgr.cur_mode == NetMgr::MODE_AP_LOOP ||
-           netMgr.cur_mode == NetMgr::MODE_WIFI_OFF ) {
-        //netMgr.cur_mode = NetMgr::MODE_START;
-        Serial.println("btn_loop_hdr> Reboot");
-        Serial.println("==========");
-        Serial.println();
-        ESP.restart();
-      } else {
-        netMgr.cur_mode = NetMgr::MODE_AP_INIT;
-      }
-      Serial.printf("btn_loop_hdr> netMgr.cur_mode=0x%02X\n", netMgr.cur_mode);
-      delay(500);
+  if ( btn_name == "BTN2" ) {
+    if ( curMode == MODE_CLOCK &&
+         btn->is_long_pressed() && Btn[1]->get_value() == Button::ON ) {
+      change_mode(MODE_HEAL);
       return;
     }
-  }
+  } // if ( "BTN2" )
 
   Mode[curMode]->btn_loop_hdr(cur_ms, btn);
 } // btn_loop_hdr()
@@ -313,17 +282,18 @@ void disableIntr() {
  */
 void setup() {
   Serial.begin(115200);
-  Serial.println("setup> begin");
+  delay(500);
+
+  log_i("begin");
 
   for (int i=0; i < MODE_N; i++) {
-    Serial.printf("Mode[%d]:%s\n", i, Mode[i]->name().c_str());
+    log_i("Mode[%d]:%s", i, Mode[i]->name().c_str());
   }
   
-  Serial.printf("NTP servers:");
+  log_i("NTP servers:");
   for (int i=0; i < sizeof(NTP_SVR) / sizeof(String); i++) {
-    Serial.printf("  %s", NTP_SVR[i].c_str());
+    log_i("  %s", NTP_SVR[i].c_str());
   }
-  Serial.println();
 
   //---------------------------------------------------------------------
   // NeoPixel
@@ -338,7 +308,7 @@ void setup() {
   nixieArray.brightness = BRIGHTNESS_MAX;
   ntpActive = false;
 
-  Serial.println("setup> RTC begin");
+  log_i("RTC begin");
   Rtc.begin();
   unsigned long sec = Rtc.now().second();
   randomSeed(sec); // TBD
@@ -354,10 +324,10 @@ void setup() {
   //---------------------------------------------------------------------
   // 割り込み初期化
   //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  Serial.println("digitalPinToInterrupt:");
-  Serial.printf(" %d --> %d\n", PIN_BTN0, intrPin0);
-  Serial.printf(" %d --> %d\n", PIN_BTN1, intrPin1);
-  Serial.printf(" %d --> %d\n", PIN_BTN2, intrPin2);
+  log_i("digitalPinToInterrupt:");
+  log_i(" %d --> %d", PIN_BTN0, intrPin0);
+  log_i(" %d --> %d", PIN_BTN1, intrPin1);
+  log_i(" %d --> %d", PIN_BTN2, intrPin2);
 
   // !! Important !!
   // 
@@ -384,22 +354,29 @@ void loop() {
   // NetMgr
   netmgr_mode = netMgr.loop();
   prev_wifiActive = wifiActive;
+
   if (netmgr_mode == NetMgr::MODE_WIFI_ON) {
     wifiActive = true;
     ntpActive = true;
+
     if ( wifiActive != prev_wifiActive ) {
-      Serial.println("loop> WiFi ON");
+      log_i("loop> WiFi ON");
+
       configTime(9 * 3600L, 0,
                  NTP_SVR[0].c_str(),
                  NTP_SVR[1].c_str(),
                  NTP_SVR[2].c_str());
+
       ntp_adjust();
     }
   } else if ( netmgr_mode == NetMgr::MODE_WIFI_OFF ) {
+
     wifiActive = false;
     ntpActive = false;
+
     if ( wifiActive != prev_wifiActive ) {
-      Serial.println("loop> WiFi OFF");
+      log_i("loop> WiFi OFF");
+
       netMgr.cur_mode = NetMgr::MODE_START;
     }
   }
@@ -413,13 +390,11 @@ void loop() {
 
   //---------------------------------------------------------------------
   if (loopCount % 3000 == 0) {
-    Serial.printf("loop> ");
-    Serial.printf("now=%04d/%02d/%02d(%s) %02d:%02d:%02d",
-                  now.year(), now.month(), now.day(),
-                  dayOfWeekStr[now.dayOfTheWeek()].c_str(),
-                  now.hour(), now.minute(), now.second());
-    Serial.printf(", brightness=%d", nixieArray.brightness);
-    Serial.println();
+    log_i("now=%04d/%02d/%02d(%s) %02d:%02d:%02d, brightness=%d/%d",
+          now.year(), now.month(), now.day(),
+          dayOfWeekStr[now.dayOfTheWeek()].c_str(),
+          now.hour(), now.minute(), now.second(),
+          nixieArray.brightness, BRIGHTNESS_RESOLUTION);
   }
 
   //---------------------------------------------------------------------
@@ -448,14 +423,17 @@ void loop() {
     // 各モードの loop() 実行
     stat_t stat = Mode[curMode]->loop(curMsec, now);
     switch (stat) {
+
     case ModeBase::STAT_BACK_MODE:
-      Serial.printf("loop> stat=0x%X, curMode=%d, prevMode=%d\n",
-                    (int)stat, (int)curMode, (int)prevMode);
+      log_i("stat=0x%X, curMode=%d, prevMode=%d",
+            (int)stat, (int)curMode, (int)prevMode);
+
       change_mode(MODE_N + 1);
       break;
 
     case ModeBase::STAT_NEXT_MODE:
-      Serial.printf("loop> stat=0x%X\n", (int)stat);
+      log_i("stat=0x%X", (int)stat);
+
       change_mode();
       break;
 

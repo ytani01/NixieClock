@@ -1,22 +1,19 @@
 /**
- * (c) Yoichi Tanibayashi
+ * Copyright 2023 (c) Yoichi Tanibayashi
  */
-#include "ModeSetClock.h"
-
-extern Button* Btn[];
+#include "ModeHeal.h"
 
 /**
  *
  */
-ModeSetClock::ModeSetClock(NixieArray *nxa): ModeBase::ModeBase(nxa,
-                                                                "SetClock",
-                                                                ModeSetClock::TICK_MS) {
-} // ModeSetClock::ModeSetClock()
+ModeHeal::ModeHeal(NixieArray *nxa)
+  : ModeBase::ModeBase(nxa, "Heal", ModeHeal::TICK_MS) {
+} // ModeHeal::ModeHeal()
 
 /**
  *
  */
-mode_t ModeSetClock::change_mode(mode_t mode=ModeSetClock::MODE_NULL) {
+mode_t ModeHeal::change_mode(mode_t mode=ModeHeal::MODE_NULL) {
   if ( mode != MODE_NULL ) {
     this->_mode = mode;
   } else {
@@ -39,7 +36,7 @@ mode_t ModeSetClock::change_mode(mode_t mode=ModeSetClock::MODE_NULL) {
     break;
     } // switch(mode)
   } // if
-  Serial.printf("ModeSetClock::change_mode> mode=0x%02X\n", this->_mode);
+  Serial.printf("ModeHeal::change_mode> mode=0x%02X\n", this->_mode);
 
   int i_1, i_2;
   switch (this->_mode) {
@@ -59,7 +56,7 @@ mode_t ModeSetClock::change_mode(mode_t mode=ModeSetClock::MODE_NULL) {
     } else {
       this->_num[i] = this->_time_num[i];
     }
-    // Serial.printf("ModeSetClock::change_mode> num[%d]=%d\n", i, this->_num[i]);
+    // Serial.printf("ModeHeal::change_mode> num[%d]=%d\n", i, this->_num[i]);
 
     for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
       if ( e == this->_num[i] ) {
@@ -78,19 +75,19 @@ mode_t ModeSetClock::change_mode(mode_t mode=ModeSetClock::MODE_NULL) {
   } // for(i)
 
   return this->_mode;
-}// ModeSetClock::change_mode()
+}// ModeHeal::change_mode()
 
 /**
  *
  */
-void ModeSetClock::init(unsigned long start_ms, DateTime& now,
+void ModeHeal::init(unsigned long start_ms, DateTime& now,
                         int init_val[NIXIE_NUM_N]) {
   char disp_str[NIXIE_NUM_N + 1];
   
   // initialize _date_num[]
   sprintf(disp_str, "%02d%02d%02d",
           now.month(), now.day(), 0);
-  Serial.printf("ModeSetClock::init> disp_str='%s'\n", disp_str);
+  Serial.printf("ModeHeal::init> disp_str='%s'\n", disp_str);
   for (int i=0; i < NIXIE_NUM_N; i++) {
     this->_date_num[i] = (int)(disp_str[i] - '0');
   } // for(i)
@@ -98,7 +95,7 @@ void ModeSetClock::init(unsigned long start_ms, DateTime& now,
   // initialize _time_num[]
   sprintf(disp_str, "%02d%02d%02d",
           now.hour(), now.minute(), 0);
-  Serial.printf("ModeSetClock::init> disp_str='%s'\n", disp_str);
+  Serial.printf("ModeHeal::init> disp_str='%s'\n", disp_str);
   for (int i=0; i < NIXIE_NUM_N; i++) {
     this->_time_num[i] = (int)(disp_str[i] - '0');
   } // for(i)
@@ -110,28 +107,28 @@ void ModeSetClock::init(unsigned long start_ms, DateTime& now,
   
   Nx->brightness = BRIGHTNESS_MAX;
 
-  (void)change_mode(ModeSetClock::MODE_MONTH);
+  (void)change_mode(ModeHeal::MODE_MONTH);
 
   this->stat = STAT_DONE;
-} // ModeSetClock::init()
+} // ModeHeal::init()
 
 /**
  *
  */
-stat_t ModeSetClock::loop(unsigned long cur_ms, DateTime& now) {
+stat_t ModeHeal::loop(unsigned long cur_ms, DateTime& now) {
   if ( ModeBase::loop(cur_ms, now) == STAT_SKIP ) {
     return STAT_SKIP;
   }
   return this->stat;
-} // ModeSetClock::loop()
+} // ModeHeal::loop()
 
 /**
  *
  */
-void ModeSetClock::count_up(int n=1, boolean repeat=false) {
+void ModeHeal::count_up(int n=1, boolean repeat=false) {
   int num = 0;
 
-  Serial.printf("ModeSetClock::count_up> this->_mode=0x%02X\n", this->_mode);
+  Serial.printf("ModeHeal::count_up> this->_mode=0x%02X\n", this->_mode);
 
   switch (this->_mode) {
   case MODE_MONTH:
@@ -146,9 +143,9 @@ void ModeSetClock::count_up(int n=1, boolean repeat=false) {
 
   } // switch(mode)
 
-  Serial.printf("ModeSetClock::count_up> num=%d\n", num);
+  Serial.printf("ModeHeal::count_up> num=%d\n", num);
   num += n;
-  Serial.printf("ModeSetClock::count_up> num=%d\n", num);
+  Serial.printf("ModeHeal::count_up> num=%d\n", num);
 
   switch (this->_mode) {
   case MODE_YEAR:
@@ -195,26 +192,21 @@ void ModeSetClock::count_up(int n=1, boolean repeat=false) {
 
   change_mode(this->_mode);
 
-} // ModeSetClock::count_up()
+} // ModeHeal::count_up()
 
 /**
  *
  */
-void ModeSetClock::btn_intr_hdr(unsigned long cur_ms, Button *btn) {
-} // ModeSetClock::btn_intr_hdr()
+void ModeHeal::btn_intr_hdr(unsigned long cur_ms, Button *btn) {
+} // ModeHeal::btn_intr_hdr()
 
 /**
  *
  */
-void ModeSetClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
+void ModeHeal::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   mode_t mode;
-  String btn_name = btn->get_name();
-
-  if ( Btn[1]->get_value() == Button::ON ) {
-    return;
-  }
   
-  if ( btn_name == "BTN0" ) {
+  if ( btn->get_name() == "BTN0" ) {
     if ( btn->is_long_pressed() && ! btn->is_repeated() ) {
       this->stat = ModeBase::STAT_BACK_MODE;
       return;
@@ -229,11 +221,7 @@ void ModeSetClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
     return;
   }
 
-  if ( btn_name == "BTN1" ) {
-    if ( btn->is_long_pressed() ) {
-      return;
-    }
-    
+  if ( btn->get_name() == "BTN1" ) {
     for (int i=0; i < n; i++) {
       mode = this->change_mode();
 
@@ -256,9 +244,9 @@ void ModeSetClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
     return;
   }
 
-  if (btn_name == "BTN2" ) {
+  if (btn->get_name() == "BTN2" ) {
     for (int i=0; i < n; i++) {
       count_up();
     }
   }
-} // ModeSetClock::btn_loop_hdr()
+} // ModeHeal::btn_loop_hdr()

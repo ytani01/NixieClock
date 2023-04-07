@@ -1,5 +1,5 @@
 /*
- * (c) 2020 Yoichi Tanibayashi
+ * Copyright (c) 2023 Yoichi Tanibayashi
  */
 #include "ModeBase.h"
 
@@ -17,7 +17,7 @@ ModeBase::ModeBase(NixieArray *nxa, String name, unsigned long tick_ms) {
   msg += ", ";
   msg += "_tick_ms=" + String(this->_tick_ms);
   msg += ".";
-  Serial.println(msg);
+  log_i("%s", msg.c_str());
 }
 
 /**
@@ -33,10 +33,6 @@ String ModeBase::name() {
 boolean ModeBase::tick(unsigned long cur_ms) {
   if ( this->_tick_ms == 0 ) {
     return true;
-    /*
-    Serial.println("!? _tick_ms=" + String(this->_tick_ms));
-    return false;
-    */
   }
   this->_prev_tick = this->_tick;
   this->_tick = (cur_ms - this->_start_ms) / this->_tick_ms;
@@ -54,10 +50,13 @@ void ModeBase::init(unsigned long start_ms, DateTime& now,
   this->_start_ms = start_ms;
   (void)this->tick(start_ms);
   
-  Serial.printf("ModeBase::init> init_val=[ ");
+  log_i("init_val=[%d,%d,%d,%d,%d,%d]",
+        init_val[0], init_val[1], init_val[2],
+        init_val[3], init_val[4], init_val[5]);
+
   for (int i = 0; i < NIXIE_NUM_N; i++) {
-    Serial.printf("%d ", init_val[i]);
     this->_num[i] = init_val[i];
+
     for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
       if ( this->_num[i] == e ) {
         NxNumEl(i, e).set_brightness(Nx->brightness);
@@ -66,7 +65,6 @@ void ModeBase::init(unsigned long start_ms, DateTime& now,
       }
     } // for(e)
   } // for(i)
-  Serial.println("]");
 
   this->stat = STAT_NONE;
   Serial.printf("ModeBase::init> stat=0x%X\n", (int)this->stat);

@@ -2,6 +2,7 @@
  * Copyright (c) 2023 Yoichi Tanibayashi
  */
 #include "ModeClock.h"
+#include "NetMgr.h"
 
 static const unsigned int CL_FADE_OFF = 0;
 static const unsigned int CL_FADE_IN  = 1;
@@ -11,10 +12,6 @@ int colon_fade_mode[NIXIE_COLON_N] = {CL_FADE_OFF, CL_FADE_OFF};
 static const unsigned long CL_FADE_TICK0 = 20;
 static const unsigned long CL_FADE_TICK1 = 120;
 static unsigned long cFadeTick = CL_FADE_TICK0;
-
-extern boolean wifiActive;
-
-extern Button* Btn[];
 
 static DateTime prev_dt = DateTime(2000,1,1,0,0,0);
 
@@ -26,6 +23,12 @@ static const unsigned long PixelCol[] =
   {0x000000, 0xffffff, 0x0000ff, 0x0000ff};
 static boolean pixel_on = false;
 static boolean prev_pixel_on = pixel_on;
+
+extern Button* Btn[];
+extern NetMgr netMgr;
+extern boolean wifiActive;
+extern boolean prev_wifiActive;
+extern boolean ntpActive;
 
 /**
  *
@@ -42,8 +45,8 @@ void ModeClock::init(unsigned long start_ms, DateTime& now,
                      int init_val[NIXIE_NUM_N]) {
   ModeBase::init(start_ms, now, init_val);
   this->mode_start_ms = millis();
-  Serial.printf("ModeClock::init> mode_start_ms=%ld, stat=0x%X\n",
-                this->mode_start_ms, (int)this->stat);
+  log_i("ModeClock::init> mode_start_ms=%ld, stat=0x%X",
+        this->mode_start_ms, (int)this->stat);
 
   Nx->brightness = this->brightness;
 }
@@ -61,12 +64,12 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
   }
 
   if ( this->stat != STAT_NONE && this->stat != STAT_DONE ) {
-    Serial.printf("ModeClock::loop> stat=0x%X\n", (int)this->stat);
+    log_i("stat=0x%X", (int)this->stat);
     return this->stat;
   }
 
   if ( pixel_on != prev_pixel_on ) {
-    Serial.printf("ModeClock::loop> pixel_on=%d\n", pixel_on);
+    log_i("pixel_on=%d", pixel_on);
     prev_pixel_on = pixel_on;
 
     if ( pixel_on ) {
@@ -172,7 +175,7 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
 } // ModeClock::loop()
 
 void ModeClock::change_mode(unsigned long mode=ModeClock::MODE_NULL) {
-  Serial.printf("ModeClock::change_mode(%ld)> ", this->mode);
+  log_i("mode=%ld", this->mode);
 
   if ( mode != MODE_NULL ) {
     this->mode = mode;
@@ -193,7 +196,7 @@ void ModeClock::change_mode(unsigned long mode=ModeClock::MODE_NULL) {
     } // switch(mode)
   }
   this->mode_start_ms = millis();
-  Serial.printf("mode=%ld, mode_start_ms=%ld\n", this->mode, this->mode_start_ms);
+  log_i("mode=%ld, mode_start_ms=%ld", this->mode, this->mode_start_ms);
 }
 
 void ModeClock::btn_intr_hdr(unsigned long cur_ms, Button *btn) {
@@ -203,32 +206,52 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   boolean      flag = false;
   unsigned int bl = Nx->brightness;
   
-  // BTN0 or BTN1 or BTN2
   if ( btn->get_name() == "BTN0" ) {
     // BTN0
     if ( btn->is_long_pressed() && ! btn->is_repeated() ) {
       this->stat = ModeBase::STAT_NEXT_MODE;
-      Serial.printf("ModeClock::btn_loop_hdr> stat=0x%X\n", (int)this->stat);
+      log_i("stat=0x%X", (int)this->stat);
       return;
     }
 
-    if ( btn->get_click_count() >= 1 ) {
-      this->change_mode(); // 日付/時刻 切り替え
+    if ( btn->get_click_count() == 1 ) {
+      if ( Btn[1]->get_value() == Button::OFF ) {
+        this->change_mode(); // 日付/時刻 切り替え
+        return;
+      }
+
+      // BTN1:ON && BTN0:clicked
+      // WiFi ON/OFF
+      log_i("netMgr.cur_mode=0x%02X", netMgr.cur_mode);
+
+      wifiActive = false;
+      prev_wifiActive = false;
+      ntpActive = false;
+
+      if ( netMgr.cur_mode == NetMgr::MODE_AP_LOOP ||
+           netMgr.cur_mode == NetMgr::MODE_WIFI_OFF ) {
+        //netMgr.cur_mode = NetMgr::MODE_START;
+        log_i("Reboot");
+        log_i("==========");
+        log_i("");
+        ESP.restart();
+      } else {
+        netMgr.cur_mode = NetMgr::MODE_AP_INIT;
+      }
+      log_i("netMgr.cur_mode=0x%02X", netMgr.cur_mode);
+      delay(500);
+      return;
+
     }
     return;
   }
 
-  // BTN1 or BTN2
   if ( btn->get_name() == "BTN1" ) {
     // BTN1
     return;
   }
 
   // BTN2
-  if ( btn->get_click_count() == 0 ) {
-    return;
-  }
-  
   if ( btn->get_click_count() == 1 ) {
     if ( Btn[1]->get_value() == Button::ON ) {
         // ハードの最高輝度に設定
@@ -242,8 +265,7 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   
     Nx->brightness = bl;
     this->brightness = bl;
-    Serial.printf("ModeClock::btn_loop_hdr> Nx->brightness=%d\n",
-                  Nx->brightness);
+    log_i("Nx->brightness=%d", Nx->brightness);
 
     for (int i=0; i < NIXIE_NUM_N; i++) {
       NxNumEl(i, this->_num[i]).set_brightness(bl);
@@ -254,10 +276,11 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
     } // for(COLON)
 
     return;
-  } // if ( btn->get_click() == 1)
+  } // if ( btn->get_click_count() >= 1)
 
-  // BTN2 and click_count > 1
-  pixel_on = !pixel_on;
-  Serial.printf("ModeClock::btn_loop_hdr> pixel_on=%d\n", pixel_on);
+  if ( btn->get_click_count() >= 2 ) {
+    pixel_on = !pixel_on;
+    log_i("pixel_on=%d", pixel_on);
+  } 
   
 } // ModeClock::btn_loop_hdr()

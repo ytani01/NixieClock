@@ -3,6 +3,8 @@
  */
 #ifndef MODE_CLOCK_H
 #define MODE_CLOCK_H
+
+#include "common.h"
 #include "ModeBase.h"
 
 /**

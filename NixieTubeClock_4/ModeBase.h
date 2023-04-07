@@ -1,9 +1,11 @@
 /*
- * (c) 2020 Yoichi Tanibayashi
+ * Copyright (c) 2023 Yoichi Tanibayashi
  */
 #ifndef MODE_BASE_H
 #define MODE_BASE_H
+
 #include <Arduino.h>
+#include "common.h"
 #include "NixieArray.h"
 #include "Button.h"
 
