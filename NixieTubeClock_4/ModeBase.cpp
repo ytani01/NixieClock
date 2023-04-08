@@ -82,9 +82,9 @@ stat_t ModeBase::loop(unsigned long cur_ms, DateTime& now) {
 } // ModeBase::loop()
 
 void ModeBase::btn_intr_hdr(unsigned long cur_ms, Button *btn) {
-  Serial.println("ModeBase::btn_intr_hdr()");
+  log_d("");
 } // ModeBase::btn_intr_hdr()
 
 void ModeBase::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
-  Serial.println("ModeBase::btn_loop_hdr()");
+  log_d("");
 } // ModeBase::btn_loop_hdr()

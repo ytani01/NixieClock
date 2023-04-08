@@ -239,7 +239,7 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
     if ( btn->get_click_count() >= 3 ) {
       // モード変更
       change_mode();
-      while ( curMode == MODE_SET_CLOCK || curMode == MODE_HEAL ) {
+      while ( curMode == MODE_SET_CLOCK ) {
         change_mode();
       }
       return;
