@@ -24,7 +24,7 @@ static const String MY_NAME = "Nixie Tube Clock";
  * Z = v3
  * v4, v5: 0 (always)
  */
-int                 initValVer[NIXIE_NUM_N] = {0,0, 9,3,  0,0};
+int                 initValVer[NIXIE_NUM_N] = {0,0, 9,3};
 
 #define LOOP_DELAY_US   1   // micro sbeconds
 #define DEBOUNCE        300 // msec
@@ -57,9 +57,7 @@ uint8_t nixiePins[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N] =
    { 9,  0,  1,  2,  3,  4,  5,  6,  7,  8},
    {19, 10, 11, 12, 13, 14, 15, 16, 17, 18},
    {29, 20, 21, 22, 23, 24, 25, 26, 27, 28},
-   {39, 30, 31, 32, 33, 34, 35, 36, 37, 38},
-   {49, 40, 41, 42, 43, 44, 45, 46, 47, 48},
-   {59, 50, 51, 52, 53, 54, 55, 56, 57, 58}
+   {39, 30, 31, 32, 33, 34, 35, 36, 37, 38}
   };
 
 uint8_t colonPins[NIXIE_COLON_N][NIXIE_COLON_DOT_N] =
@@ -423,6 +421,14 @@ void loop() {
     // 各モードの loop() 実行
     stat_t stat = Mode[curMode]->loop(curMsec, now);
     switch (stat) {
+
+    case ModeBase::STAT_DONE:
+      if ( curMode == MODE_HEAL ) {
+        log_i("stat=0x%X, curMode=%d", (int)stat, (int)curMode);
+
+        change_mode(MODE_CLOCK);
+      }
+      break;
 
     case ModeBase::STAT_BACK_MODE:
       log_i("stat=0x%X, curMode=%d, prevMode=%d",

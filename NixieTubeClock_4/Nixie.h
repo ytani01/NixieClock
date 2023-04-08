@@ -29,7 +29,7 @@
 #define BRIGHTNESS_MAX         8
 #define BRIGHTNESS_MIN         1
 
-#define NIXIE_NUM_N          6  // 数字の桁数
+#define NIXIE_NUM_N          4  // 数字の桁数
 #define NIXIE_NUM_DIGIT_N   10  // 一桁の数字のパターン数
 
 #define NIXIE_COLON_N        2

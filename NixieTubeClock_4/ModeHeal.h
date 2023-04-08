@@ -7,6 +7,9 @@
 
 class ModeHeal : public ModeBase {
  public:
+  //static const unsigned long HEALING_TIME_MS = 60 * 3 * 1000; // 3 minutes
+  static const unsigned long HEALING_TIME_MS = 10 * 1000; // 10 seconds
+
   static const mode_t TICK_MS = 10;        // ms
   static const mode_t BLINK_TICK_MS = 200; // ms
 
@@ -17,8 +20,9 @@ class ModeHeal : public ModeBase {
   void btn_loop_hdr(unsigned long cur_ms, Button *btn);
 
  private:
-  int _curTube = 0;
-  int _curElement = 0;
+  int _targetNum = -1;
+  int _targetElement = 0;
+  unsigned long _startMs = 0;
   
 }; // class ModeHeal
 #endif // MODE_HEAL_H
