@@ -10,6 +10,9 @@ class ModeHeal : public ModeBase {
   //static const unsigned long HEALING_TIME_MS = 60 * 3 * 1000; // 3 minutes
   static const unsigned long HEALING_TIME_MS = 10 * 1000; // 10 seconds
 
+  //static const uint8_t BRIGHTNESS_HEAL = BRIGHTNESS_RESOLUTION;
+  static const uint8_t BRIGHTNESS_HEAL = 4;
+
   static const mode_t TICK_MS = 10;        // ms
   static const mode_t BLINK_TICK_MS = 200; // ms
 

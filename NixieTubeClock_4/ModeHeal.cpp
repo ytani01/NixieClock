@@ -33,7 +33,7 @@ stat_t ModeHeal::loop(unsigned long cur_ms, DateTime& now) {
     return STAT_SKIP;
   }
 
-  if ( cur_ms - this->_startMs >= HEALING_TIME_MS ) {
+  if ( millis() - this->_startMs >= HEALING_TIME_MS ) {
     log_i("cur_ms=%u, startMs=%u: %u, %u",
           cur_ms, this->_startMs, cur_ms - this->_startMs, HEALING_TIME_MS);
           
@@ -57,7 +57,7 @@ stat_t ModeHeal::loop(unsigned long cur_ms, DateTime& now) {
   for (int i=0; i < NIXIE_NUM_N; i++) {
     for ( int e=0; e <=9; e++) {
       if ( i == this->_targetNum && e == this->_targetElement ) {
-        NxNumEl(i, e).set_brightness(BRIGHTNESS_MAX);
+        NxNumEl(i, e).set_brightness(BRIGHTNESS_HEAL);
       } else {
         NxNumEl(i, e).set_brightness(0);
       }
