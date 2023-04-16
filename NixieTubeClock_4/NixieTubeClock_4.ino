@@ -200,6 +200,10 @@ unsigned long change_mode(unsigned long mode=MODE_N) {
 
   nixieArray.end_all_effect();
 
+  log_i("%s ==> %s",
+        Mode[prevMode]->name().c_str(),
+        Mode[curMode]->name().c_str());
+
   return curMode;
 } // change_mode()
 
@@ -246,10 +250,11 @@ void btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   } // if ( "BTN0" )
 
   if ( btn_name == "BTN2" ) {
-    if ( curMode == MODE_CLOCK &&
-         btn->is_long_pressed() && Btn[1]->get_value() == Button::ON ) {
-      change_mode(MODE_HEAL);
-      return;
+    if ( curMode == MODE_CLOCK ) {
+      if ( btn->is_long_pressed() && Btn[1]->get_value() == Button::ON ) {
+        change_mode(MODE_HEAL);
+        return;
+      }
     }
   } // if ( "BTN2" )
 

@@ -156,6 +156,7 @@ mode_t NetMgr::loop() {
     break;
   } // switch
 
+  //delay(1); // これを入れると表示がちらつく
   return this->cur_mode;
 } // NetMgr::loop()
 
