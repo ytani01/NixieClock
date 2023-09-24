@@ -26,3 +26,14 @@
 
 [BOOT]を押しながら、[RST]をクリック
 → DFU(Device Firmware Update) mode
+
+## PINS
+
+```
+constexpr int PIN_SDA = 8;
+constexpr int PIN_SCL = 9;
+
+constexpr int PIN_BTN_UP = 18;
+constexpr int PIN_BTN_DOWN = 17;
+constexpr int PIN_BTN_MODE = 14;
+```
