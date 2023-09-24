@@ -1,6 +1,11 @@
-# test02
+# test01
 
-- Serial: NG
-- log_i(): OK
-- buttons: OK
-- OLED: OK
+- [ ] Serial: NG
+- [x] log_i(): OK
+- [x] buttons: OK
+- [x] OLED: OK
+- [ ] RTC
+- [ ] WiFi
+- [ ] Task
+- [ ] Mode
+- [ ] NixieTube
