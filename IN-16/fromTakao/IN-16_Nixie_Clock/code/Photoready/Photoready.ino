@@ -40,8 +40,8 @@ void setup() {
   n5 = d5[3];
   n6 = d6[0];
 
+  Serial.println("AAA");
   displayNix();
-  
 }
 
 void loop() {
