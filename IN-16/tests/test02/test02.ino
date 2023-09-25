@@ -9,8 +9,8 @@
 static int loopCount = 0;
 CommonData_t commonData;  // see commo.h
 
-constexpr int PIN_SDA = 8;
-constexpr int PIN_SCL = 9;
+constexpr int PIN_SDA = 9;
+constexpr int PIN_SCL = 8;
 
 constexpr int PIN_BTN_UP = 18;
 constexpr int PIN_BTN_DOWN = 17;
@@ -52,7 +52,7 @@ void setup() {
   btn_down = new Button("DOWN", PIN_BTN_DOWN, btn_intr_hdr);
   btn_mode = new Button("MODE", PIN_BTN_MODE, btn_intr_hdr);
 
-  Wire.setPins(PIN_SCL,PIN_SDA);
+  Wire.setPins(PIN_SDL,PIN_SCL);
   Disp = new Display_t(DISPLAY_W, DISPLAY_H, &Wire, -1);
   Disp->DispBegin(DISPLAY_I2C_ADDR); // 0x3C in Display.h
   //delay(2000);

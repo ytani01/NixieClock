@@ -1,10 +1,11 @@
 /**
- * (c) 2021 Yoichi Tanibayashi
+ * Copyright (c) 2023 Yoichi Tanibayashi
  */
 #ifndef NETMGR_H
 #define NETMGR_H
 
 #include <esp_system.h>
+#include <esp32-hal-log.h>
 #include <WiFi.h>
 #include <WebServer.h>
 #include <DNSServer.h>

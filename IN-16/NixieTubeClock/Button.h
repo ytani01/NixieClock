@@ -1,5 +1,5 @@
 /**
- * (c) 2021 Yoichi Tanibayashi
+ * Copyright (c) 2023 Yoichi Tanibayashi
  *
  *  ==========================================================================
  *  example1
@@ -70,8 +70,7 @@ class Button {
   boolean	is_long_pressed();
   boolean	is_repeated();
 
-  void    	print();
-  void    	print(boolean interrupt);
+  String    	toString(boolean interrupt=false);
 
  private:
   String	_name;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 Yoichi Tanibayashi
+ * Copyright (c) 2023 Yoichi Tanibayashi
  */
 #include "ModeClock.h"
 
@@ -15,15 +15,6 @@ static unsigned long cFadeTick = CL_FADE_TICK0;
 extern boolean wifiActive;
 
 static DateTime prev_dt = DateTime(2000,1,1,0,0,0);
-
-#include <Adafruit_NeoPixel.h>
-extern Adafruit_NeoPixel   Pixels;
-static const uint8_t       PIXEL_N = 6;
-static const int           PIXEL_BL = 255;
-static const unsigned long PixelCol[] =
-  {0x000000, 0xffffff, 0x0000ff, 0x0000ff};
-static boolean pixel_on = false;
-static boolean prev_pixel_on = pixel_on;
 
 /**
  *
@@ -63,31 +54,6 @@ stat_t ModeClock::loop(unsigned long cur_ms, DateTime& now) {
     return this->stat;
   }
 
-  if ( pixel_on != prev_pixel_on ) {
-    Serial.printf("ModeClock::loop> pixel_on=%d\n", pixel_on);
-    prev_pixel_on = pixel_on;
-
-    if ( pixel_on ) {
-      for (int i=0; i < PIXEL_N; i++) {
-        Pixels.setPixelColor(i, PixelCol[this->mode]);
-      } // for(i)
-    } else {
-      Pixels.clear();
-    } // if (pixel_on)
-    Pixels.show();
-    prev_mode = this->mode;
-  } // if
-  
-  if ( pixel_on ) {
-    if ( this->mode != prev_mode ) {
-      for (int i=0; i < PIXEL_N; i++) {
-        Pixels.setPixelColor(i, PixelCol[this->mode]);
-      } // for(i)
-      Pixels.show();
-      prev_mode = this->mode;
-    } // if
-  } //if
-  
   switch ( this->mode ) {
   case ModeClock::MODE_HMS:
     sprintf(disp_str, "%02d%02d%02d", now.hour(), now.minute(), now.second());
@@ -240,7 +206,4 @@ void ModeClock::btn_loop_hdr(unsigned long cur_ms, Button *btn) {
   } // if
 
   // BTN2 and click_count > 1
-  pixel_on = !pixel_on;
-  Serial.printf("ModeClock::btn_loop_hdr> pixel_on=%d\n", pixel_on);
-  
 } // ModeClock::btn_loop_hdr()

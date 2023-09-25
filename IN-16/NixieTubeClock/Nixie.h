@@ -1,5 +1,5 @@
 /**
- * (c) 2020 Yoichi Tanibayashi
+ * Copyright (c) 2023 Yoichi Tanibayashi
  *
  *----------------------------------------------------------------------------
  * [ Data structure ( not a class tree ) ]
@@ -22,11 +22,12 @@
 #ifndef NIXIE_H
 #define NIXIE_H
 #include <Arduino.h>
+#include <esp32-hal-log.h>
 #include <RTClib.h>
 #include <WiFi.h>
 
 #define BRIGHTNESS_RESOLUTION 16  // 明るさの段階数 2^n
-#define BRIGHTNESS_MIN         3  // 明るさ最小値
+#define BRIGHTNESS_MIN         2  // 明るさ最小値
 
 #define NIXIE_NUM_N          6  // 数字の桁数
 #define NIXIE_NUM_DIGIT_N   10  // 一桁の数字のパターン数

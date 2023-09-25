@@ -1,5 +1,5 @@
 /**
- * (c) 2021 Yoichi Tanibayashi
+ * Copyright (c) 2023 Yoichi Tanibayashi
  */
 #include "Button.h"
 
@@ -137,11 +137,7 @@ boolean Button::is_repeated()
   return this->_repeated;
 }
 
-void Button::print() {
-  print(false);
-}
-void Button::print(boolean interrupt)
-{
+String Button::toString(bool interrupt) {
   String str = interrupt ? "!" : " ";
   
   str += "Btn[" + this->_name + "] ";
@@ -151,5 +147,5 @@ void Button::print(boolean interrupt)
   str += this->_long_pressed ? "Long " : "---- ";
   str += this->_repeated ? "Repeat "  : "------ ";
 
-  Serial.println(str);
+  return str;
 }
