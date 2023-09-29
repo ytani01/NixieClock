@@ -69,7 +69,7 @@ uint8_t colonPins[NIXIE_COLON_N][NIXIE_COLON_DOT_N] =
    {PIN_COLON_L_TOP}
   };
 
-NixieTubeArray *nixieTubeArray = NULL;
+NixieTubeArray *nta = NULL;
 
 Task_NixieTubeArray *task_NixieTubeArray = NULL;
 
@@ -288,31 +288,15 @@ void setup() {
   dispFps = confFps->disp_fps;
   log_i("dispFps=%d", dispFps);
 
+  // create Nixie Tube object
+  nta = new NixieTubeArray(PIN_HV5812_CLK,  PIN_HV5812_STOBE,
+                           PIN_HV5812_DATA, PIN_HV5812_BLANK,
+                           nixiePins, colonPins);
+
   // init commonData
   commonData.netmgr_info = &netMgrInfo;
   commonData.ntp_info = &ntpInfo;
-
-  // init Nixie Tube
-  nixieTubeArray = new NixieTubeArray(PIN_HV5812_CLK,  PIN_HV5812_STOBE,
-                                  PIN_HV5812_DATA, PIN_HV5812_BLANK,
-                                  nixiePins, colonPins);
-
-  nixieTubeArray->brightness = BRIGHTNESS_RESOLUTION;
-
-  int init_val[NIXIE_NUM_N] = {0, 1, 2, 3, 4, 5};
-  for (int i = 0; i < NIXIE_NUM_N; i++) {
-    for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
-      if ( init_val[i] == e ) {
-        nixieTubeArray->num[i].element[e].set_brightness(nixieTubeArray->brightness);
-      } else {
-        nixieTubeArray->num[i].element[e].set_brightness(0);
-      }
-    } // for(e)
-  } // for(i)
-
-  for (int i=0; i < NIXIE_COLON_N; i++) {
-    nixieTubeArray->colon[i].element[0].set_brightness(nixieTubeArray->brightness);
-  } // for(i)
+  commonData.nta = nta;
 
   // init Display
   Wire.setPins(PIN_I2C_SDA, PIN_I2C_SCL);
@@ -327,7 +311,7 @@ void setup() {
 
   unsigned long task_interval = 10;
 
-  task_NixieTubeArray = new Task_NixieTubeArray(nixieTubeArray);
+  task_NixieTubeArray = new Task_NixieTubeArray(nta);
   task_NixieTubeArray->start();
   delay(1000);
 
@@ -371,7 +355,7 @@ void setup() {
   }
   change_mode(MODE_MAIN);
 
-  nixieTubeArray->display(0);
+  nta->display(0);
 
   idleStart = millis();
 } // setup()
@@ -462,7 +446,7 @@ void loop() {
     Disp->printf("%6d", idle_ms);
   } // if (dispFps);
 
-  //nixieTubeArray->display(cur_ms);
+  //nta->display(cur_ms);
   Disp->display();
   delay(1);
 } // loop()

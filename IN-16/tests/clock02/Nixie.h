@@ -39,11 +39,12 @@
 
 #define NIXIE_ELEMENT_N_MAX  (NIXIE_NUM_DIGIT_N > NIXIE_COLON_DOT_N ? NIXIE_NUM_DIGIT_N : NIXIE_COLON_DOT_N)
 
+// 省略記法
 #define Nta           this->_nta
-#define NtaNum(i)     Nx->num[i]
-#define NtaNumEl(i,j) NxNum(i).element[j]
-#define NtaCol(i)     Nx->colon[i]
-#define NtaColEl(i,j) NxCol(i).element[j]
+#define NtaNum(i)     Nta->num[i]
+#define NtaNumEl(i,j) NtaNum(i).element[j]
+#define NtaCol(i)     Nta->colon[i]
+#define NtaColEl(i,j) NtaCol(i).element[j]
 
 //typedef unsigned long mode_t;
 typedef unsigned long stat_t;

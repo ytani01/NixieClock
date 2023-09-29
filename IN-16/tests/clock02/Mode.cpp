@@ -9,6 +9,7 @@
 Mode::Mode(String name, CommonData_t *common_data) {
   this->name = name;
   this->common_data = common_data;
+  this->_nta = this->common_data->nta;
 } // Mode::Mode()
 
 /**

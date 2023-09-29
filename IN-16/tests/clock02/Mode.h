@@ -34,6 +34,7 @@ public:
 protected:
   String name;
   CommonData_t *common_data;
+  NixieTubeArray *_nta;
   Mode_t prev_mode;
 }; // class Mode
 

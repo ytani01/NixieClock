@@ -18,6 +18,7 @@
 
 #include "Task_NetMgr.h"
 #include "NtpTask.h"
+#include "NixieTubeArray.h"
 
 #define VERSION_STR "0.xx"
 
@@ -39,6 +40,7 @@ typedef struct {
   // std::stack<Mode_t> mode_stack; // XXX
   NetMgrInfo_t *netmgr_info;
   NtpTaskInfo_t *ntp_info;
+  NixieTubeArray *nta;
 } CommonData_t;
 
 //-----------------------------

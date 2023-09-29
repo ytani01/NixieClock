@@ -89,8 +89,7 @@ void IRAM_ATTR NixieTubeArray::display(unsigned long cur_ms) {
   uint8_t pin_n = NIXIE_NUM_N * NIXIE_NUM_DIGIT_N;
   uint8_t val[pin_n];
 
-  disp_count++;
-  disp_count %= BRIGHTNESS_RESOLUTION;
+  disp_count = (disp_count + 1) % BRIGHTNESS_RESOLUTION;
   
   //---------------------------------------------------------------------
   this->loop(cur_ms); // ニキシー管 全て
