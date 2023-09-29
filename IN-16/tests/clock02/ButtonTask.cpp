@@ -158,6 +158,8 @@ ButtonInfo_t *ButtonWatcher::get_btn_info() {
  *
  */
 void ButtonWatcher::setup() {
+  log_i("%s", this->conf.name);
+
   this->_btn_task = new ButtonTask(this->_btn_name, this->_pin,
                                         this->_stack_size,
                                         this->_priority,

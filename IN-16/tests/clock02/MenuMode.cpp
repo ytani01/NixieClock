@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Yoichi Tanibayashi
+ * Copyright (c) 2023 Yoichi Tanibayashi
  */
 #include "MenuMode.h"
 
@@ -8,7 +8,7 @@
  */
 MenuMode::MenuMode(String name, CommonData_t *common_data,
                    void (*cb)(String text))
-  : ModeBase(name, common_data) {
+  : Mode(name, common_data) {
   this->cb = cb;
 
 } // MenuMode::MenuMode()
@@ -79,7 +79,7 @@ void MenuMode::setup() {
  *
  */
 bool MenuMode::enter(Mode_t prev_mode) {
-  ModeBase::enter(prev_mode);
+  Mode::enter(prev_mode);
 
   if ( prev_mode == MODE_MAIN ) {
     this->curMenu = this->topMenu;

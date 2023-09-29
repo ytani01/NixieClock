@@ -7,7 +7,7 @@
  *
  */
 MainMode::MainMode(String name, CommonData_t *common_data)
-  : ModeBase(name, common_data) {
+  : Mode(name, common_data) {
 
   strcpy(this->mac_addr_str, get_mac_addr_String().c_str());
   log_i("mac_addr_str=\"%s\"", this->mac_addr_str);
@@ -16,23 +16,38 @@ MainMode::MainMode(String name, CommonData_t *common_data)
 /**
  *
  */
-Mode_t MainMode::reBtn_cb(ButtonInfo_t *bi) {
+Mode_t MainMode::btnCb_Mode(ButtonInfo_t *bi) {
+  log_i("%s", this->name.c_str());
+
   if ( bi->click_count > 0 ) {
-    return MODE_MENU;
+    _cd->msg = String(bi->name) + "> click:" + String(bi->click_count);
   }
   return MODE_N;
-} // MainMode::reBtn_cb()
+} // MainMode::btnCb_Mode()
 
 /**
  *
  */
-Mode_t MainMode::obBtn_cb(ButtonInfo_t *bi) {
+Mode_t MainMode::btnCb_Up(ButtonInfo_t *bi) {
+  log_i("%s", this->name.c_str());
+  
   if ( bi->click_count > 0 ) {
-    _cd->msg = " Onboard Btn\n";
-    _cd->msg += " click:" + String(bi->click_count);
+    _cd->msg = String(bi->name) + "> click:" + String(bi->click_count);
   }
   return MODE_N;
-} // MainMode::obBtn_cb()
+} // MainMode::btnCb_Up()
+
+/**
+ *
+ */
+Mode_t MainMode::btnCb_Down(ButtonInfo_t *bi) {
+  (void)Mode::btnCb_Down(bi);
+
+  if ( bi->click_count > 0 ) {
+    _cd->msg = String(bi->name) + "> click:" + String(bi->click_count);
+  }
+  return MODE_N;
+} // MainMode::btnCb_Down()
 
 /**
  *

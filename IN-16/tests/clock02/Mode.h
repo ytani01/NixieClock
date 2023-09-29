@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2022 Yoichi Tanibayashi
+ * Copyright (c) 2023 Yoichi Tanibayashi
  */
-#ifndef _MODE_BASE_H_
-#define _MODE_BASE_H_
+#ifndef _MODE_H_
+#define _MODE_H_
 
 #include <esp32-hal-log.h>
 #include "common.h"
@@ -14,9 +14,9 @@
 /**
  *
  */
-class ModeBase {
+class Mode {
 public:
-  ModeBase(String name, CommonData_t *common_data);
+  Mode(String name, CommonData_t *common_data);
 
   String get_name();
 
@@ -25,14 +25,16 @@ public:
   virtual bool exit();
   virtual void loop(unsigned long cur_ms);
 
-  virtual Mode_t reBtn_cb(ButtonInfo_t *bi);
-  virtual Mode_t obBtn_cb(ButtonInfo_t *bi);
+  virtual Mode_t btnCb_Mode(ButtonInfo_t *bi);
+  virtual Mode_t btnCb_Up(ButtonInfo_t *bi);
+  virtual Mode_t btnCb_Down(ButtonInfo_t *bi);
+
   virtual void display(Display_t *disp);
 
 protected:
   String name;
   CommonData_t *common_data;
   Mode_t prev_mode;
-}; // class ModeBase
+}; // class Mode
 
-#endif // _MODE_BASE_H_
+#endif // _MODE_H_

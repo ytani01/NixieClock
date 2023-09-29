@@ -5,19 +5,21 @@
 #define _MAIN_MODE_H_
 
 #include "commonlib.h"
-#include "ModeBase.h"
+#include "Mode.h"
 
 /** constructor
  *
  */
-class MainMode: public ModeBase {
+class MainMode: public Mode {
  public:
   char mac_addr_str[13];
 
   MainMode(String name, CommonData_t *common_data);
 
-  virtual Mode_t reBtn_cb(ButtonInfo_t *bi);
-  virtual Mode_t obBtn_cb(ButtonInfo_t *bi);
+  virtual Mode_t btnCb_Mode(ButtonInfo_t *bi);
+  virtual Mode_t btnCb_Up(ButtonInfo_t *bi);
+  virtual Mode_t btnCb_Down(ButtonInfo_t *bi);
+
   virtual void display(Display_t *disp);
 
  protected:

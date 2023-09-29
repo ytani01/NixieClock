@@ -1,6 +1,5 @@
 /**
- * $Id: 1f0fd03a1ae0002a569a4fb77a967acf2cd615c4 $
- * Copyright (c) 2022 Yoichi Tanibayashi
+ * Copyright (c) 2023 Yoichi Tanibayashi
  */
 #ifndef _COMMON_H_
 #define _COMMON_H_
@@ -17,7 +16,7 @@
 #include <Fonts/Picopixel.h>
 //#include <Fonts/Org_01.h>
 
-#include "NetMgrTask.h"
+#include "Task_NetMgr.h"
 #include "NtpTask.h"
 
 #define VERSION_STR "0.xx"
@@ -42,6 +41,15 @@ typedef struct {
   NtpTaskInfo_t *ntp_info;
 } CommonData_t;
 
+//-----------------------------
+// class Mode {
+//  :
+//  protected:
+//  :
+//   CommonData_t *common_data;
+//  :
+// }
+//-----------------------------
 #define _cd this->common_data
 
 #endif // _COMMON_H_

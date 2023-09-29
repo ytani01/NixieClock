@@ -1,14 +1,15 @@
 /**
  * (c) 2021 Yoichi Tanibayashi
  */
-#include "NixieArray.h"
+#include "NixieTubeArray.h"
 
 //============================================================================
-// class NixieArray
+// class NixieTubeArray
 //----------------------------------------------------------------------------
-NixieArray::NixieArray(uint8_t clk, uint8_t stobe, uint8_t data, uint8_t blank,
-                       uint8_t num_pin[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N],
-                       uint8_t colon_pin[NIXIE_COLON_N][NIXIE_COLON_DOT_N]) {
+NixieTubeArray::NixieTubeArray(uint8_t clk, uint8_t stobe, uint8_t data,
+                               uint8_t blank,
+                               uint8_t num_pin[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N],
+                               uint8_t colon_pin[NIXIE_COLON_N][NIXIE_COLON_DOT_N]) {
   uint8_t pout[] = {clk, stobe, data, blank};
 
   for (int p=0; p < sizeof(pout) / sizeof(uint8_t); p++) {
@@ -32,30 +33,30 @@ NixieArray::NixieArray(uint8_t clk, uint8_t stobe, uint8_t data, uint8_t blank,
     }
   } // for(c)
 
-} // NixieArray::setup()
+} // NixieTubeArray::setup()
 
-void NixieArray::loop(unsigned long cur_ms) {
+void NixieTubeArray::loop(unsigned long cur_ms) {
   for (int ti=0; ti < NIXIE_NUM_N; ti++) {
     this->num[ti].loop(cur_ms);
   } // for(ti)
   for (int ti=0; ti < NIXIE_COLON_N; ti++) {
     this->colon[ti].loop(cur_ms);
   } // for(ti)
-} // NixieArray::loop()
+} // NixieTubeArray::loop()
 
-void NixieArray::end_all_effect() {
+void NixieTubeArray::end_all_effect() {
   for (int t=0; t < NIXIE_NUM_N; t++) {
     this->num[t].end_effect();
   } // for(t)
   for (int c=0; c < NIXIE_COLON_N; c++) {
     this->colon[c].end_effect();
   } // for(c)
-} // NixieArray::end_all_effect()
+} // NixieTubeArray::end_all_effect()
 
 /**
  *
  */
-void NixieArray::set_onoff(unsigned long cur_ms) {
+void NixieTubeArray::set_onoff(unsigned long cur_ms) {
   uint8_t timing = cur_ms % BRIGHTNESS_RESOLUTION;
 
   // 数字部
@@ -78,13 +79,13 @@ void NixieArray::set_onoff(unsigned long cur_ms) {
       }
     } // for(e)
   } // for(t)
-} // NixieArray::set_onoff()
+} // NixieTubeArray::set_onoff()
 
 /**
  *
  */
 static unsigned long disp_count=0;
-void IRAM_ATTR NixieArray::display(unsigned long cur_ms) {
+void IRAM_ATTR NixieTubeArray::display(unsigned long cur_ms) {
   uint8_t pin_n = NIXIE_NUM_N * NIXIE_NUM_DIGIT_N;
   uint8_t val[pin_n];
 
@@ -115,17 +116,17 @@ void IRAM_ATTR NixieArray::display(unsigned long cur_ms) {
 
   digitalWrite(_pin_clk, LOW);
   for (int p=(pin_n - 1); p >=0; p--) {
-    //delayMicroseconds(NixieArray::DISP_DELAY_US);
+    //delayMicroseconds(NixieTubeArray::DISP_DELAY_US);
     digitalWrite(_pin_data, val[p]);
-    //delayMicroseconds(NixieArray::DISP_DELAY_US);
+    //delayMicroseconds(NixieTubeArray::DISP_DELAY_US);
     digitalWrite(_pin_clk, HIGH);
-    delayMicroseconds(NixieArray::DISP_DELAY_US);
+    delayMicroseconds(NixieTubeArray::DISP_DELAY_US);
     digitalWrite(_pin_clk, LOW);
   }
   digitalWrite(_pin_stobe, HIGH);
-  delayMicroseconds(NixieArray::DISP_DELAY_US);
+  delayMicroseconds(NixieTubeArray::DISP_DELAY_US);
   digitalWrite(_pin_stobe, LOW);
-  delayMicroseconds(NixieArray::DISP_DELAY_US);
+  delayMicroseconds(NixieTubeArray::DISP_DELAY_US);
   //--------------------------------------------------------------------
   // コロンの表示処理
   for (int c=0; c < NIXIE_COLON_N; c++) {
@@ -138,4 +139,4 @@ void IRAM_ATTR NixieArray::display(unsigned long cur_ms) {
       }
     } // for(d)
   } // for(c)
-} // NixieArray::display()
+} // NixieTubeArray::display()

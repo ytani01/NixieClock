@@ -440,9 +440,9 @@ unsigned int NetMgr::async_scan_ssid_wait() {
 void NetMgr::handle_top() {
   String   ssid, pw;
 
-  // confSsid->load();
-  ssid = "";
-  pw = "";
+  confSsid->load();
+  ssid = confSsid->ent.begin()->first.c_str();
+  pw = confSsid->ent.begin()->second.c_str();
   log_i("ssid=%s, pw=%s", ssid.c_str(), pw.c_str());
 
   String html = NetMgr::html_header("Current settings");

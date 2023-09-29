@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Yoichi Tanibayashi
+ * Copyright (c) 2023 Yoichi Tanibayashi
  */
 #include "RestartMode.h"
 
@@ -7,7 +7,7 @@
  *
  */
 RestartMode::RestartMode(String name, CommonData_t *common_data)
-  : ModeBase(name, common_data) {
+  : Mode(name, common_data) {
 
 } // RestartMode::RestartMode()
 
@@ -15,7 +15,7 @@ RestartMode::RestartMode(String name, CommonData_t *common_data)
  *
  */
 bool RestartMode::enter(Mode_t prev_mode) {
-  ModeBase::enter(prev_mode);
+  Mode::enter(prev_mode);
 
   log_w("restart ..");
 

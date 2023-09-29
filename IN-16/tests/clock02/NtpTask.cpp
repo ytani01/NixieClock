@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Yoichi Tanibayashi
+ * Copyright (c) 2023 Yoichi Tanibayashi
  */
 #include "NtpTask.h"
 
@@ -21,17 +21,17 @@ char* NtpTask::get_time_str() {
   getLocalTime(&ti);
   strftime(buf, sizeof(buf), "%Y-%m-%d(%a) %H:%M:%S", &ti);
   return buf;
-} // NetMgrTask::get_time_str()
+} // Task_NetMgr::get_time_str()
 
 /** constructor
  *
  */
-NtpTask::NtpTask(String ntp_svr[], NetMgrTask **pNetMgrTask,
+NtpTask::NtpTask(String ntp_svr[], Task_NetMgr **pTask_NetMgr,
                            void (*cb)(NtpTaskInfo_t *ntp_info))
   : Task("NTP_task") {
 
   this->ntp_svr = ntp_svr;
-  this->pNetMgrTask = pNetMgrTask;
+  this->pTask_NetMgr = pTask_NetMgr;
   this->_cb = cb;
   if ( cb == NULL ) {
     this->_cb = _ntp_cb;
@@ -66,7 +66,7 @@ void NtpTask::loop() {
   bool wifi_available = false;
   unsigned long interval = INTERVAL_NO_WIFI;
 
-  NetMgrTask *netMgrTask = *(this->pNetMgrTask);
+  Task_NetMgr *netMgrTask = *(this->pTask_NetMgr);
   if ( netMgrTask != NULL ) {
     NetMgr *netMgr = netMgrTask->netMgr;
     if ( netMgr != NULL ) {
@@ -87,7 +87,7 @@ void NtpTask::loop() {
   }
     
   // start sync
-  log_d("start sync ..");
+  log_i("start sync ..");
   configTime(9 * 3600L, 0,
              ntp_svr[0].c_str(), ntp_svr[1].c_str(), ntp_svr[2].c_str());
 

@@ -4,7 +4,7 @@
  *----------------------------------------------------------------------------
  * [ Data structure ( not a class tree ) ]
  *
- *  NixieArray
+ *  NixieTubeArray
  *   |
  *   +- NixieTube num[NIXIE_NUM_N]
  *   |   |
@@ -39,11 +39,11 @@
 
 #define NIXIE_ELEMENT_N_MAX  (NIXIE_NUM_DIGIT_N > NIXIE_COLON_DOT_N ? NIXIE_NUM_DIGIT_N : NIXIE_COLON_DOT_N)
 
-#define Nx           this->_nxa
-#define NxNum(i)     Nx->num[i]
-#define NxNumEl(i,j) NxNum(i).element[j]
-#define NxCol(i)     Nx->colon[i]
-#define NxColEl(i,j) NxCol(i).element[j]
+#define Nta           this->_nta
+#define NtaNum(i)     Nx->num[i]
+#define NtaNumEl(i,j) NxNum(i).element[j]
+#define NtaCol(i)     Nx->colon[i]
+#define NtaColEl(i,j) NxCol(i).element[j]
 
 //typedef unsigned long mode_t;
 typedef unsigned long stat_t;

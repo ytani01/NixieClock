@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2022 Yoichi Tanibayashi
+ * Copyright (c) 2023 Yoichi Tanibayashi
  */
-#ifndef _NETMGR_TASK_H_
-#define _NETMGR_TASK_H_
+#ifndef _TASK_NETMGR_H_
+#define _TASK_NETMGR_H_
 
 #include "Task.h"
 #include "NetMgr.h"
@@ -19,13 +19,15 @@ typedef struct {
 /**
  *
  */
-class NetMgrTask: public Task {
+class Task_NetMgr: public Task {
  public:
   NetMgr *netMgr = NULL;
   String ap_ssid_hdr;
   unsigned long wifi_try_count;
 
-  NetMgrTask(String name, String ap_ssid_hdr,
+  static constexpr char *name = (char *)"Task:NetMgr";
+  
+  Task_NetMgr(String name, String ap_ssid_hdr,
                   NetMgrInfo_t *netmgr_info,
                   unsigned long wifi_try_count=NetMgr::DEF_TRY_COUNT_MAX);
 
@@ -38,5 +40,5 @@ class NetMgrTask: public Task {
   virtual void setup();
   virtual void loop();
 
-}; // class NetMgrTask
-#endif // _NETMGR_TASK_H_
+}; // class Task_NetMgr
+#endif // _TASK_NETMGR_H_

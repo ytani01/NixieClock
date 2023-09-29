@@ -1,78 +1,86 @@
 /**
  * Copyright (c) 2022 Yoichi Tanibayashi
  */
-#include "ModeBase.h"
+#include "Mode.h"
 
 /** constructor
  *
  */
-ModeBase::ModeBase(String name, CommonData_t *common_data) {
+Mode::Mode(String name, CommonData_t *common_data) {
   this->name = name;
   this->common_data = common_data;
-} // ModeBase::ModeBase()
+} // Mode::Mode()
 
 /**
  *
  */
-String ModeBase::get_name() {
+String Mode::get_name() {
     return this->name;
-} // ModeBase::get_name()
+} // Mode::get_name()
   
 /**
  * 最初の初期化
  */
-void ModeBase::setup() {
+void Mode::setup() {
   log_d("%s", this->name.c_str());
-} // ModeBase::setup()
+} // Mode::setup()
 
 /**
  * モード切替時に毎回実行
  */
-bool ModeBase::enter(Mode_t prev_mode) {
+bool Mode::enter(Mode_t prev_mode) {
   log_i("%s: prev_mode=%s", this->name.c_str(), MODE_T_STR[prev_mode]);
   this->prev_mode = prev_mode;
   return true;
-} // ModeBase::resume()
+} // Mode::resume()
 
 /**
  * モード切替時に毎回実行
  */
-bool ModeBase::exit() {
+bool Mode::exit() {
   log_i("%s", this->name.c_str());
   return true;
-} // ModeBase::resume()
+} // Mode::resume()
 
 /**
  * 
  */
-void ModeBase::loop(unsigned long cur_ms) {
+void Mode::loop(unsigned long cur_ms) {
   return;
-} // ModeBase::resume()
+} // Mode::resume()
 
 /**
  *
  */
-Mode_t ModeBase::reBtn_cb(ButtonInfo_t *bi) {
+Mode_t Mode::btnCb_Mode(ButtonInfo_t *bi) {
   log_i("%s", this->name.c_str());
   return MODE_N;
-} // ModeBase::reBtn_cb()
+} // Mode::btnCb_Mode()
 
 /**
  *
  */
-Mode_t ModeBase::obBtn_cb(ButtonInfo_t *bi) {
-  log_i("");
+Mode_t Mode::btnCb_Up(ButtonInfo_t *bi) {
+  log_i("%s", this->name.c_str());
   return MODE_N;
-} // ModeBase::obBtn_cb()
+} // Mode::btnCb_Up()
 
 /**
  *
  */
-void ModeBase::display(Display_t *disp) {
+Mode_t Mode::btnCb_Down(ButtonInfo_t *bi) {
+  log_i("%s", this->name.c_str());
+  return MODE_N;
+} // Mode::btnCb_Down()
+
+/**
+ *
+ */
+void Mode::display(Display_t *disp) {
   disp->clearDisplay();
   disp->setCursor(0, 0);
   disp->setTextSize(1);
   disp->setTextColor(BLACK, WHITE);
   disp->printf("%s", __FILE__);
   // disp->display();
-} // ModeBase::display()
+} // Mode::display()

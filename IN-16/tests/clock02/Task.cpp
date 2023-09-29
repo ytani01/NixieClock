@@ -46,6 +46,7 @@ void Task::start() {
       delay(1);
     }
   }
+
   delay(100);
   return;
 } // Task::start()
@@ -61,14 +62,14 @@ bool Task::is_active() {
  *
  */
 void Task::setup() {
-  log_d("");
+  log_d("%s", this->conf.name);
 } // Task::setup()
 
 /**
  *
  */
 void Task::loop() {
-  log_d("");
+  log_d("%s", this->conf.name);
   delay(1000);
 } // Task::loop()
 
@@ -85,6 +86,7 @@ void Task::call_task_main(void *this_instance) {
  *
  */
 void Task::__task_main() {
+  delay(1);
   this->_active = false;
   this->setup();
   delay(1);

@@ -1,10 +1,10 @@
 /*
- * (c) 2020 Yoichi Tanibayashi
+ * (c) 2023 Yoichi Tanibayashi
  *
  *----------------------------------------------------------------------------
  * [ Data structure ( not a class tree ) ]
  *
- *  NixieArray
+ *  NixieTubeArray
  *   |
  *   +- NixieTube num[NIXIE_NUM_N]
  *   |   |

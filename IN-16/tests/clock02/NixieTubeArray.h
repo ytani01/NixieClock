@@ -1,10 +1,10 @@
 /**
- * (c) 2021 Yoichi Tanibayashi
+ * (c) 2023 Yoichi Tanibayashi
  *
  *------------------------------------------------------------------------
  * [ Data structure ( not a class tree ) ]
  *
- *  NixieArray
+ *  NixieTubeArray
  *   |
  *   +- NixieTube num[NIXIE_NUM_N]
  *   |   |
@@ -19,11 +19,11 @@
  *       +- Effect
  *-----------------------------------------------------------------------
  */
-#ifndef NIXIE_ARRAY_H
-#define NIXIE_ARRAY_H
+#ifndef _NIXIE_TUBE_ARRAY_H_
+#define _NIXIE_TUBE_ARRAY_H_
 #include "NixieTube.h"
 
-class NixieArray {
+class NixieTubeArray {
  public:
   static const unsigned int DISP_DELAY_US = 1; // microsec
           
@@ -32,7 +32,7 @@ class NixieArray {
   NixieTube  num[NIXIE_NUM_N];
   NixieTube  colon[NIXIE_COLON_N];
 
-  NixieArray(uint8_t clk, uint8_t stobe, uint8_t data, uint8_t blank,
+  NixieTubeArray(uint8_t clk, uint8_t stobe, uint8_t data, uint8_t blank,
              uint8_t num[NIXIE_NUM_N][NIXIE_NUM_DIGIT_N],
              uint8_t colon[NIXIE_COLON_N][NIXIE_COLON_DOT_N]);
   void loop(unsigned long cur_ms);
@@ -46,4 +46,4 @@ class NixieArray {
   uint8_t    _pin_clk, _pin_stobe, _pin_data, _pin_blank;
 };
 
-#endif // NIXIE_ARRAY_H
+#endif // _NIXIE_TUBE_ARRAY_H_

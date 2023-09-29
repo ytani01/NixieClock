@@ -1,16 +1,16 @@
 /**
- * Copyright (c) 2022 Yoichi Tanibayashi
+ * Copyright (c) 2023 Yoichi Tanibayashi
  */
 #ifndef _MENU_MODE_H_
 #define _MENU_MODE_H_
 
-#include "ModeBase.h"
+#include "Mode.h"
 #include "OledMenu.h"
 
 /**
  *
  */
-class MenuMode: public ModeBase {
+class MenuMode: public Mode {
 public:
   MenuMode(String name, CommonData_t *common_data,
            void (*cb)(String text)=NULL);

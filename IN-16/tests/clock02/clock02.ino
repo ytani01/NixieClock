@@ -6,14 +6,15 @@
 #include "common.h"
 #include "Display.h"
 #include "Nixie.h"
-#include "NixieArray.h"
+#include "NixieTubeArray.h"
 
 #include "MainMode.h"
 #include "MenuMode.h"
 #include "RestartMode.h"
 
+#include "Task_NixieTubeArray.h"
 #include "ButtonTask.h"
-#include "NetMgrTask.h"
+#include "Task_NetMgr.h"
 #include "NtpTask.h"
 
 #include "ConfFps.h"
@@ -33,7 +34,7 @@ unsigned long idleStart = 0;
 // Modes
 #define curMode commonData.cur_mode
 
-std::vector<ModeBase *> Mode;
+std::vector<Mode *> Mode;
 MainMode *mainMode;
 MenuMode *menuMode;
 RestartMode *restartMode;
@@ -68,27 +69,33 @@ uint8_t colonPins[NIXIE_COLON_N][NIXIE_COLON_DOT_N] =
    {PIN_COLON_L_TOP}
   };
 
-NixieArray nixieArray(PIN_HV5812_CLK,  PIN_HV5812_STOBE,
-                      PIN_HV5812_DATA, PIN_HV5812_BLANK,
-                      nixiePins, colonPins);
+NixieTubeArray *nixieTubeArray = NULL;
+
+Task_NixieTubeArray *task_NixieTubeArray = NULL;
 
 // OLED
 Display_t *Disp;
 
 // Buttons
-constexpr uint8_t PIN_BTN_RE = 14;
-const String RE_BTN_NAME = "RotaryEncoderBtn";
-ButtonWatcher *reBtnWatcher = NULL;
-ButtonInfo_t reBtnInfo;
+constexpr uint8_t PIN_BTN_UP = 18;
+constexpr uint8_t PIN_BTN_DOWN = 17;
+constexpr uint8_t PIN_BTN_MODE = 14;
 
-constexpr uint8_t PIN_BTN_ONBOARD = 17;
-const String ONBOARD_BTN_NAME = "OnBoardBtn";
-ButtonWatcher *obBtnWatcher = NULL;
-ButtonInfo_t obBtnInfo;
+const String BTN_NAME_UP = "UpBtn";
+ButtonWatcher *btnWatcher_Up = NULL;
+ButtonInfo_t btnInfo_Up;
+
+const String BTN_NAME_DOWN = "DownBtn";
+ButtonWatcher *btnWatcher_Down = NULL;
+ButtonInfo_t btnInfo_Down;
+
+const String BTN_NAME_MODE = "ModeBtn";
+ButtonWatcher *btnWatcher_Mode = NULL;
+ButtonInfo_t btnInfo_Mode;
 
 // WiFi
 const String AP_SSID_HDR = "iot";
-NetMgrTask *netMgrTask = NULL;
+Task_NetMgr *netMgrTask = NULL;
 NetMgrInfo_t netMgrInfo;
 
 // NTP
@@ -169,37 +176,57 @@ void timer1_cb() {
 /** callback
  *
  */
-void reBtn_cb(ButtonInfo_t *btn_info) {
+void btnCb_Up(ButtonInfo_t *btn_info) {
   idleStart = millis();
 
   log_i("%s", Button::info2String(btn_info).c_str());
-  reBtnInfo = *btn_info;
-
-  Mode_t dst_mode = Mode[curMode]->reBtn_cb(btn_info);
-  if ( dst_mode != MODE_N && dst_mode != curMode ) {
-    change_mode(dst_mode);
-  }
-} // reBtn_cb()
-
-/** callback
- *
- */
-void obBtn_cb(ButtonInfo_t *btn_info) {
-  idleStart = millis();
-
-  log_i("%s", Button::info2String(btn_info).c_str());
-  obBtnInfo = *btn_info;
+  btnInfo_Up = *btn_info;
 
   if ( btn_info->long_pressed && btn_info->repeat_count == 0 ) {
     do_restart();
     return;
   }
 
-  Mode_t dst_mode = Mode[curMode]->obBtn_cb(btn_info);
+  Mode_t dst_mode = Mode[curMode]->btnCb_Up(btn_info);
   if ( dst_mode != MODE_N && dst_mode != curMode ) {
     change_mode(dst_mode);
   }
-} // obBtn_cb()
+} // btnCb_Up()
+
+/** callback
+ *
+ */
+void btnCb_Down(ButtonInfo_t *btn_info) {
+  idleStart = millis();
+
+  log_i("%s", Button::info2String(btn_info).c_str());
+  btnInfo_Down = *btn_info;
+
+  if ( btn_info->long_pressed && btn_info->repeat_count == 0 ) {
+    do_restart();
+    return;
+  }
+
+  Mode_t dst_mode = Mode[curMode]->btnCb_Down(btn_info);
+  if ( dst_mode != MODE_N && dst_mode != curMode ) {
+    change_mode(dst_mode);
+  }
+} // btnCb_Down()
+
+/** callback
+ *
+ */
+void btnCb_Mode(ButtonInfo_t *btn_info) {
+  idleStart = millis();
+
+  log_i("%s", Button::info2String(btn_info).c_str());
+  btnInfo_Mode = *btn_info;
+
+  Mode_t dst_mode = Mode[curMode]->btnCb_Mode(btn_info);
+  if ( dst_mode != MODE_N && dst_mode != curMode ) {
+    change_mode(dst_mode);
+  }
+} // btnCb_Mode()
 
 /** callback
  *
@@ -251,8 +278,9 @@ void setup() {
     delay(500);
     Serial.print('.');
   } while (!Serial);  // Serial Init Wait
-  Serial.println();
-  Serial.println("===== start: " + String(MYNAME) + " =====");
+
+  delay(1000);
+  log_i("===== start: %s =====", MYNAME);
   log_i("portTICK_PERIOD_MS=%d", portTICK_PERIOD_MS);
 
   confFps = new ConfFps();
@@ -265,21 +293,25 @@ void setup() {
   commonData.ntp_info = &ntpInfo;
 
   // init Nixie Tube
-  nixieArray.brightness = BRIGHTNESS_RESOLUTION;
+  nixieTubeArray = new NixieTubeArray(PIN_HV5812_CLK,  PIN_HV5812_STOBE,
+                                  PIN_HV5812_DATA, PIN_HV5812_BLANK,
+                                  nixiePins, colonPins);
+
+  nixieTubeArray->brightness = BRIGHTNESS_RESOLUTION;
 
   int init_val[NIXIE_NUM_N] = {0, 1, 2, 3, 4, 5};
   for (int i = 0; i < NIXIE_NUM_N; i++) {
     for (int e=0; e < NIXIE_NUM_DIGIT_N; e++) {
       if ( init_val[i] == e ) {
-        nixieArray.num[i].element[e].set_brightness(nixieArray.brightness);
+        nixieTubeArray->num[i].element[e].set_brightness(nixieTubeArray->brightness);
       } else {
-        nixieArray.num[i].element[e].set_brightness(0);
+        nixieTubeArray->num[i].element[e].set_brightness(0);
       }
     } // for(e)
   } // for(i)
 
   for (int i=0; i < NIXIE_COLON_N; i++) {
-    nixieArray.colon[i].element[0].set_brightness(nixieArray.brightness);
+    nixieTubeArray->colon[i].element[0].set_brightness(nixieTubeArray->brightness);
   } // for(i)
 
   // init Display
@@ -291,9 +323,15 @@ void setup() {
   Disp->display();
 
   // Tasks
+  delay(1000);
+
   unsigned long task_interval = 10;
 
-  netMgrTask = new NetMgrTask("NetMgr", AP_SSID_HDR, &netMgrInfo);
+  task_NixieTubeArray = new Task_NixieTubeArray(nixieTubeArray);
+  task_NixieTubeArray->start();
+  delay(1000);
+
+  netMgrTask = new Task_NetMgr("NetMgr", AP_SSID_HDR, &netMgrInfo);
   netMgrTask->start();
   delay(1000); // NTPなどより先に実行することが重要(?)
 
@@ -301,12 +339,16 @@ void setup() {
   ntpTask->start();
   delay(task_interval);
 
-  reBtnWatcher = new ButtonWatcher(RE_BTN_NAME, PIN_BTN_RE, reBtn_cb);
-  reBtnWatcher->start();
+  btnWatcher_Up = new ButtonWatcher(BTN_NAME_UP, PIN_BTN_UP, btnCb_Up);
+  btnWatcher_Up->start();
   delay(task_interval);
 
-  obBtnWatcher = new ButtonWatcher(ONBOARD_BTN_NAME, PIN_BTN_ONBOARD, obBtn_cb);
-  obBtnWatcher->start();
+  btnWatcher_Down = new ButtonWatcher(BTN_NAME_DOWN, PIN_BTN_DOWN, btnCb_Down);
+  btnWatcher_Down->start();
+  delay(task_interval);
+
+  btnWatcher_Mode = new ButtonWatcher(BTN_NAME_MODE, PIN_BTN_MODE, btnCb_Mode);
+  btnWatcher_Mode->start();
   delay(task_interval);
 
   // start timer1
@@ -329,7 +371,7 @@ void setup() {
   }
   change_mode(MODE_MAIN);
 
-  nixieArray.display(0);
+  nixieTubeArray->display(0);
 
   idleStart = millis();
 } // setup()
@@ -365,11 +407,11 @@ void loop() {
 
     Disp->setFont(NULL);
     Disp->setTextSize(1);
-    Disp->setCursor(0, 10);
+    Disp->setCursor(0, 1);
     Disp->setTextWrap(true);
-    Disp->printf(" %s", commonData.msg.c_str());
-
+    Disp->printf("%s", commonData.msg.c_str());
     Disp->display();
+
     commonData.msg = "";
     delay(1000);
 
@@ -420,7 +462,7 @@ void loop() {
     Disp->printf("%6d", idle_ms);
   } // if (dispFps);
 
-  //nixieArray.display(cur_ms);
+  //nixieTubeArray->display(cur_ms);
   Disp->display();
-  delay(1000);
+  delay(1);
 } // loop()
